@@ -1,10 +1,11 @@
 CREATE TABLE IF NOT EXISTS Item(
-  item_name TEXT PRIMARY KEY
+  item_name TEXT PRIMARY KEY,
+  ge_limit INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Turn(
   turn_id SERIAL PRIMARY KEY,
-  item_name TEXT REFERENCES Item(item_name),
+  item_name TEXT REFERENCES Item(item_name) ON UPDATE CASCADE,
   open_ts TIMESTAMP NOT NULL DEFAULT now(),
   close_ts TIMESTAMP
 );
@@ -18,7 +19,7 @@ CREATE TABLE IF NOT EXISTS Trade(
 );
 
 CREATE TABLE IF NOT EXISTS Quote(
-  item_name TEXT REFERENCES Item(item_name),
+  item_name TEXT REFERENCES Item(item_name) ON UPDATE CASCADE,
   quote_ts TIMESTAMP NOT NULL DEFAULT now(),
   bid1 INTEGER NOT NULL,
   ask1 INTEGER NOT NULL,

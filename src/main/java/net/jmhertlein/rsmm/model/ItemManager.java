@@ -21,6 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -34,20 +35,21 @@ public class ItemManager {
         this.conn = conn;
     }
 
-    public void addItem(String name) throws SQLException {
-        try(PreparedStatement p = conn.prepareStatement("INSERT INTO Item VALUES(?)")) {
+    public void addItem(String name, int buyLimit) throws SQLException {
+        try(PreparedStatement p = conn.prepareStatement("INSERT INTO Item VALUES(?,?)")) {
             p.setString(1, name);
+            p.setInt(2, buyLimit);
             p.executeUpdate();
         }
     }
 
-    public Set<String> matchItem(String match) throws SQLException {
-        Set<String> ret = new HashSet<>();
-        try(PreparedStatement p = conn.prepareStatement("SELECT item_name FROM Item WHERE item_name LIKE ?")) {
+    public Set<Item> matchItem(String match) throws SQLException {
+        Set<Item> ret = new HashSet<>();
+        try(PreparedStatement p = conn.prepareStatement("SELECT * FROM Item WHERE item_name LIKE ?")) {
             p.setString(1, "%" + match + "%");
             try(ResultSet rs = p.executeQuery()) {
                 while(rs.next()) {
-                    ret.add(rs.getString("item_name"));
+                    ret.add(new Item(rs));
                 }
             }
         }
@@ -55,11 +57,28 @@ public class ItemManager {
         return ret;
     }
 
-    public boolean itemExists(String name) throws SQLException {
-        try(PreparedStatement p = conn.prepareStatement("SELECT item_name FROM Item WHERE item_name=?")) {
+    public Optional<Item> getItem(String name) throws SQLException {
+        try(PreparedStatement p = conn.prepareStatement("SELECT * FROM Item WHERE item_name=?")) {
             p.setString(1, name);
             try(ResultSet rs = p.executeQuery()) {
-                return rs.next();
+                if(rs.next()) {
+                    return Optional.of(new Item(rs));
+                } else {
+                    return Optional.empty();
+                }
+            }
+        }
+    }
+
+    public Optional<Integer> getLimitFor(String name) throws SQLException {
+        try(PreparedStatement p = conn.prepareStatement("SELECT ge_limit FROM Item WHERE item_name=?")) {
+            p.setString(1, name);
+            try(ResultSet rs = p.executeQuery()) {
+                if(rs.next()) {
+                    return Optional.of(rs.getInt("ge_limit"));
+                } else {
+                    return Optional.empty();
+                }
             }
         }
     }
