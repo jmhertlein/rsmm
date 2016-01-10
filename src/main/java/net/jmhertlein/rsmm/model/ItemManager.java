@@ -82,4 +82,17 @@ public class ItemManager {
             }
         }
     }
+
+    public Set<Item> getItems() throws SQLException {
+        Set<Item> ret = new HashSet<>();
+        try(PreparedStatement p = conn.prepareStatement("SELECT * FROM Item")) {
+            try(ResultSet rs = p.executeQuery()) {
+                while(rs.next()) {
+                    ret.add(new Item(rs));
+                }
+            }
+        }
+
+        return ret;
+    }
 }

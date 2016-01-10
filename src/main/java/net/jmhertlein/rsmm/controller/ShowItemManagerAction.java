@@ -14,38 +14,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.jmhertlein.rsmm.view;
+package net.jmhertlein.rsmm.controller;
 
-import java.awt.Frame;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JTable;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.JFrame;
 import net.jmhertlein.rsmm.model.ItemManager;
+import net.jmhertlein.rsmm.view.item.ItemManagerFrame;
 
 /**
  *
  * @author joshua
  */
-public class ItemManagerFrame extends JDialog {
+public class ShowItemManagerAction extends AbstractAction {
     private final ItemManager items;
+    private final JFrame parent;
 
-    private final JButton addItemButton;
-    private final JTable itemTable;
-    private final ItemManagerTableModel itemTableModel;
-
-    public ItemManagerFrame(ItemManager items, Frame frame) {
-        super(frame, "Item Manager");
+    public ShowItemManagerAction(ItemManager items, JFrame parent) {
+        super("Item Definitions...");
         this.items = items;
-
-        addItemButton = new JButton();
-        itemTableModel = new ItemManagerTableModel();
-        itemTable = new JTable(itemTableModel);
-
-        setupUI();
+        this.parent = parent;
     }
 
-    private void setupUI() {
-
+    @Override
+    public void actionPerformed(ActionEvent ae) {
+        ItemManagerFrame f = new ItemManagerFrame(items, parent);
+        f.setLocationRelativeTo(parent);
+        f.setVisible(true);
+        f.dispose();
     }
 
 }

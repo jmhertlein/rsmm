@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.jmhertlein.rsmm.view;
+package net.jmhertlein.rsmm.view.item;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +69,10 @@ public class ItemManagerTableModel extends AbstractTableModel {
             default:
                 return null;
         }
+    }
+
+    public void addItem(Item item) {
+        items.add(item);
     }
 
 }

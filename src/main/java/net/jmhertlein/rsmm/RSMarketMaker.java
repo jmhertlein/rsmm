@@ -22,9 +22,7 @@ import java.sql.SQLException;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-import net.jmhertlein.rsmm.model.ItemManager;
-import net.jmhertlein.rsmm.model.QuoteManager;
-import net.jmhertlein.rsmm.model.TurnManager;
+import net.jmhertlein.rsmm.view.MMFrame;
 
 /**
  *
@@ -42,9 +40,9 @@ public class RSMarketMaker {
             return;
         }
 
-        ItemManager items = new ItemManager(conn);
-        QuoteManager quotes = new QuoteManager(conn);
-        TurnManager turns = new TurnManager(conn);
+        MMFrame f = new MMFrame(conn);
+        f.setLocationRelativeTo(null);
+        f.setVisible(true);
     }
 
     public static void pickNimbus() {

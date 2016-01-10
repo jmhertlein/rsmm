@@ -32,6 +32,11 @@ public class Item {
         this.buyLimit = rs.getInt("ge_limit");
     }
 
+    public Item(String name, int buyLimit) {
+        this.name = name;
+        this.buyLimit = buyLimit;
+    }
+
     public String getName() {
         return name;
     }
