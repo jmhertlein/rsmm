@@ -20,11 +20,13 @@ import java.awt.*;
 import java.sql.Connection;
 import javax.swing.*;
 
+import net.jmhertlein.rsmm.controller.AddTradeAction;
 import net.jmhertlein.rsmm.controller.ShowItemManagerAction;
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
 import net.jmhertlein.rsmm.model.TurnManager;
 import net.jmhertlein.rsmm.view.quote.QuotePanel;
+import net.jmhertlein.rsmm.view.trade.TradePanel;
 import net.jmhertlein.rsmm.view.turn.TurnPanel;
 
 /**
@@ -34,6 +36,7 @@ public class MMFrame extends JFrame {
     private final ShowItemManagerAction showItemManagerAction;
     private final QuotePanel quotePanel;
     private final TurnPanel turnPanel;
+    private final TradePanel tradePanel;
 
     public MMFrame(Connection conn) {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -46,6 +49,15 @@ public class MMFrame extends JFrame {
         quotePanel.setBorder(BorderFactory.createTitledBorder(""));
 
         this.turnPanel = new TurnPanel(turns, quotes, items);
+        this.tradePanel = new TradePanel();
+        turnPanel.addTableSelectionListener(tradePanel);
+
+        tradePanel.setBuyAction(new AddTradeAction(tradePanel.getQuantityField(), tradePanel.getTradeTable(), tradePanel.getTradeTableModel(),
+                quotePanel.getItemChooser(), turnPanel.getTurnTable(), turnPanel.getTurnTableModel(),
+                quotePanel.getQuoteTable(), quotePanel.getQuoteTableModel(), true));
+        tradePanel.setSellAction(new AddTradeAction(tradePanel.getQuantityField(), tradePanel.getTradeTable(), tradePanel.getTradeTableModel(),
+                quotePanel.getItemChooser(), turnPanel.getTurnTable(), turnPanel.getTurnTableModel(),
+                quotePanel.getQuoteTable(), quotePanel.getQuoteTableModel(), false));
 
         setupMenus();
         setupUI();
@@ -61,6 +73,7 @@ public class MMFrame extends JFrame {
         rightPanel.setBottomComponent(turnPanel);
 
         lrPanel.setRightComponent(rightPanel);
+        lrPanel.setLeftComponent(tradePanel);
 
         c.fill = GridBagConstraints.BOTH;
         c.weightx = 1;

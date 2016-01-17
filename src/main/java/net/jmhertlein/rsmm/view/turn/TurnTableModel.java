@@ -7,6 +7,7 @@ import javax.swing.table.AbstractTableModel;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by joshua on 1/16/16.
@@ -89,5 +90,12 @@ public class TurnTableModel extends AbstractTableModel {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error Getting Turns", JOptionPane.ERROR_MESSAGE);
         }
         fireTableDataChanged();
+    }
+
+    public Optional<Turn> getTurnAtRow(int selectedRow) {
+        if (selectedRow < 0 || selectedRow >= turnsCache.size()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(turnsCache.get(selectedRow));
     }
 }

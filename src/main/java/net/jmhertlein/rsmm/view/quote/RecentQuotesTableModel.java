@@ -6,15 +6,15 @@ import net.jmhertlein.rsmm.model.QuoteManager;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Optional;
 
 public class RecentQuotesTableModel extends AbstractTableModel {
     private final QuoteManager quotes;
-    private final ArrayList<Quote> quoteCache;
+    private final Quote[] quoteCache;
 
     public RecentQuotesTableModel(QuoteManager quotes) {
         this.quotes = quotes;
-        this.quoteCache = new ArrayList<>();
+        this.quoteCache = new Quote[5];
     }
 
     @Override
@@ -43,14 +43,15 @@ public class RecentQuotesTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int row, int col) {
-        row -= (5 - quoteCache.size());
-        System.out.println(String.format("Row: %s, Col: %s", row, col));
-        if (row >= quoteCache.size() || row < 0) {
-            System.out.println("Cache miss.");
+        if (row >= quoteCache.length || row < 0) {
             return null;
         }
 
-        Quote quote = quoteCache.get(row);
+        Quote quote = quoteCache[row];
+        if (quote == null) {
+            return null;
+        }
+
         switch (col) {
             case 0:
                 return quote.getQuoteTS();
@@ -64,12 +65,26 @@ public class RecentQuotesTableModel extends AbstractTableModel {
     }
 
     public void showQuotesFor(String itemName) {
-        quoteCache.clear();
+        for (int i = 0; i < quoteCache.length; i++) {
+            quoteCache[i] = null;
+        }
+
         try {
-            quoteCache.addAll(quotes.getLatestQuotes(itemName));
+            Object[] srcList = quotes.getLatestQuotes(itemName).toArray();
+            for (int srcPos = 0, dstPos = quoteCache.length - 1; dstPos >= 0 && srcPos < srcList.length; srcPos++, dstPos--) {
+                quoteCache[dstPos] = (Quote) srcList[srcPos];
+            }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error Getting Quotes For " + itemName, JOptionPane.ERROR_MESSAGE);
         }
         fireTableDataChanged();
+    }
+
+    public Optional<Quote> getQuoteAt(int quoteRow) {
+        System.out.println("For row " + quoteRow);
+        if (quoteRow < 0 || quoteRow >= quoteCache.length) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(quoteCache[quoteRow]);
     }
 }

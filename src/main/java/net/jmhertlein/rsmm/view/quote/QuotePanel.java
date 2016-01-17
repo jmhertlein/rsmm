@@ -32,6 +32,7 @@ import net.jmhertlein.rsmm.model.QuoteManager;
  */
 public class QuotePanel extends JPanel {
     private final JTable recentQuotes;
+    private final RecentQuotesTableModel model;
     private final JComboBox<Item> itemChooser;
     private final JTextField bidField, askField;
     private final JButton addQuoteButton;
@@ -42,11 +43,11 @@ public class QuotePanel extends JPanel {
         bidField = new JTextField(10);
         askField = new JTextField(10);
         addQuoteButton = new JButton();
-        RecentQuotesTableModel tableModel = new RecentQuotesTableModel(quotes);
-        recentQuotes = new JTable(tableModel);
-        itemChooser.addItemListener(new QuoteItemSelectedAction(quotes, itemChooser, tableModel));
+        model = new RecentQuotesTableModel(quotes);
+        recentQuotes = new JTable(model);
+        itemChooser.addItemListener(new QuoteItemSelectedAction(quotes, itemChooser, model));
 
-        addQuoteButton.setAction(new AddQuoteAction(this, quotes, itemChooser, tableModel, bidField, askField));
+        addQuoteButton.setAction(new AddQuoteAction(this, quotes, itemChooser, model, bidField, askField));
 
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -70,5 +71,17 @@ public class QuotePanel extends JPanel {
         add(askField, c);
         c.gridx = 3;
         add(addQuoteButton, c);
+    }
+
+    public JComboBox<Item> getItemChooser() {
+        return itemChooser;
+    }
+
+    public JTable getQuoteTable() {
+        return recentQuotes;
+    }
+
+    public RecentQuotesTableModel getQuoteTableModel() {
+        return model;
     }
 }

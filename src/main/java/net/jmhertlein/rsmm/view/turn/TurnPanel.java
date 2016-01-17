@@ -1,9 +1,11 @@
 package net.jmhertlein.rsmm.view.turn;
 
+import net.jmhertlein.rsmm.controller.turn.TurnSelectedAction;
 import net.jmhertlein.rsmm.controller.turn.NewTurnAction;
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
 import net.jmhertlein.rsmm.model.TurnManager;
+import net.jmhertlein.rsmm.view.trade.TradePanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,6 +25,11 @@ public class TurnPanel extends JPanel {
         closeTurnButton = new JButton("Close Turn");
         closeTurnButton.setEnabled(false);
 
+        turnsTable.setRowSelectionAllowed(true);
+        turnsTable.setCellSelectionEnabled(true);
+        turnsTable.setColumnSelectionAllowed(false);
+        turnsTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.BOTH;
@@ -41,5 +48,15 @@ public class TurnPanel extends JPanel {
         add(closeTurnButton, c);
     }
 
+    public void addTableSelectionListener(TradePanel p) {
+        turnsTable.getSelectionModel().addListSelectionListener(new TurnSelectedAction(turnsTable, model, p));
+    }
 
+    public JTable getTurnTable() {
+        return turnsTable;
+    }
+
+    public TurnTableModel getTurnTableModel() {
+        return model;
+    }
 }

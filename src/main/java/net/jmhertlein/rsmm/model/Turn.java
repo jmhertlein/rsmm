@@ -68,7 +68,7 @@ public class Turn {
 
     public void addTrade(int price, int quantity) throws SQLException {
         try (PreparedStatement p = conn.prepareStatement(
-                "INSERT INTO Trade turn_id,price,quantity VALUES(?,?,?)")) {
+                "INSERT INTO Trade(turn_id,price,quantity) VALUES(?,?,?)")) {
             p.setInt(1, turnId);
             p.setInt(2, price);
             p.setInt(3, quantity);
