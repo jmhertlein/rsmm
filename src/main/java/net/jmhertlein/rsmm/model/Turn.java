@@ -16,6 +16,7 @@
  */
 package net.jmhertlein.rsmm.model;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,9 +25,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
- *
  * @author joshua
  */
 public class Turn {
@@ -62,17 +63,11 @@ public class Turn {
     }
 
     public boolean isFlat() throws SQLException {
-        try(PreparedStatement p = conn.prepareStatement("SELECT SUM(quantity) AS sum_qty FROM Trade WHERE turn_id=?")) {
-            p.setInt(1, turnId);
-            try(ResultSet rs = p.executeQuery()) {
-                rs.next();
-                return rs.getInt("sum_qty") == 0;
-            }
-        }
+        return getPosition() == 0;
     }
 
     public void addTrade(int price, int quantity) throws SQLException {
-        try(PreparedStatement p = conn.prepareStatement(
+        try (PreparedStatement p = conn.prepareStatement(
                 "INSERT INTO Trade turn_id,price,quantity VALUES(?,?,?)")) {
             p.setInt(1, turnId);
             p.setInt(2, price);
@@ -83,11 +78,11 @@ public class Turn {
 
     public List<Trade> getTrades() throws SQLException {
         List<Trade> ret = new ArrayList<>();
-        try(PreparedStatement p = conn.prepareStatement(
+        try (PreparedStatement p = conn.prepareStatement(
                 "SELECT * FROM Trade WHERe turn_id=? ORDER BY trade_ts ASC")) {
             p.setInt(1, turnId);
-            try(ResultSet rs = p.executeQuery()) {
-                while(rs.next()) {
+            try (ResultSet rs = p.executeQuery()) {
+                while (rs.next()) {
                     ret.add(new Trade(this, rs));
                 }
             }
@@ -95,5 +90,81 @@ public class Turn {
 
         return ret;
     }
+
+    public BigDecimal entryVWAP() throws SQLException {
+        List<Trade> trades = getTrades();
+        return vwapOf(trades.stream().filter(t -> t.getQuantity() > 0).collect(Collectors.toList()));
+    }
+
+    public BigDecimal exitVWAP() throws SQLException {
+        List<Trade> trades = getTrades();
+        return vwapOf(trades.stream().filter(t -> t.getQuantity() < 0).collect(Collectors.toList()));
+    }
+
+    private static BigDecimal vwapOf(List<Trade> trades) {
+        int sumVolumeWeightedPrices = 0;
+        int totalShares = 0;
+        for (Trade t : trades) {
+            sumVolumeWeightedPrices = t.getPrice() * t.getQuantity();
+            totalShares += t.getQuantity();
+        }
+
+        BigDecimal numerator = new BigDecimal(sumVolumeWeightedPrices), denominator = new BigDecimal(totalShares);
+        return numerator.divide(denominator);
+    }
+
+    public int getPosition() throws SQLException {
+        try (PreparedStatement p = conn.prepareStatement("SELECT SUM(quantity) AS sum_qty FROM Trade WHERE turn_id=?")) {
+            p.setInt(1, turnId);
+            try (ResultSet rs = p.executeQuery()) {
+                rs.next();
+                return rs.getInt("sum_qty");
+            }
+        }
+    }
+
+    public int getClosedPosition() throws SQLException {
+        try (PreparedStatement p = conn.prepareStatement("SELECT SUM(quantity) AS sum_qty FROM Trade WHERE turn_id=? AND quantity " + (getPosition() > 0 ? "<" : ">") + " 0")) {
+            p.setInt(1, turnId);
+            try (ResultSet rs = p.executeQuery()) {
+                rs.next();
+                return Math.abs(rs.getInt("sum_qty"));
+            }
+        }
+    }
+
+    public BigDecimal getOpenProfit(QuoteManager quotes) throws SQLException, NoQuoteException {
+        Quote quote = quotes.getLatestQuote(itemName).orElseThrow(() -> new NoQuoteException(itemName));
+        int pos = getPosition();
+        if (pos > 0) {
+            pos = Math.abs(pos);
+            return new BigDecimal(pos * quote.getAsk().intValue()).subtract(entryVWAP().multiply(BigDecimal.valueOf(pos)));
+        } else {
+            pos = Math.abs(pos);
+            return exitVWAP().multiply(BigDecimal.valueOf(pos)).subtract(BigDecimal.valueOf(quote.getBid().intValue() * pos));
+        }
+    }
+
+    public BigDecimal getClosedProfit() throws SQLException {
+        BigDecimal closed = BigDecimal.valueOf(getClosedPosition());
+        return exitVWAP().subtract(entryVWAP()).multiply(closed);
+    }
+
+    public RSInteger getPositionCost(QuoteManager quotes) throws SQLException, NoQuoteException {
+        int pos = getPosition();
+        int qty = Math.abs(pos);
+
+        Quote quote = quotes.getLatestQuote(itemName).orElseThrow(() -> new NoQuoteException(itemName));
+
+        int multiplicand;
+        if (pos > 0) {
+            multiplicand = quote.getBid().intValue();
+        } else {
+            multiplicand = quote.getAsk().intValue();
+        }
+
+        return new RSInteger(qty * multiplicand);
+    }
+
 
 }

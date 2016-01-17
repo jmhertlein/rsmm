@@ -20,10 +20,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
- *
  * @author joshua
  */
 public class TurnManager {
@@ -34,10 +35,10 @@ public class TurnManager {
     }
 
     public Optional<Turn> getOpenTurn(String itemName) throws SQLException {
-        try(PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE item_name=? AND close_ts=NULL")) {
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE item_name=? AND close_ts IS NULL")) {
             p.setString(1, itemName);
-            try(ResultSet rs = p.executeQuery()) {
-                if(rs.next()) {
+            try (ResultSet rs = p.executeQuery()) {
+                if (rs.next()) {
                     return Optional.of(new Turn(conn, rs));
                 } else {
                     return Optional.empty();
@@ -46,16 +47,27 @@ public class TurnManager {
         }
     }
 
-    public Turn newTurn(String itemName) throws SQLException, DuplicateOpenTurnException {
-        if(getOpenTurn(itemName).isPresent()) {
+    public void newTurn(String itemName) throws SQLException, DuplicateOpenTurnException {
+        if (getOpenTurn(itemName).isPresent()) {
             throw new DuplicateOpenTurnException(itemName);
         }
 
-        try(PreparedStatement p = conn.prepareStatement("INSERT INTO Turn item_name VALUES(?)")) {
+        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Turn(item_name) VALUES(?)")) {
             p.setString(1, itemName);
             p.executeUpdate();
         }
+    }
 
-        return getOpenTurn(itemName).get();
+    public List<Turn> getOpenTurns() throws SQLException {
+        List<Turn> turns = new ArrayList<>();
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE close_ts IS NULL")) {
+            try (ResultSet rs = p.executeQuery()) {
+                while (rs.next()) {
+                    turns.add(new Turn(conn, rs));
+                }
+            }
+        }
+        System.out.println("Turns: " + turns.size());
+        return turns;
     }
 }

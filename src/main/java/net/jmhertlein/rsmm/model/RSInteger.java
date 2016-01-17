@@ -16,8 +16,9 @@
  */
 package net.jmhertlein.rsmm.model;
 
+import java.math.BigDecimal;
+
 /**
- *
  * @author joshua
  */
 public class RSInteger extends Number {
@@ -26,6 +27,10 @@ public class RSInteger extends Number {
 
     public RSInteger(int value) {
         this.value = value;
+    }
+
+    public RSInteger(Number value) {
+        this.value = value.intValue();
     }
 
     @Override
@@ -50,9 +55,9 @@ public class RSInteger extends Number {
 
     @Override
     public String toString() {
-        if(value >= 10000000) {
+        if (value >= 10000000) {
             return (value / 1000000) + "M";
-        } else if(value >= 100000) {
+        } else if (value >= 100000) {
             return (value / 1000) + "k";
         } else {
             return Integer.toString(value);
@@ -63,14 +68,14 @@ public class RSInteger extends Number {
         s = s.toLowerCase();
 
         int multiplier;
-        if(s.endsWith("k")) {
-            s = s.substring(0, s.length()-1);
+        if (s.endsWith("k")) {
+            s = s.substring(0, s.length() - 1);
             multiplier = 1000;
-        } else if(s.endsWith("m")) {
-            s = s.substring(0, s.length()-1);
+        } else if (s.endsWith("m")) {
+            s = s.substring(0, s.length() - 1);
             multiplier = 1000000;
-        } else if(s.endsWith("b")) {
-            s = s.substring(0, s.length()-1);
+        } else if (s.endsWith("b")) {
+            s = s.substring(0, s.length() - 1);
             multiplier = 1000000000;
         } else {
             multiplier = 1;

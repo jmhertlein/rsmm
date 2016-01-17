@@ -16,24 +16,24 @@
  */
 package net.jmhertlein.rsmm.view;
 
+import java.awt.*;
 import java.sql.Connection;
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
+import javax.swing.*;
+
 import net.jmhertlein.rsmm.controller.ShowItemManagerAction;
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
 import net.jmhertlein.rsmm.model.TurnManager;
 import net.jmhertlein.rsmm.view.quote.QuotePanel;
+import net.jmhertlein.rsmm.view.turn.TurnPanel;
 
 /**
- *
  * @author joshua
  */
 public class MMFrame extends JFrame {
     private final ShowItemManagerAction showItemManagerAction;
     private final QuotePanel quotePanel;
+    private final TurnPanel turnPanel;
 
     public MMFrame(Connection conn) {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -45,13 +45,27 @@ public class MMFrame extends JFrame {
         this.quotePanel = new QuotePanel(items, quotes);
         quotePanel.setBorder(BorderFactory.createTitledBorder(""));
 
+        this.turnPanel = new TurnPanel(turns, quotes, items);
+
         setupMenus();
         setupUI();
         setSize(800, 600);
     }
 
     private void setupUI() {
-        add(quotePanel);
+        setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        JSplitPane lrPanel = new JSplitPane(), rightPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+
+        rightPanel.setTopComponent(new FatPanel(quotePanel));
+        rightPanel.setBottomComponent(turnPanel);
+
+        lrPanel.setRightComponent(rightPanel);
+
+        c.fill = GridBagConstraints.BOTH;
+        c.weightx = 1;
+        c.weighty = 1;
+        add(lrPanel, c);
     }
 
     private void setupMenus() {

@@ -26,7 +26,6 @@ public class QuoteItemSelectedAction implements ItemListener {
     @Override
     public void itemStateChanged(ItemEvent itemEvent) {
         System.out.println("Refreshing items.");
-        tableModel.clearAllQuotes();
         Item item = chooser.getItemAt(chooser.getSelectedIndex());
         String name;
         if (item == null) {
@@ -35,14 +34,6 @@ public class QuoteItemSelectedAction implements ItemListener {
             name = item.getName();
         }
 
-        System.out.println("Getting for " + item.toString());
-        List<Quote> latestQuotes;
-        try {
-            latestQuotes = quotes.getLatestQuotes(name);
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(chooser, e.getMessage(), "Error Getting Quotes", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        latestQuotes.forEach(tableModel::appendQuote);
+        tableModel.showQuotesFor(name);
     }
 }
