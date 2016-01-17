@@ -51,15 +51,18 @@ public class QuotePanel extends JPanel {
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
 
+
         c.gridy = 0;
         c.gridwidth = 4;
         c.fill = GridBagConstraints.HORIZONTAL;
         c.weightx = 1;
+        add(recentQuotes.getTableHeader(), c);
+        c.gridy = 1;
         add(recentQuotes, c);
 
         c.weightx = 0.25;
         c.gridwidth = 1;
-        c.gridy = 1;
+        c.gridy = 2;
         add(itemChooser, c);
         c.gridx = 1;
         add(bidField, c);
