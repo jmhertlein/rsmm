@@ -71,7 +71,6 @@ public class AddItemAction extends AbstractAction {
             items.addItem(name, buyLimit);
             Optional<Item> item = items.getItem(name);
             if(item.isPresent()) {
-                table.addItem(item.get());
                 table.fireTableDataChanged();
                 nameField.setText("");
                 limitField.setText("");

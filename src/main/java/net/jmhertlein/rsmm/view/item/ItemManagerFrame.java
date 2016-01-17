@@ -19,17 +19,14 @@ package net.jmhertlein.rsmm.view.item;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.sql.SQLException;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
 import net.jmhertlein.rsmm.controller.item.AddItemAction;
-import net.jmhertlein.rsmm.model.Item;
 import net.jmhertlein.rsmm.model.ItemManager;
 
 /**
@@ -49,20 +46,12 @@ public class ItemManagerFrame extends JDialog {
         setModalityType(ModalityType.APPLICATION_MODAL);
 
         addItemButton = new JButton("Add Item");
-        itemTableModel = new ItemManagerTableModel();
+        itemTableModel = new ItemManagerTableModel(items);
         itemTable = new JTable(itemTableModel);
         tablePane = new JScrollPane(itemTable);
 
         nameField = new JTextField();
         limitField = new JTextField();
-
-        try {
-            for(Item i : items.getItems()) {
-                itemTableModel.addItem(i);
-            }
-        } catch(SQLException ex) {
-            JOptionPane.showMessageDialog(frame, ex.getMessage(), "Database Exception", JOptionPane.ERROR_MESSAGE);
-        }
 
         addItemButton.setAction(new AddItemAction(this, items, itemTableModel, nameField, limitField));
 
@@ -99,11 +88,5 @@ public class ItemManagerFrame extends JDialog {
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         itemTable.setDefaultRenderer(Object.class, centerRenderer);
-    }
-
-    public static void main(String... args) {
-        ItemManagerFrame f = new ItemManagerFrame(null, null);
-        f.setLocationRelativeTo(null);
-        f.setVisible(true);
     }
 }

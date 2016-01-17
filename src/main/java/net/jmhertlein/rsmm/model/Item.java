@@ -23,7 +23,7 @@ import java.sql.SQLException;
  *
  * @author joshua
  */
-public class Item {
+public class Item implements Comparable<Item> {
     private final String name;
     private final int buyLimit;
 
@@ -43,5 +43,15 @@ public class Item {
 
     public int getBuyLimit() {
         return buyLimit;
+    }
+
+    @Override
+    public int compareTo(Item t) {
+        return getName().compareTo(t.getName());
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

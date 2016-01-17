@@ -16,25 +16,30 @@
  */
 package net.jmhertlein.rsmm.view.item;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.SQLException;
+import java.util.Optional;
 import javax.swing.table.AbstractTableModel;
 import net.jmhertlein.rsmm.model.Item;
+import net.jmhertlein.rsmm.model.ItemManager;
 
 /**
  *
  * @author joshua
  */
 public class ItemManagerTableModel extends AbstractTableModel {
-    private final List<Item> items;
+    private final ItemManager items;
 
-    public ItemManagerTableModel() {
-        items = new ArrayList<>();
+    public ItemManagerTableModel(ItemManager items) {
+        this.items = items;
     }
 
     @Override
     public int getRowCount() {
-        return items.size();
+        try {
+            return items.countItems();
+        } catch(SQLException ex) {
+            return 0;
+        }
     }
 
     @Override
@@ -56,23 +61,23 @@ public class ItemManagerTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int row, int col) {
-        if(row >= items.size()) {
+        Optional<Item> item;
+        try {
+            item = items.getItem(row);
+        } catch(SQLException ex) {
+            return null;
+        }
+        if(!item.isPresent()) {
             return null;
         }
 
-        Item i = items.get(row);
         switch(col) {
             case 0:
-                return i.getName();
+                return item.get().getName();
             case 1:
-                return i.getBuyLimit();
+                return item.get().getBuyLimit();
             default:
                 return null;
         }
     }
-
-    public void addItem(Item item) {
-        items.add(item);
-    }
-
 }

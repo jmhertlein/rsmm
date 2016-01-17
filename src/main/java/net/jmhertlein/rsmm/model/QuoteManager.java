@@ -20,10 +20,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
- *
  * @author joshua
  */
 public class QuoteManager {
@@ -34,7 +37,7 @@ public class QuoteManager {
     }
 
     public void addQuote(String name, int bid, int ask) throws SQLException {
-        try(PreparedStatement p = conn.prepareStatement("INSERT INTO Quote item_name,bid1,ask1 VALUES(?,?,?)")) {
+        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Quote(item_name,bid1,ask1) VALUES(?,?,?)")) {
             p.setString(1, name);
             p.setInt(2, bid);
             p.setInt(3, ask);
@@ -43,15 +46,30 @@ public class QuoteManager {
     }
 
     public Optional<Quote> getLatestQuote(String item) throws SQLException {
-        try(PreparedStatement p = conn.prepareStatement("SELECT * FROM Quote WHERE item_name=? ORDER BY quote_ts DESC LIMIT 1")) {
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Quote WHERE item_name=? ORDER BY quote_ts DESC LIMIT 1")) {
             p.setString(1, item);
-            try(ResultSet rs = p.executeQuery()) {
-                if(rs.next()) {
+            try (ResultSet rs = p.executeQuery()) {
+                if (rs.next()) {
                     return Optional.of(new Quote(rs));
                 } else {
                     return Optional.empty();
                 }
             }
         }
+    }
+
+    public List<Quote> getLatestQuotes(String item) throws SQLException {
+        List<Quote> quotes = new ArrayList<>();
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Quote WHERE item_name=? ORDER BY quote_ts DESC LIMIT 5")) {
+            p.setString(1, item);
+            try (ResultSet rs = p.executeQuery()) {
+                while (rs.next()) {
+                    quotes.add(new Quote(rs));
+                }
+            }
+        }
+        Collections.reverse(quotes);
+        System.out.println(quotes.size());
+        return quotes;
     }
 }

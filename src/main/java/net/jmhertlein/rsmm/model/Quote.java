@@ -21,22 +21,21 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 /**
- *
  * @author joshua
  */
 public class Quote {
     private final String itemName;
     private final Timestamp quoteTS;
-    private final int bid, ask;
+    private final RSInteger bid, ask;
 
     public Quote(ResultSet rs) throws SQLException {
         this.itemName = rs.getString("item_name");
         this.quoteTS = rs.getTimestamp("quote_ts");
-        this.bid = rs.getInt("bid1");
-        this.ask = rs.getInt("ask1");
+        this.bid = new RSInteger(rs.getInt("bid1"));
+        this.ask = new RSInteger(rs.getInt("ask1"));
     }
 
-    public Quote(String itemName, Timestamp quoteTS, int bid, int ask) {
+    public Quote(String itemName, Timestamp quoteTS, RSInteger bid, RSInteger ask) {
         this.itemName = itemName;
         this.quoteTS = quoteTS;
         this.bid = bid;
@@ -51,11 +50,11 @@ public class Quote {
         return quoteTS;
     }
 
-    public int getBid() {
+    public RSInteger getBid() {
         return bid;
     }
 
-    public int getAsk() {
+    public RSInteger getAsk() {
         return ask;
     }
 }

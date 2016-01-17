@@ -17,6 +17,7 @@
 package net.jmhertlein.rsmm.view;
 
 import java.sql.Connection;
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -24,6 +25,7 @@ import net.jmhertlein.rsmm.controller.ShowItemManagerAction;
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
 import net.jmhertlein.rsmm.model.TurnManager;
+import net.jmhertlein.rsmm.view.quote.QuotePanel;
 
 /**
  *
@@ -31,6 +33,7 @@ import net.jmhertlein.rsmm.model.TurnManager;
  */
 public class MMFrame extends JFrame {
     private final ShowItemManagerAction showItemManagerAction;
+    private final QuotePanel quotePanel;
 
     public MMFrame(Connection conn) {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -39,6 +42,8 @@ public class MMFrame extends JFrame {
         TurnManager turns = new TurnManager(conn);
 
         this.showItemManagerAction = new ShowItemManagerAction(items, this);
+        this.quotePanel = new QuotePanel(items, quotes);
+        quotePanel.setBorder(BorderFactory.createTitledBorder(""));
 
         setupMenus();
         setupUI();
@@ -46,7 +51,7 @@ public class MMFrame extends JFrame {
     }
 
     private void setupUI() {
-
+        add(quotePanel);
     }
 
     private void setupMenus() {

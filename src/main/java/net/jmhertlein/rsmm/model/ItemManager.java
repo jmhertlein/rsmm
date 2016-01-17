@@ -20,15 +20,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Supplier;
 
 /**
  *
  * @author joshua
  */
-public class ItemManager {
+public class ItemManager implements Supplier<List<Item>> {
     private final Connection conn;
 
     public ItemManager(Connection conn) {
@@ -83,9 +82,9 @@ public class ItemManager {
         }
     }
 
-    public Set<Item> getItems() throws SQLException {
-        Set<Item> ret = new HashSet<>();
-        try(PreparedStatement p = conn.prepareStatement("SELECT * FROM Item")) {
+    public List<Item> getItems() throws SQLException {
+        List<Item> ret = new ArrayList<>();
+        try(PreparedStatement p = conn.prepareStatement("SELECT * FROM Item ORDER BY item_name ASC")) {
             try(ResultSet rs = p.executeQuery()) {
                 while(rs.next()) {
                     ret.add(new Item(rs));
@@ -94,5 +93,32 @@ public class ItemManager {
         }
 
         return ret;
+    }
+
+    public Optional<Item> getItem(int i) throws SQLException {
+        try(PreparedStatement p = conn.prepareStatement("SELECT * FROM Item ORDER BY item_name ASC LIMIT 1 OFFSET ?")) {
+            p.setInt(1, i);
+            try(ResultSet rs = p.executeQuery()) {
+                return rs.next() ? Optional.of(new Item(rs)) : Optional.empty();
+            }
+        }
+    }
+
+    public int countItems() throws SQLException {
+        try(PreparedStatement p = conn.prepareStatement("SELECT COUNT(*) AS count FROM Item")) {
+            try(ResultSet rs = p.executeQuery()) {
+                rs.next();
+                return rs.getInt("count");
+            }
+        }
+    }
+
+    @Override
+    public List<Item> get() {
+        try {
+            return getItems();
+        } catch (SQLException e) {
+            return Collections.emptyList();
+        }
     }
 }
