@@ -1,5 +1,6 @@
 package net.jmhertlein.rsmm.view.turn;
 
+import net.jmhertlein.rsmm.controller.turn.CloseTurnAction;
 import net.jmhertlein.rsmm.controller.turn.TurnSelectedAction;
 import net.jmhertlein.rsmm.controller.turn.NewTurnAction;
 import net.jmhertlein.rsmm.model.ItemManager;
@@ -22,8 +23,7 @@ public class TurnPanel extends JPanel {
         model = new TurnTableModel(turns, quotes);
         turnsTable = new JTable(model);
         openTurnButton = new JButton(new NewTurnAction(this, items, turns, model));
-        closeTurnButton = new JButton("Close Turn");
-        closeTurnButton.setEnabled(false);
+        closeTurnButton = new JButton();
 
         turnsTable.setRowSelectionAllowed(true);
         turnsTable.setCellSelectionEnabled(true);
@@ -58,5 +58,9 @@ public class TurnPanel extends JPanel {
 
     public TurnTableModel getTurnTableModel() {
         return model;
+    }
+
+    public void setCloseTurnAction(AbstractAction a) {
+        closeTurnButton.setAction(a);
     }
 }

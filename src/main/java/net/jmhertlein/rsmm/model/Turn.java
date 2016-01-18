@@ -140,7 +140,6 @@ public class Turn {
             return new BigDecimal(pos * quote.getAsk().intValue()).subtract(entryVWAP().multiply(BigDecimal.valueOf(pos)));
         } else {
             pos = Math.abs(pos);
-            //return exitVWAP().multiply(BigDecimal.valueOf(pos)).subtract(BigDecimal.valueOf(quote.getBid().intValue() * pos));
             return exitVWAP().subtract(BigDecimal.valueOf(quote.getBid().intValue())).multiply(BigDecimal.valueOf(pos));
         }
     }
@@ -166,4 +165,10 @@ public class Turn {
     }
 
 
+    public void closeTurn() throws SQLException {
+        try (PreparedStatement p = conn.prepareStatement("UPDATE Turn SET close_ts=now() WHERE turn_id=?")) {
+            p.setInt(1, turnId);
+            p.executeUpdate();
+        }
+    }
 }

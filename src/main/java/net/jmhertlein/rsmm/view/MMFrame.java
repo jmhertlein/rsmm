@@ -22,6 +22,7 @@ import javax.swing.*;
 
 import net.jmhertlein.rsmm.controller.AddTradeAction;
 import net.jmhertlein.rsmm.controller.ShowItemManagerAction;
+import net.jmhertlein.rsmm.controller.turn.CloseTurnAction;
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
 import net.jmhertlein.rsmm.model.TurnManager;
@@ -59,6 +60,8 @@ public class MMFrame extends JFrame {
         tradePanel.setSellAction(new AddTradeAction(tradePanel.getQuantityField(), tradePanel.getTradeTable(), tradePanel.getTradeTableModel(),
                 quotePanel.getItemChooser(), turnPanel.getTurnTable(), turnPanel.getTurnTableModel(),
                 quotePanel.getQuoteTable(), quotePanel.getQuoteTableModel(), false));
+
+        turnPanel.setCloseTurnAction(new CloseTurnAction(turnPanel.getTurnTable(), turnPanel.getTurnTableModel(), tradePanel));
 
         setSize(800, 600);
         setupMenus();

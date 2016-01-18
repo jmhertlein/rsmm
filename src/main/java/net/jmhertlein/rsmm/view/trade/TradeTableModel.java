@@ -22,7 +22,7 @@ public class TradeTableModel extends AbstractTableModel {
 
     @Override
     public String getColumnName(int i) {
-        switch(i) {
+        switch (i) {
             case 0:
                 return "Time";
             case 1:
@@ -46,12 +46,12 @@ public class TradeTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int row, int col) {
-        if(row >= tradeCache.size()) {
+        if (row >= tradeCache.size()) {
             return null;
         }
 
         Trade t = tradeCache.get(row);
-        switch(col) {
+        switch (col) {
             case 0:
                 return t.getTradeTime();
             case 1:
@@ -72,6 +72,11 @@ public class TradeTableModel extends AbstractTableModel {
             return;
         }
 
+        fireTableDataChanged();
+    }
+
+    public void clearCache() {
+        tradeCache.clear();
         fireTableDataChanged();
     }
 }

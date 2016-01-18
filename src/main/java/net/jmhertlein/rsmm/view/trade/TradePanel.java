@@ -72,4 +72,8 @@ public class TradePanel extends JPanel {
     public TradeTableModel getTradeTableModel() {
         return tradeTableModel;
     }
+
+    public void clearCache() {
+        tradeTableModel.clearCache();
+    }
 }

@@ -73,8 +73,10 @@ public class TurnTableModel extends AbstractTableModel {
                 default:
                     return null;
             }
-        } catch (SQLException | NoQuoteException e) {
+        } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error Getting Turn Field", JOptionPane.ERROR_MESSAGE);
+            return null;
+        } catch (NoQuoteException e) {
             return null;
         } catch (ArithmeticException ex) {
             //TODO: this is awful please fix it
