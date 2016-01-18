@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=RS Market Maker
+Comment=Make sick bank on RuneScape.
+Exec=rsmm
+Icon=/opt/rsmm/icon.png
+Terminal=false
+Type=Application
+Categories=Game;
