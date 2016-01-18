@@ -62,6 +62,7 @@ public class MMFrame extends JFrame {
                 quotePanel.getQuoteTable(), quotePanel.getQuoteTableModel(), false));
 
         turnPanel.setCloseTurnAction(new CloseTurnAction(turnPanel.getTurnTable(), turnPanel.getTurnTableModel(), tradePanel));
+        quotePanel.setAddQuoteAction(quotes, turnPanel);
 
         setSize(800, 600);
         setupMenus();

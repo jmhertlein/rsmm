@@ -26,6 +26,7 @@ import net.jmhertlein.rsmm.controller.QuoteItemSelectedAction;
 import net.jmhertlein.rsmm.model.Item;
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
+import net.jmhertlein.rsmm.view.turn.TurnPanel;
 
 /**
  * @author joshua
@@ -45,8 +46,6 @@ public class QuotePanel extends JPanel {
         model = new RecentQuotesTableModel(quotes);
         recentQuotes = new JTable(model);
         itemChooser.addItemListener(new QuoteItemSelectedAction(quotes, itemChooser, model));
-
-        addQuoteButton.setAction(new AddQuoteAction(this, quotes, itemChooser, model, bidField, askField));
 
         try {
             refreshItems(items);
@@ -102,5 +101,9 @@ public class QuotePanel extends JPanel {
         for (Item q : items.getItems()) {
             itemChooser.addItem(q);
         }
+    }
+
+    public void setAddQuoteAction(QuoteManager quotes, TurnPanel turnPanel) {
+        addQuoteButton.setAction(new AddQuoteAction(this, quotes, itemChooser, model, turnPanel, bidField, askField));
     }
 }

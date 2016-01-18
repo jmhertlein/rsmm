@@ -68,8 +68,6 @@ public class QuoteManager {
                 }
             }
         }
-        Collections.reverse(quotes);
-        System.out.println(quotes.size());
         return quotes;
     }
 }

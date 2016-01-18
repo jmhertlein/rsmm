@@ -63,4 +63,20 @@ public class TurnPanel extends JPanel {
     public void setCloseTurnAction(AbstractAction a) {
         closeTurnButton.setAction(a);
     }
+
+    public void reload() {
+        int selectedRow = turnsTable.getSelectedRow();
+        model.reloadTurns();
+        if (selectedRow >= 0) {
+            turnsTable.setRowSelectionInterval(selectedRow, selectedRow);
+        }
+    }
+
+    public void refresh() {
+        int selectedRow = turnsTable.getSelectedRow();
+        model.fireTableDataChanged();
+        if (selectedRow >= 0) {
+            turnsTable.setRowSelectionInterval(selectedRow, selectedRow);
+        }
+    }
 }

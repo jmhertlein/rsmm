@@ -28,6 +28,8 @@ public class RecentQuotesTableModel extends AbstractTableModel {
                 return "Bid";
             case 2:
                 return "Ask";
+            case 3:
+                return "Spread";
             default:
                 return "";
         }
@@ -40,7 +42,7 @@ public class RecentQuotesTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -61,6 +63,8 @@ public class RecentQuotesTableModel extends AbstractTableModel {
                 return quote.getBid();
             case 2:
                 return quote.getAsk();
+            case 3:
+                return quote.getAsk().intValue() - quote.getBid().intValue();
             default:
                 return null;
         }

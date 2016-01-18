@@ -25,10 +25,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import net.jmhertlein.rsmm.model.Item;
-import net.jmhertlein.rsmm.model.Quote;
 import net.jmhertlein.rsmm.model.QuoteManager;
 import net.jmhertlein.rsmm.model.RSInteger;
 import net.jmhertlein.rsmm.view.quote.RecentQuotesTableModel;
+import net.jmhertlein.rsmm.view.turn.TurnPanel;
 
 /**
  * @author joshua
@@ -38,14 +38,16 @@ public class AddQuoteAction extends AbstractAction {
     private final QuoteManager quotes;
     private final JComboBox<Item> itemChooser;
     private final RecentQuotesTableModel tableModel;
+    private final TurnPanel turnPanel;
     private final JTextField bidField, askField;
 
-    public AddQuoteAction(JComponent parent, QuoteManager quotes, JComboBox<Item> itemChooser, RecentQuotesTableModel tableModel, JTextField bidField, JTextField askField) {
+    public AddQuoteAction(JComponent parent, QuoteManager quotes, JComboBox<Item> itemChooser, RecentQuotesTableModel tableModel, TurnPanel turnPanel, JTextField bidField, JTextField askField) {
         super("Add Quote");
         this.parent = parent;
         this.quotes = quotes;
         this.itemChooser = itemChooser;
         this.tableModel = tableModel;
+        this.turnPanel = turnPanel;
         this.bidField = bidField;
         this.askField = askField;
     }
@@ -76,6 +78,9 @@ public class AddQuoteAction extends AbstractAction {
         try {
             quotes.addQuote(selected.getName(), bid.intValue(), ask.intValue());
             tableModel.showQuotesFor(selected.getName());
+            turnPanel.refresh();
+            bidField.setText("");
+            askField.setText("");
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(parent, ex.getMessage(), "Error Adding Quote", JOptionPane.ERROR_MESSAGE);
         }
