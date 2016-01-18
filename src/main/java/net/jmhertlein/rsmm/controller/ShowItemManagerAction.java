@@ -19,26 +19,29 @@ package net.jmhertlein.rsmm.controller;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JFrame;
+
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.view.item.ItemManagerFrame;
+import net.jmhertlein.rsmm.view.quote.QuotePanel;
 
 /**
- *
  * @author joshua
  */
 public class ShowItemManagerAction extends AbstractAction {
     private final ItemManager items;
     private final JFrame parent;
+    private final QuotePanel quotePanel;
 
-    public ShowItemManagerAction(ItemManager items, JFrame parent) {
+    public ShowItemManagerAction(ItemManager items, JFrame parent, QuotePanel quotePanel) {
         super("Item Definitions...");
         this.items = items;
         this.parent = parent;
+        this.quotePanel = quotePanel;
     }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        ItemManagerFrame f = new ItemManagerFrame(items, parent);
+        ItemManagerFrame f = new ItemManagerFrame(quotePanel, items, parent);
         f.setLocationRelativeTo(parent);
         f.setVisible(true);
         f.dispose();

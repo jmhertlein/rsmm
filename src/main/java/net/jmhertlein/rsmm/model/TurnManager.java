@@ -67,7 +67,6 @@ public class TurnManager {
                 }
             }
         }
-        System.out.println("Turns: " + turns.size());
         return turns;
     }
 }

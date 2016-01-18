@@ -28,6 +28,7 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
 import net.jmhertlein.rsmm.controller.item.AddItemAction;
 import net.jmhertlein.rsmm.model.ItemManager;
+import net.jmhertlein.rsmm.view.quote.QuotePanel;
 
 /**
  *
@@ -41,7 +42,7 @@ public class ItemManagerFrame extends JDialog {
     private final JScrollPane tablePane;
     private final ItemManagerTableModel itemTableModel;
 
-    public ItemManagerFrame(ItemManager items, Frame frame) {
+    public ItemManagerFrame(QuotePanel quotePanel, ItemManager items, Frame frame) {
         super(frame, "Item Manager");
         setModalityType(ModalityType.APPLICATION_MODAL);
 
@@ -53,7 +54,7 @@ public class ItemManagerFrame extends JDialog {
         nameField = new JTextField();
         limitField = new JTextField();
 
-        addItemButton.setAction(new AddItemAction(this, items, itemTableModel, nameField, limitField));
+        addItemButton.setAction(new AddItemAction(this, items, itemTableModel, quotePanel, nameField, limitField));
 
         setupComponents();
         setupUI();

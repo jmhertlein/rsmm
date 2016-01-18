@@ -146,13 +146,7 @@ public class Turn {
     }
 
     public BigDecimal getClosedProfit() throws SQLException {
-        int cpos = getClosedPosition();
-        System.out.println("CLOSED POS: " + cpos);
-        BigDecimal closed = BigDecimal.valueOf(cpos);
-        System.out.println("EXIT VWAP: " + exitVWAP() + ", ENTRY VWAP: " + entryVWAP());
-        BigDecimal pxDiff = exitVWAP().subtract(entryVWAP());
-        System.out.println("PXDIFF: " + pxDiff);
-        return pxDiff.multiply(closed);
+        return exitVWAP().subtract(entryVWAP()).multiply(BigDecimal.valueOf(getClosedPosition()));
     }
 
     public RSInteger getPositionCost(QuoteManager quotes) throws SQLException, NoQuoteException {

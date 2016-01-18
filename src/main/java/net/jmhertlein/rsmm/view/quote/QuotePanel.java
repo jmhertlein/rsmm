@@ -18,11 +18,11 @@ package net.jmhertlein.rsmm.view.quote;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.sql.SQLException;
 import javax.swing.*;
 
 import net.jmhertlein.rsmm.controller.AddQuoteAction;
 import net.jmhertlein.rsmm.controller.QuoteItemSelectedAction;
-import net.jmhertlein.rsmm.controller.item.RefreshOnFocusListener;
 import net.jmhertlein.rsmm.model.Item;
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
@@ -39,7 +39,6 @@ public class QuotePanel extends JPanel {
 
     public QuotePanel(ItemManager items, QuoteManager quotes) {
         itemChooser = new JComboBox<>();
-        itemChooser.addFocusListener(new RefreshOnFocusListener<>(this, items, () -> itemChooser.removeAllItems(), item -> itemChooser.addItem(item)));
         bidField = new JTextField(10);
         askField = new JTextField(10);
         addQuoteButton = new JButton();
@@ -48,6 +47,12 @@ public class QuotePanel extends JPanel {
         itemChooser.addItemListener(new QuoteItemSelectedAction(quotes, itemChooser, model));
 
         addQuoteButton.setAction(new AddQuoteAction(this, quotes, itemChooser, model, bidField, askField));
+
+        try {
+            refreshItems(items);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error Getting Items", JOptionPane.ERROR_MESSAGE);
+        }
 
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -61,15 +66,22 @@ public class QuotePanel extends JPanel {
         c.gridy = 1;
         add(recentQuotes, c);
 
-        c.weightx = 0.25;
+        c.weightx = 0;
         c.gridwidth = 1;
         c.gridy = 2;
+        c.fill = GridBagConstraints.NONE;
         add(itemChooser, c);
+
         c.gridx = 1;
+        c.weightx = 0.5;
+        c.fill = GridBagConstraints.HORIZONTAL;
         add(bidField, c);
         c.gridx = 2;
         add(askField, c);
+
         c.gridx = 3;
+        c.weightx = 0;
+        c.fill = GridBagConstraints.NONE;
         add(addQuoteButton, c);
     }
 
@@ -83,5 +95,12 @@ public class QuotePanel extends JPanel {
 
     public RecentQuotesTableModel getQuoteTableModel() {
         return model;
+    }
+
+    public void refreshItems(ItemManager items) throws SQLException {
+        itemChooser.removeAllItems();
+        for (Item q : items.getItems()) {
+            itemChooser.addItem(q);
+        }
     }
 }

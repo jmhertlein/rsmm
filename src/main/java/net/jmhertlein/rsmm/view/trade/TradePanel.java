@@ -20,7 +20,7 @@ public class TradePanel extends JPanel {
         tradeTable = new JTable(tradeTableModel);
         buyButton = new JButton();
         sellButton = new JButton();
-        qtyField = new JTextField();
+        qtyField = new JTextField(13);
 
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -45,6 +45,8 @@ public class TradePanel extends JPanel {
         add(buyButton, c);
         c.gridx = 2;
         add(sellButton, c);
+
+        setPreferredSize(new Dimension(400, 600));
     }
 
     public void showTradesFor(Turn t) {

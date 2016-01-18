@@ -39,13 +39,14 @@ public class MMFrame extends JFrame {
     private final TradePanel tradePanel;
 
     public MMFrame(Connection conn) {
+        super("RS Market Maker");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         ItemManager items = new ItemManager(conn);
         QuoteManager quotes = new QuoteManager(conn);
         TurnManager turns = new TurnManager(conn);
 
-        this.showItemManagerAction = new ShowItemManagerAction(items, this);
         this.quotePanel = new QuotePanel(items, quotes);
+        this.showItemManagerAction = new ShowItemManagerAction(items, this, quotePanel);
         quotePanel.setBorder(BorderFactory.createTitledBorder(""));
 
         this.turnPanel = new TurnPanel(turns, quotes, items);
@@ -59,9 +60,22 @@ public class MMFrame extends JFrame {
                 quotePanel.getItemChooser(), turnPanel.getTurnTable(), turnPanel.getTurnTableModel(),
                 quotePanel.getQuoteTable(), quotePanel.getQuoteTableModel(), false));
 
+        setSize(800, 600);
         setupMenus();
         setupUI();
-        setSize(800, 600);
+        setIconImage(new ImageIcon(getClass().getResource("/coins.png")).getImage());
+        hackWMClassName();
+    }
+
+    private final void hackWMClassName() {
+        try {
+            Toolkit xToolkit = Toolkit.getDefaultToolkit();
+            java.lang.reflect.Field awtAppClassNameField = xToolkit.getClass().getDeclaredField("awtAppClassName");
+            awtAppClassNameField.setAccessible(true);
+            awtAppClassNameField.set(xToolkit, "RS Market Maker");
+        } catch (Throwable t) {
+
+        }
     }
 
     private void setupUI() {
