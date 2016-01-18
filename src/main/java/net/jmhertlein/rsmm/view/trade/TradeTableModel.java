@@ -6,7 +6,10 @@ import net.jmhertlein.rsmm.model.Turn;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +18,7 @@ import java.util.Optional;
  * Created by joshua on 1/17/16.
  */
 public class TradeTableModel extends AbstractTableModel {
+    private static final SimpleDateFormat FMT = new SimpleDateFormat("MM/dd HH:mm");
     private final List<Trade> tradeCache;
 
     public TradeTableModel() {
@@ -54,7 +58,7 @@ public class TradeTableModel extends AbstractTableModel {
         Trade t = tradeCache.get(row);
         switch (col) {
             case 0:
-                return t.getTradeTime();
+                return FMT.format(Timestamp.valueOf(t.getTradeTime()));
             case 1:
                 return t.getQuantity();
             case 2:

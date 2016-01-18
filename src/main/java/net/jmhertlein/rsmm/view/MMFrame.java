@@ -49,7 +49,6 @@ public class MMFrame extends JFrame {
 
         this.quotePanel = new QuotePanel(items, quotes);
         this.showItemManagerAction = new ShowItemManagerAction(items, this, quotePanel);
-        quotePanel.setBorder(BorderFactory.createTitledBorder(""));
 
         this.turnPanel = new TurnPanel(turns, quotes, items);
         this.tradePanel = new TradePanel();

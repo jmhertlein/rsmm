@@ -6,9 +6,11 @@ import net.jmhertlein.rsmm.model.QuoteManager;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Optional;
 
 public class RecentQuotesTableModel extends AbstractTableModel {
+    private static final SimpleDateFormat FMT = new SimpleDateFormat("MM/dd HH:mm");
     private final QuoteManager quotes;
     private final Quote[] quoteCache;
 
@@ -54,7 +56,7 @@ public class RecentQuotesTableModel extends AbstractTableModel {
 
         switch (col) {
             case 0:
-                return quote.getQuoteTS();
+                return FMT.format(quote.getQuoteTS());
             case 1:
                 return quote.getBid();
             case 2:
