@@ -19,19 +19,15 @@ package net.jmhertlein.rsmm.view.item;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
+
 import net.jmhertlein.rsmm.controller.item.AddItemAction;
+import net.jmhertlein.rsmm.controller.item.NavigateToGELimitsAction;
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.view.quote.QuotePanel;
 
 /**
- *
  * @author joshua
  */
 public class ItemManagerFrame extends JDialog {
@@ -58,7 +54,16 @@ public class ItemManagerFrame extends JDialog {
 
         setupComponents();
         setupUI();
+        setupMenu();
         setSize(300, 300);
+    }
+
+    private void setupMenu() {
+        JMenuBar bar = new JMenuBar();
+        JMenu menu = new JMenu("Lookup");
+        menu.add(new NavigateToGELimitsAction());
+        bar.add(menu);
+        setJMenuBar(bar);
     }
 
     private void setupUI() {
