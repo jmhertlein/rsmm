@@ -1,0 +1,2 @@
+allow busting trades
+allow closing turns
