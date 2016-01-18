@@ -105,12 +105,12 @@ public class Turn {
         int sumVolumeWeightedPrices = 0;
         int totalShares = 0;
         for (Trade t : trades) {
-            sumVolumeWeightedPrices = t.getPrice() * t.getQuantity();
+            sumVolumeWeightedPrices += t.getPrice() * t.getQuantity();
             totalShares += t.getQuantity();
         }
 
         BigDecimal numerator = new BigDecimal(sumVolumeWeightedPrices), denominator = new BigDecimal(totalShares);
-        return numerator.divide(denominator);
+        return numerator.divide(denominator, 4, BigDecimal.ROUND_HALF_EVEN);
     }
 
     public int getPosition() throws SQLException {
@@ -137,17 +137,22 @@ public class Turn {
         Quote quote = quotes.getLatestQuote(itemName).orElseThrow(() -> new NoQuoteException(itemName));
         int pos = getPosition();
         if (pos > 0) {
-            pos = Math.abs(pos);
             return new BigDecimal(pos * quote.getAsk().intValue()).subtract(entryVWAP().multiply(BigDecimal.valueOf(pos)));
         } else {
             pos = Math.abs(pos);
-            return exitVWAP().multiply(BigDecimal.valueOf(pos)).subtract(BigDecimal.valueOf(quote.getBid().intValue() * pos));
+            //return exitVWAP().multiply(BigDecimal.valueOf(pos)).subtract(BigDecimal.valueOf(quote.getBid().intValue() * pos));
+            return exitVWAP().subtract(BigDecimal.valueOf(quote.getBid().intValue())).multiply(BigDecimal.valueOf(pos));
         }
     }
 
     public BigDecimal getClosedProfit() throws SQLException {
-        BigDecimal closed = BigDecimal.valueOf(getClosedPosition());
-        return exitVWAP().subtract(entryVWAP()).multiply(closed);
+        int cpos = getClosedPosition();
+        System.out.println("CLOSED POS: " + cpos);
+        BigDecimal closed = BigDecimal.valueOf(cpos);
+        System.out.println("EXIT VWAP: " + exitVWAP() + ", ENTRY VWAP: " + entryVWAP());
+        BigDecimal pxDiff = exitVWAP().subtract(entryVWAP());
+        System.out.println("PXDIFF: " + pxDiff);
+        return pxDiff.multiply(closed);
     }
 
     public RSInteger getPositionCost(QuoteManager quotes) throws SQLException, NoQuoteException {

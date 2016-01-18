@@ -32,6 +32,7 @@ public class RSMarketMaker {
     public static void main(String... args) {
         pickNimbus();
 
+
         Connection conn = null;
         try {
             conn = DriverManager.getConnection("jdbc:postgresql:rsmm", "rsmm", "");
