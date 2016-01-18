@@ -21,7 +21,6 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 /**
- *
  * @author joshua
  */
 public class Trade {
@@ -52,4 +51,7 @@ public class Trade {
         return quantity;
     }
 
+    public void bustTrade() throws SQLException {
+        turn.bustTrade(this);
+    }
 }

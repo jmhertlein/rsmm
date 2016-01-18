@@ -9,6 +9,7 @@ import javax.swing.table.AbstractTableModel;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by joshua on 1/17/16.
@@ -78,5 +79,13 @@ public class TradeTableModel extends AbstractTableModel {
     public void clearCache() {
         tradeCache.clear();
         fireTableDataChanged();
+    }
+
+    public Optional<Trade> getTradeAtRow(int selectedRow) {
+        if (selectedRow < 0 || selectedRow >= tradeCache.size()) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(tradeCache.get(selectedRow));
     }
 }

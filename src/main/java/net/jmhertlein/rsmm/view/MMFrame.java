@@ -21,6 +21,7 @@ import java.sql.Connection;
 import javax.swing.*;
 
 import net.jmhertlein.rsmm.controller.AddTradeAction;
+import net.jmhertlein.rsmm.controller.BustTradeAction;
 import net.jmhertlein.rsmm.controller.ShowItemManagerAction;
 import net.jmhertlein.rsmm.controller.turn.CloseTurnAction;
 import net.jmhertlein.rsmm.model.ItemManager;
@@ -100,9 +101,15 @@ public class MMFrame extends JFrame {
 
     private void setupMenus() {
         JMenuBar bar = new JMenuBar();
+
         JMenu itemsMenu = new JMenu("Items");
         itemsMenu.add(showItemManagerAction);
         bar.add(itemsMenu);
+
+        JMenu tradesMenu = new JMenu("Trades");
+        tradesMenu.add(new BustTradeAction(tradePanel.getTradeTable(), tradePanel.getTradeTableModel(), turnPanel.getTurnTableModel()));
+        bar.add(tradesMenu);
+
         setJMenuBar(bar);
     }
 }

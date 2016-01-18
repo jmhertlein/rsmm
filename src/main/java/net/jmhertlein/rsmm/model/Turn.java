@@ -17,10 +17,7 @@
 package net.jmhertlein.rsmm.model;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -168,6 +165,14 @@ public class Turn {
     public void closeTurn() throws SQLException {
         try (PreparedStatement p = conn.prepareStatement("UPDATE Turn SET close_ts=now() WHERE turn_id=?")) {
             p.setInt(1, turnId);
+            p.executeUpdate();
+        }
+    }
+
+    public void bustTrade(Trade t) throws SQLException {
+        try (PreparedStatement p = conn.prepareStatement("DELETE FROM Trade WHERE turn_id=? AND trade_ts=?")) {
+            p.setInt(1, turnId);
+            p.setTimestamp(2, Timestamp.valueOf(t.getTradeTime()));
             p.executeUpdate();
         }
     }

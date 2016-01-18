@@ -1,5 +1,6 @@
 package net.jmhertlein.rsmm.view.trade;
 
+import net.jmhertlein.rsmm.controller.BustTradeAction;
 import net.jmhertlein.rsmm.model.Turn;
 import net.jmhertlein.rsmm.view.turn.TurnPanel;
 
@@ -13,13 +14,14 @@ public class TradePanel extends JPanel {
     private final JTable tradeTable;
     private final TradeTableModel tradeTableModel;
     private final JTextField qtyField;
-    private final JButton buyButton, sellButton;
+    private final JButton buyButton, sellButton, bustButton;
 
     public TradePanel() {
         tradeTableModel = new TradeTableModel();
         tradeTable = new JTable(tradeTableModel);
         buyButton = new JButton();
         sellButton = new JButton();
+        bustButton = new JButton();
         qtyField = new JTextField(13);
 
         setLayout(new GridBagLayout());
