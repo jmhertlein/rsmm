@@ -38,19 +38,21 @@ public class ItemManagerFrame extends JDialog {
     private final JScrollPane tablePane;
     private final ItemManagerTableModel itemTableModel;
 
-    public ItemManagerFrame(QuotePanel quotePanel, ItemManager items, Frame frame) {
+    public ItemManagerFrame(ItemManager items, Frame frame) {
         super(frame, "Item Manager");
         setModalityType(ModalityType.APPLICATION_MODAL);
 
         addItemButton = new JButton("Add Item");
-        itemTableModel = new ItemManagerTableModel(items);
+        itemTableModel = new ItemManagerTableModel();
         itemTable = new JTable(itemTableModel);
         tablePane = new JScrollPane(itemTable);
 
         nameField = new JTextField();
         limitField = new JTextField();
 
-        addItemButton.setAction(new AddItemAction(this, items, itemTableModel, quotePanel, nameField, limitField));
+        addItemButton.setAction(new AddItemAction(this, items, nameField, limitField));
+
+        items.addListener(() -> itemTableModel.refresh(items));
 
         setupComponents();
         setupUI();

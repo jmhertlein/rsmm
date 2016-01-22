@@ -19,12 +19,14 @@ package net.jmhertlein.rsmm.view.quote;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.sql.SQLException;
+import java.util.Optional;
 import javax.swing.*;
 
 import net.jmhertlein.rsmm.controller.AddQuoteAction;
 import net.jmhertlein.rsmm.controller.QuoteItemSelectedAction;
 import net.jmhertlein.rsmm.model.Item;
 import net.jmhertlein.rsmm.model.ItemManager;
+import net.jmhertlein.rsmm.model.Quote;
 import net.jmhertlein.rsmm.model.QuoteManager;
 import net.jmhertlein.rsmm.view.turn.TurnPanel;
 
@@ -105,5 +107,9 @@ public class QuotePanel extends JPanel {
 
     public void setAddQuoteAction(QuoteManager quotes, TurnPanel turnPanel) {
         addQuoteButton.setAction(new AddQuoteAction(this, quotes, itemChooser, model, turnPanel, bidField, askField));
+    }
+
+    public Optional<Quote> getSelectedQuote() {
+        return model.getQuoteAt(recentQuotes.getSelectedRow());
     }
 }

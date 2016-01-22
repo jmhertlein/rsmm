@@ -16,6 +16,8 @@
  */
 package net.jmhertlein.rsmm.model;
 
+import net.jmhertlein.rsmm.model.update.UpdatableManager;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,7 +29,7 @@ import java.util.Optional;
 /**
  * @author joshua
  */
-public class TurnManager {
+public class TurnManager extends UpdatableManager {
     private final Connection conn;
 
     public TurnManager(Connection conn) {

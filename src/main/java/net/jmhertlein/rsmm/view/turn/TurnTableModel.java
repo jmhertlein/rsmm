@@ -13,15 +13,12 @@ import java.util.Optional;
  * Created by joshua on 1/16/16.
  */
 public class TurnTableModel extends AbstractTableModel {
-    private final TurnManager turns;
     private final QuoteManager quotes;
     private final List<Turn> turnsCache;
 
-    public TurnTableModel(TurnManager turns, QuoteManager quotes) {
-        this.turns = turns;
+    public TurnTableModel(QuoteManager quotes) {
         this.quotes = quotes;
         turnsCache = new ArrayList<>();
-        reloadTurns();
     }
 
     @Override
@@ -84,7 +81,7 @@ public class TurnTableModel extends AbstractTableModel {
         }
     }
 
-    public void reloadTurns() {
+    public void reloadTurns(TurnManager turns) {
         turnsCache.clear();
         try {
             turnsCache.addAll(turns.getOpenTurns());

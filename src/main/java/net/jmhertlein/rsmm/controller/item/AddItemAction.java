@@ -18,16 +18,12 @@ package net.jmhertlein.rsmm.controller.item;
 
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
-import java.util.Optional;
 import javax.swing.AbstractAction;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
-import net.jmhertlein.rsmm.model.Item;
 import net.jmhertlein.rsmm.model.ItemManager;
-import net.jmhertlein.rsmm.view.item.ItemManagerTableModel;
-import net.jmhertlein.rsmm.view.quote.QuotePanel;
 
 /**
  * @author joshua
@@ -35,16 +31,12 @@ import net.jmhertlein.rsmm.view.quote.QuotePanel;
 public class AddItemAction extends AbstractAction {
     private final JDialog parent;
     private final ItemManager items;
-    private final ItemManagerTableModel table;
-    private final QuotePanel quotePanel;
     private final JTextField nameField, limitField;
 
-    public AddItemAction(JDialog parent, ItemManager items, ItemManagerTableModel table, QuotePanel quotePanel, JTextField nameField, JTextField limitField) {
+    public AddItemAction(JDialog parent, ItemManager items, JTextField nameField, JTextField limitField) {
         super("Add Item");
         this.parent = parent;
         this.items = items;
-        this.table = table;
-        this.quotePanel = quotePanel;
         this.nameField = nameField;
         this.limitField = limitField;
     }
@@ -54,12 +46,12 @@ public class AddItemAction extends AbstractAction {
         try {
             String name = nameField.getText();
             if (name.isEmpty()) {
-                showError("Invalid Name", "Name cannot be empty.");
+                JOptionPane.showMessageDialog(parent, "Name cannot be empty.", "Invalid Name", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             if (items.getItem(name).isPresent()) {
-                showError("Invalid Name", "There is already an item named " + name);
+                JOptionPane.showMessageDialog(parent, "There is already an item named " + name, "Invalid Name", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -67,27 +59,15 @@ public class AddItemAction extends AbstractAction {
             try {
                 buyLimit = Integer.parseInt(limitField.getText());
             } catch (NumberFormatException nfe) {
-                showError("Invalid GE Limit", nfe.getMessage());
+                JOptionPane.showMessageDialog(parent, nfe.getMessage(), "Invalid GE Limit", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             items.addItem(name, buyLimit);
-            Optional<Item> item = items.getItem(name);
-            if (item.isPresent()) {
-                table.fireTableDataChanged();
-                nameField.setText("");
-                limitField.setText("");
-                quotePanel.refreshItems(items);
-            } else {
-                showError("Unexpected Error", "Item " + name + " was added to DB but then was not able to be found.");
-                return;
-            }
+            items.fireUpdateEvent();
         } catch (SQLException ex) {
-            showError("Database Error", ex.getMessage());
+            JOptionPane.showMessageDialog(parent, ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void showError(String title, String msg) {
-        JOptionPane.showMessageDialog(parent, msg, title, JOptionPane.ERROR_MESSAGE);
-    }
 }

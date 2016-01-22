@@ -5,11 +5,14 @@ import net.jmhertlein.rsmm.controller.turn.TurnSelectedAction;
 import net.jmhertlein.rsmm.controller.turn.NewTurnAction;
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
+import net.jmhertlein.rsmm.model.Turn;
 import net.jmhertlein.rsmm.model.TurnManager;
+import net.jmhertlein.rsmm.model.update.TradeUpdateManager;
 import net.jmhertlein.rsmm.view.trade.TradePanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Optional;
 
 /**
  * Created by joshua on 1/16/16.
@@ -20,7 +23,7 @@ public class TurnPanel extends JPanel {
     private final JButton openTurnButton, closeTurnButton;
 
     public TurnPanel(TurnManager turns, QuoteManager quotes, ItemManager items) {
-        model = new TurnTableModel(turns, quotes);
+        model = new TurnTableModel(quotes);
         turnsTable = new JTable(model);
         openTurnButton = new JButton(new NewTurnAction(this, items, turns, model));
         closeTurnButton = new JButton();
@@ -46,6 +49,8 @@ public class TurnPanel extends JPanel {
         add(openTurnButton, c);
         c.gridx = 1;
         add(closeTurnButton, c);
+
+        reload(turns);
     }
 
     public void addTableSelectionListener(TradePanel p) {
@@ -64,19 +69,15 @@ public class TurnPanel extends JPanel {
         closeTurnButton.setAction(a);
     }
 
-    public void reload() {
+    public void reload(TurnManager turns) {
         int selectedRow = turnsTable.getSelectedRow();
-        model.reloadTurns();
+        model.reloadTurns(turns);
         if (selectedRow >= 0) {
             turnsTable.setRowSelectionInterval(selectedRow, selectedRow);
         }
     }
 
-    public void refresh() {
-        int selectedRow = turnsTable.getSelectedRow();
-        model.fireTableDataChanged();
-        if (selectedRow >= 0) {
-            turnsTable.setRowSelectionInterval(selectedRow, selectedRow);
-        }
+    public Optional<Turn> getSelectedTurn() {
+        return model.getTurnAtRow(turnsTable.getSelectedRow());
     }
 }

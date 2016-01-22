@@ -27,6 +27,7 @@ import net.jmhertlein.rsmm.controller.turn.CloseTurnAction;
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
 import net.jmhertlein.rsmm.model.TurnManager;
+import net.jmhertlein.rsmm.model.update.TradeUpdateManager;
 import net.jmhertlein.rsmm.view.quote.QuotePanel;
 import net.jmhertlein.rsmm.view.trade.TradePanel;
 import net.jmhertlein.rsmm.view.turn.TurnPanel;
@@ -46,6 +47,7 @@ public class MMFrame extends JFrame {
         ItemManager items = new ItemManager(conn);
         QuoteManager quotes = new QuoteManager(conn);
         TurnManager turns = new TurnManager(conn);
+        TradeUpdateManager trades = new TradeUpdateManager();
 
         this.quotePanel = new QuotePanel(items, quotes);
         this.showItemManagerAction = new ShowItemManagerAction(items, this, quotePanel);
@@ -54,15 +56,13 @@ public class MMFrame extends JFrame {
         this.tradePanel = new TradePanel();
         turnPanel.addTableSelectionListener(tradePanel);
 
-        tradePanel.setBuyAction(new AddTradeAction(tradePanel.getQuantityField(), tradePanel.getTradeTable(), tradePanel.getTradeTableModel(),
-                quotePanel.getItemChooser(), turnPanel.getTurnTable(), turnPanel.getTurnTableModel(),
-                quotePanel.getQuoteTable(), quotePanel.getQuoteTableModel(), true));
-        tradePanel.setSellAction(new AddTradeAction(tradePanel.getQuantityField(), tradePanel.getTradeTable(), tradePanel.getTradeTableModel(),
-                quotePanel.getItemChooser(), turnPanel.getTurnTable(), turnPanel.getTurnTableModel(),
-                quotePanel.getQuoteTable(), quotePanel.getQuoteTableModel(), false));
+        tradePanel.setBuyAction(new AddTradeAction(tradePanel, quotePanel, turnPanel, turns, trades, true));
+        tradePanel.setSellAction(new AddTradeAction(tradePanel, quotePanel, turnPanel, turns, trades, false));
 
         turnPanel.setCloseTurnAction(new CloseTurnAction(turnPanel.getTurnTable(), turnPanel.getTurnTableModel(), tradePanel));
         quotePanel.setAddQuoteAction(quotes, turnPanel);
+
+        //TODO: put all refresh listeners here
 
         setSize(800, 600);
         setupMenus();

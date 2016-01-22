@@ -16,6 +16,9 @@
  */
 package net.jmhertlein.rsmm.model;
 
+import net.jmhertlein.rsmm.model.update.UpdatableManager;
+import net.jmhertlein.rsmm.model.update.UpdateListener;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,10 +27,9 @@ import java.util.*;
 import java.util.function.Supplier;
 
 /**
- *
  * @author joshua
  */
-public class ItemManager implements Supplier<List<Item>> {
+public class ItemManager extends UpdatableManager {
     private final Connection conn;
 
     public ItemManager(Connection conn) {
@@ -35,7 +37,7 @@ public class ItemManager implements Supplier<List<Item>> {
     }
 
     public void addItem(String name, int buyLimit) throws SQLException {
-        try(PreparedStatement p = conn.prepareStatement("INSERT INTO Item VALUES(?,?)")) {
+        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Item VALUES(?,?)")) {
             p.setString(1, name);
             p.setInt(2, buyLimit);
             p.executeUpdate();
@@ -44,10 +46,10 @@ public class ItemManager implements Supplier<List<Item>> {
 
     public Set<Item> matchItem(String match) throws SQLException {
         Set<Item> ret = new HashSet<>();
-        try(PreparedStatement p = conn.prepareStatement("SELECT * FROM Item WHERE item_name LIKE ?")) {
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Item WHERE item_name LIKE ?")) {
             p.setString(1, "%" + match + "%");
-            try(ResultSet rs = p.executeQuery()) {
-                while(rs.next()) {
+            try (ResultSet rs = p.executeQuery()) {
+                while (rs.next()) {
                     ret.add(new Item(rs));
                 }
             }
@@ -57,10 +59,10 @@ public class ItemManager implements Supplier<List<Item>> {
     }
 
     public Optional<Item> getItem(String name) throws SQLException {
-        try(PreparedStatement p = conn.prepareStatement("SELECT * FROM Item WHERE item_name=?")) {
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Item WHERE item_name=?")) {
             p.setString(1, name);
-            try(ResultSet rs = p.executeQuery()) {
-                if(rs.next()) {
+            try (ResultSet rs = p.executeQuery()) {
+                if (rs.next()) {
                     return Optional.of(new Item(rs));
                 } else {
                     return Optional.empty();
@@ -70,10 +72,10 @@ public class ItemManager implements Supplier<List<Item>> {
     }
 
     public Optional<Integer> getLimitFor(String name) throws SQLException {
-        try(PreparedStatement p = conn.prepareStatement("SELECT ge_limit FROM Item WHERE item_name=?")) {
+        try (PreparedStatement p = conn.prepareStatement("SELECT ge_limit FROM Item WHERE item_name=?")) {
             p.setString(1, name);
-            try(ResultSet rs = p.executeQuery()) {
-                if(rs.next()) {
+            try (ResultSet rs = p.executeQuery()) {
+                if (rs.next()) {
                     return Optional.of(rs.getInt("ge_limit"));
                 } else {
                     return Optional.empty();
@@ -84,9 +86,9 @@ public class ItemManager implements Supplier<List<Item>> {
 
     public List<Item> getItems() throws SQLException {
         List<Item> ret = new ArrayList<>();
-        try(PreparedStatement p = conn.prepareStatement("SELECT * FROM Item ORDER BY item_name ASC")) {
-            try(ResultSet rs = p.executeQuery()) {
-                while(rs.next()) {
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Item ORDER BY item_name ASC")) {
+            try (ResultSet rs = p.executeQuery()) {
+                while (rs.next()) {
                     ret.add(new Item(rs));
                 }
             }
@@ -96,29 +98,20 @@ public class ItemManager implements Supplier<List<Item>> {
     }
 
     public Optional<Item> getItem(int i) throws SQLException {
-        try(PreparedStatement p = conn.prepareStatement("SELECT * FROM Item ORDER BY item_name ASC LIMIT 1 OFFSET ?")) {
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Item ORDER BY item_name ASC LIMIT 1 OFFSET ?")) {
             p.setInt(1, i);
-            try(ResultSet rs = p.executeQuery()) {
+            try (ResultSet rs = p.executeQuery()) {
                 return rs.next() ? Optional.of(new Item(rs)) : Optional.empty();
             }
         }
     }
 
     public int countItems() throws SQLException {
-        try(PreparedStatement p = conn.prepareStatement("SELECT COUNT(*) AS count FROM Item")) {
-            try(ResultSet rs = p.executeQuery()) {
+        try (PreparedStatement p = conn.prepareStatement("SELECT COUNT(*) AS count FROM Item")) {
+            try (ResultSet rs = p.executeQuery()) {
                 rs.next();
                 return rs.getInt("count");
             }
-        }
-    }
-
-    @Override
-    public List<Item> get() {
-        try {
-            return getItems();
-        } catch (SQLException e) {
-            return Collections.emptyList();
         }
     }
 }

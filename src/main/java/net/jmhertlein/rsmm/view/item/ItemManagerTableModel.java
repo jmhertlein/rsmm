@@ -17,29 +17,27 @@
 package net.jmhertlein.rsmm.view.item;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import javax.swing.table.AbstractTableModel;
+
 import net.jmhertlein.rsmm.model.Item;
 import net.jmhertlein.rsmm.model.ItemManager;
 
 /**
- *
  * @author joshua
  */
 public class ItemManagerTableModel extends AbstractTableModel {
-    private final ItemManager items;
+    private final List<Item> itemCache;
 
-    public ItemManagerTableModel(ItemManager items) {
-        this.items = items;
+    public ItemManagerTableModel() {
+        itemCache = new ArrayList<>();
     }
 
     @Override
     public int getRowCount() {
-        try {
-            return items.countItems();
-        } catch(SQLException ex) {
-            return 0;
-        }
+        return itemCache.size();
     }
 
     @Override
@@ -49,7 +47,7 @@ public class ItemManagerTableModel extends AbstractTableModel {
 
     @Override
     public String getColumnName(int i) {
-        switch(i) {
+        switch (i) {
             case 0:
                 return "Item";
             case 1:
@@ -61,23 +59,24 @@ public class ItemManagerTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int row, int col) {
-        Optional<Item> item;
-        try {
-            item = items.getItem(row);
-        } catch(SQLException ex) {
-            return null;
-        }
-        if(!item.isPresent()) {
+        if (row < 0 || row > itemCache.size()) {
             return null;
         }
 
-        switch(col) {
+        Item item = itemCache.get(row);
+        switch (col) {
             case 0:
-                return item.get().getName();
+                return item.getName();
             case 1:
-                return item.get().getBuyLimit();
+                return item.getBuyLimit();
             default:
                 return null;
         }
+    }
+
+    public void refresh(ItemManager items) throws SQLException {
+        itemCache.clear();
+        itemCache.addAll(items.getItems());
+        fireTableDataChanged();
     }
 }

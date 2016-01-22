@@ -16,6 +16,8 @@
  */
 package net.jmhertlein.rsmm.model;
 
+import net.jmhertlein.rsmm.model.update.UpdatableManager;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,7 +31,7 @@ import java.util.function.Supplier;
 /**
  * @author joshua
  */
-public class QuoteManager {
+public class QuoteManager extends UpdatableManager {
     private final Connection conn;
 
     public QuoteManager(Connection conn) {
