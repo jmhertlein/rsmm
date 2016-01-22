@@ -1,2 +1,3 @@
-allow busting trades
-allow closing turns
+centralize updates to turns, items, quotes, trades: use listeners or something
+add "closed volume" column to turns view
+add a "long term stats" frame that shows total profit all time, last month, last week, etc. Also shows for each item: total profit, total volume, avg profit per turn, avg turn volume
