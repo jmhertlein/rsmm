@@ -19,6 +19,7 @@ package net.jmhertlein.rsmm.view.item;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.sql.SQLException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 
@@ -58,6 +59,12 @@ public class ItemManagerFrame extends JDialog {
         setupUI();
         setupMenu();
         setSize(300, 300);
+
+        try {
+            itemTableModel.refresh(items);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error Fetching Items", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void setupMenu() {
