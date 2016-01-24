@@ -42,10 +42,10 @@ public class NewTurnAction extends AbstractAction {
         chosen.ifPresent(i -> {
             try {
                 turns.newTurn(i.getName());
+                turns.fireUpdateEvent();
             } catch (SQLException | DuplicateOpenTurnException e) {
                 JOptionPane.showMessageDialog(parent, e.getMessage(), "Error Opening Turn", JOptionPane.ERROR_MESSAGE);
             }
-            turnTable.reloadTurns();
         });
     }
 }

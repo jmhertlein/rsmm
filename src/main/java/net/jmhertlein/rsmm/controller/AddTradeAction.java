@@ -81,7 +81,6 @@ public class AddTradeAction extends AbstractAction {
         try {
             t.get().addTrade(px, qty);
             trades.fireUpdateEvent();
-            turns.fireUpdateEvent();
             tradePanel.getQuantityField().setText("");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error Adding Trade", JOptionPane.ERROR_MESSAGE);

@@ -105,6 +105,10 @@ public class QuotePanel extends JPanel {
         }
     }
 
+    public void reloadQuotes(QuoteManager quotes) {
+        model.showQuotesFor(itemChooser.getItemAt(itemChooser.getSelectedIndex()).getName(), quotes);
+    }
+
     public void setAddQuoteAction(QuoteManager quotes, TurnPanel turnPanel) {
         addQuoteButton.setAction(new AddQuoteAction(this, quotes, itemChooser, model, turnPanel, bidField, askField));
     }

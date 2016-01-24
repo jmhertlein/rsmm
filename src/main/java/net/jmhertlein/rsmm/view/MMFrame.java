@@ -37,6 +37,7 @@ import net.jmhertlein.rsmm.view.turn.TurnPanel;
  */
 public class MMFrame extends JFrame {
     private final ShowItemManagerAction showItemManagerAction;
+    private final BustTradeAction bustTradeAction;
     private final QuotePanel quotePanel;
     private final TurnPanel turnPanel;
     private final TradePanel tradePanel;
@@ -59,10 +60,19 @@ public class MMFrame extends JFrame {
         tradePanel.setBuyAction(new AddTradeAction(tradePanel, quotePanel, turnPanel, turns, trades, true));
         tradePanel.setSellAction(new AddTradeAction(tradePanel, quotePanel, turnPanel, turns, trades, false));
 
-        turnPanel.setCloseTurnAction(new CloseTurnAction(turnPanel.getTurnTable(), turnPanel.getTurnTableModel(), tradePanel));
+        turnPanel.setCloseTurnAction(new CloseTurnAction(turns, turnPanel, tradePanel));
         quotePanel.setAddQuoteAction(quotes, turnPanel);
+        bustTradeAction = new BustTradeAction(trades, tradePanel);
 
-        //TODO: put all refresh listeners here
+        trades.addListener(() -> turnPanel.reload(turns));
+        trades.addListener(() -> turnPanel.getSelectedTurn().ifPresent(tradePanel::showTradesFor));
+
+        quotes.addListener(() -> quotePanel.reloadQuotes(quotes));
+        quotes.addListener(() -> turnPanel.reload(turns));
+
+        items.addListener(() -> quotePanel.refreshItems(items));
+
+        turns.addListener(() -> turnPanel.reload(turns));
 
         setSize(800, 600);
         setupMenus();
@@ -107,7 +117,7 @@ public class MMFrame extends JFrame {
         bar.add(itemsMenu);
 
         JMenu tradesMenu = new JMenu("Trades");
-        tradesMenu.add(new BustTradeAction(tradePanel.getTradeTable(), tradePanel.getTradeTableModel(), turnPanel.getTurnTableModel()));
+        tradesMenu.add(bustTradeAction);
         bar.add(tradesMenu);
 
         setJMenuBar(bar);

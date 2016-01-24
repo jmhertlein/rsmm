@@ -11,11 +11,9 @@ import java.util.Optional;
 
 public class RecentQuotesTableModel extends AbstractTableModel {
     private static final SimpleDateFormat FMT = new SimpleDateFormat("MM/dd HH:mm");
-    private final QuoteManager quotes;
     private final Quote[] quoteCache;
 
     public RecentQuotesTableModel(QuoteManager quotes) {
-        this.quotes = quotes;
         this.quoteCache = new Quote[5];
     }
 
@@ -70,7 +68,7 @@ public class RecentQuotesTableModel extends AbstractTableModel {
         }
     }
 
-    public void showQuotesFor(String itemName) {
+    public void showQuotesFor(String itemName, QuoteManager quotes) {
         for (int i = 0; i < quoteCache.length; i++) {
             quoteCache[i] = null;
         }

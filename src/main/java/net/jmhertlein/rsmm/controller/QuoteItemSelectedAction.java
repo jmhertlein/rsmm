@@ -34,6 +34,6 @@ public class QuoteItemSelectedAction implements ItemListener {
             name = item.getName();
         }
 
-        tableModel.showQuotesFor(name);
+        tableModel.showQuotesFor(name, quotes);
     }
 }

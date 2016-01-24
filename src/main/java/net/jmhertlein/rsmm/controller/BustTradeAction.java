@@ -1,7 +1,10 @@
 package net.jmhertlein.rsmm.controller;
 
 import net.jmhertlein.rsmm.model.Trade;
+import net.jmhertlein.rsmm.model.update.TradeUpdateManager;
+import net.jmhertlein.rsmm.view.trade.TradePanel;
 import net.jmhertlein.rsmm.view.trade.TradeTableModel;
+import net.jmhertlein.rsmm.view.turn.TurnPanel;
 import net.jmhertlein.rsmm.view.turn.TurnTableModel;
 
 import javax.swing.*;
@@ -13,35 +16,32 @@ import java.util.Optional;
  * Created by joshua on 1/18/16.
  */
 public class BustTradeAction extends AbstractAction {
-    private final JTable tradeTable;
-    private final TradeTableModel tradeTableModel;
-    private final TurnTableModel turnTableModel;
+    private final TradeUpdateManager trades;
+    private final TradePanel tradePanel;
 
-    public BustTradeAction(JTable tradeTable, TradeTableModel tradeTableModel, TurnTableModel turnTableModel) {
+    public BustTradeAction(TradeUpdateManager trades, TradePanel tradePanel) {
         super("Bust Trade");
-        this.tradeTable = tradeTable;
-        this.tradeTableModel = tradeTableModel;
-        this.turnTableModel = turnTableModel;
+        this.tradePanel = tradePanel;
+        this.trades = trades;
     }
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        if (JOptionPane.showConfirmDialog(tradeTable, "Really bust trade?") != 0) {
+        if (JOptionPane.showConfirmDialog(tradePanel, "Really bust trade?") != 0) {
             return;
         }
 
-        Optional<Trade> t = tradeTableModel.getTradeAtRow(tradeTable.getSelectedRow());
+        Optional<Trade> t = tradePanel.getSelectedTrade();
 
         if (t.isPresent()) {
             try {
                 t.get().bustTrade();
-                tradeTableModel.showTradesFor(t.get().getTurn());
-                turnTableModel.fireTableDataChanged();
+                trades.fireUpdateEvent();
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(tradeTable, e.getMessage(), "Error Busting Trade", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(tradePanel, e.getMessage(), "Error Busting Trade", JOptionPane.ERROR_MESSAGE);
             }
         } else {
-            JOptionPane.showMessageDialog(tradeTable, "No trade selected.", "Error Busting Trade", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(tradePanel, "No trade selected.", "Error Busting Trade", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

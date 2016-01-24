@@ -41,7 +41,7 @@ public class ShowItemManagerAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        ItemManagerFrame f = new ItemManagerFrame(quotePanel, items, parent);
+        ItemManagerFrame f = new ItemManagerFrame(items, parent);
         f.setLocationRelativeTo(parent);
         f.setVisible(true);
         f.dispose();

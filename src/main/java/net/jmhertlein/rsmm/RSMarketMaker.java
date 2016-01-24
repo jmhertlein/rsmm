@@ -22,21 +22,25 @@ import java.sql.SQLException;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+
 import net.jmhertlein.rsmm.view.MMFrame;
 
 /**
- *
  * @author joshua
  */
 public class RSMarketMaker {
     public static void main(String... args) {
+        String host = "claudius";
+        if (args.length > 0) {
+            host = args[0];
+        }
         pickNimbus();
 
-
-        Connection conn = null;
+        System.out.println("Connecting to " + host + ".");
+        Connection conn;
         try {
-            conn = DriverManager.getConnection("jdbc:postgresql:rsmm", "rsmm", "");
-        } catch(SQLException ex) {
+            conn = DriverManager.getConnection("jdbc:postgresql://" + host + "/rsmm", "rsmm", "");
+        } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "Error Connecting to Database", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -48,13 +52,13 @@ public class RSMarketMaker {
 
     public static void pickNimbus() {
         try {
-            for(LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                if("Nimbus".equals(info.getName())) {
+            for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
                     UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
         }
     }
 }

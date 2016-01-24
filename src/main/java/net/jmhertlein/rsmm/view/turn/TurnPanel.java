@@ -72,7 +72,7 @@ public class TurnPanel extends JPanel {
     public void reload(TurnManager turns) {
         int selectedRow = turnsTable.getSelectedRow();
         model.reloadTurns(turns);
-        if (selectedRow >= 0) {
+        if (selectedRow >= 0 && selectedRow < model.getRowCount()) {
             turnsTable.setRowSelectionInterval(selectedRow, selectedRow);
         }
     }

@@ -77,8 +77,7 @@ public class AddQuoteAction extends AbstractAction {
 
         try {
             quotes.addQuote(selected.getName(), bid.intValue(), ask.intValue());
-            tableModel.showQuotesFor(selected.getName());
-            turnPanel.refresh();
+            quotes.fireUpdateEvent();
             bidField.setText("");
             askField.setText("");
         } catch (SQLException ex) {
