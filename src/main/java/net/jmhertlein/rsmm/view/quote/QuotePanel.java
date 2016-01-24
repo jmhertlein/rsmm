@@ -35,7 +35,7 @@ public class QuotePanel extends JPanel {
     private final RecentQuotesTableModel model;
     private final JComboBox<Item> itemChooser;
     private final JTextField bidField, askField;
-    private final JButton addQuoteButton;
+    private final JButton addQuoteButton, syncQuoteButton;
 
     public QuotePanel(ItemManager items, QuoteManager quotes) {
         itemChooser = new JComboBox<>();
@@ -45,6 +45,7 @@ public class QuotePanel extends JPanel {
         model = new RecentQuotesTableModel(quotes);
         recentQuotes = new JTable(model);
         itemChooser.addItemListener(new QuoteItemSelectedAction(quotes, itemChooser, model));
+        syncQuoteButton = new JButton();
 
         try {
             refreshItems(items);
@@ -57,7 +58,7 @@ public class QuotePanel extends JPanel {
 
 
         c.gridy = 0;
-        c.gridwidth = 4;
+        c.gridwidth = 5;
         c.fill = GridBagConstraints.HORIZONTAL;
         c.weightx = 1;
         add(recentQuotes.getTableHeader(), c);
@@ -68,16 +69,19 @@ public class QuotePanel extends JPanel {
         c.gridwidth = 1;
         c.gridy = 2;
         c.fill = GridBagConstraints.NONE;
-        add(itemChooser, c);
+        add(syncQuoteButton, c);
 
         c.gridx = 1;
+        add(itemChooser, c);
+
+        c.gridx = 2;
         c.weightx = 0.5;
         c.fill = GridBagConstraints.HORIZONTAL;
         add(bidField, c);
-        c.gridx = 2;
+        c.gridx = 3;
         add(askField, c);
 
-        c.gridx = 3;
+        c.gridx = 4;
         c.weightx = 0;
         c.fill = GridBagConstraints.NONE;
         add(addQuoteButton, c);
@@ -108,6 +112,10 @@ public class QuotePanel extends JPanel {
 
     public void setAddQuoteAction(QuoteManager quotes, TurnPanel turnPanel) {
         addQuoteButton.setAction(new AddQuoteAction(this, quotes, itemChooser, model, turnPanel, bidField, askField));
+    }
+
+    public void setSyncQuoteAction(AbstractAction a) {
+        syncQuoteButton.setAction(a);
     }
 
     public Optional<Quote> getSelectedQuote() {

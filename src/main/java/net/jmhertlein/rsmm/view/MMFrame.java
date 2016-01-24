@@ -23,6 +23,7 @@ import javax.swing.*;
 import net.jmhertlein.rsmm.controller.AddTradeAction;
 import net.jmhertlein.rsmm.controller.BustTradeAction;
 import net.jmhertlein.rsmm.controller.ShowItemManagerAction;
+import net.jmhertlein.rsmm.controller.ShowQuotesForSelectedTurnAction;
 import net.jmhertlein.rsmm.controller.turn.CloseTurnAction;
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
@@ -63,6 +64,8 @@ public class MMFrame extends JFrame {
         turnPanel.setCloseTurnAction(new CloseTurnAction(turns, turnPanel, tradePanel));
         quotePanel.setAddQuoteAction(quotes, turnPanel);
         bustTradeAction = new BustTradeAction(trades, tradePanel);
+
+        quotePanel.setSyncQuoteAction(new ShowQuotesForSelectedTurnAction(turnPanel, quotePanel));
 
         trades.addListener(() -> turnPanel.reload(turns));
         trades.addListener(() -> turnPanel.getSelectedTurn().ifPresent(tradePanel::showTradesFor));

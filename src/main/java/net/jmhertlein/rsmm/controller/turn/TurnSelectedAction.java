@@ -36,7 +36,6 @@ public class TurnSelectedAction implements ListSelectionListener {
         Optional<Turn> t = turnTableModel.getTurnAtRow(turnTable.getSelectedRow());
         t.ifPresent((turn) -> {
             tradePanel.showTradesFor(turn);
-            quotePanel.showQuotesFor(turn.getItemName());
         });
     }
 }
