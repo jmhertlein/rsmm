@@ -24,10 +24,7 @@ import javax.swing.*;
 
 import net.jmhertlein.rsmm.controller.AddQuoteAction;
 import net.jmhertlein.rsmm.controller.QuoteItemSelectedAction;
-import net.jmhertlein.rsmm.model.Item;
-import net.jmhertlein.rsmm.model.ItemManager;
-import net.jmhertlein.rsmm.model.Quote;
-import net.jmhertlein.rsmm.model.QuoteManager;
+import net.jmhertlein.rsmm.model.*;
 import net.jmhertlein.rsmm.view.turn.TurnPanel;
 
 /**
@@ -115,5 +112,14 @@ public class QuotePanel extends JPanel {
 
     public Optional<Quote> getSelectedQuote() {
         return model.getQuoteAt(recentQuotes.getSelectedRow());
+    }
+
+    public void showQuotesFor(String itemName) {
+        for (int i = 0; i < itemChooser.getItemCount(); i++) {
+            if (itemChooser.getItemAt(i).getName().equals(itemName)) {
+                itemChooser.setSelectedIndex(i);
+                break;
+            }
+        }
     }
 }

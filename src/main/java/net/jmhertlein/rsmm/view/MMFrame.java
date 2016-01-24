@@ -55,7 +55,7 @@ public class MMFrame extends JFrame {
 
         this.turnPanel = new TurnPanel(turns, quotes, items);
         this.tradePanel = new TradePanel();
-        turnPanel.addTableSelectionListener(tradePanel);
+        turnPanel.addTableSelectionListener(tradePanel, quotePanel);
 
         tradePanel.setBuyAction(new AddTradeAction(tradePanel, quotePanel, turnPanel, turns, trades, true));
         tradePanel.setSellAction(new AddTradeAction(tradePanel, quotePanel, turnPanel, turns, trades, false));

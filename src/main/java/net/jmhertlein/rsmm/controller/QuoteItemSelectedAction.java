@@ -25,7 +25,9 @@ public class QuoteItemSelectedAction implements ItemListener {
 
     @Override
     public void itemStateChanged(ItemEvent itemEvent) {
-        System.out.println("Refreshing items.");
+        if (itemEvent.getStateChange() != ItemEvent.SELECTED) {
+            return;
+        }
         Item item = chooser.getItemAt(chooser.getSelectedIndex());
         String name;
         if (item == null) {

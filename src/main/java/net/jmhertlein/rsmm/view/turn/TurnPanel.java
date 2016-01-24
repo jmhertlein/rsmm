@@ -1,13 +1,12 @@
 package net.jmhertlein.rsmm.view.turn;
 
-import net.jmhertlein.rsmm.controller.turn.CloseTurnAction;
 import net.jmhertlein.rsmm.controller.turn.TurnSelectedAction;
 import net.jmhertlein.rsmm.controller.turn.NewTurnAction;
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
 import net.jmhertlein.rsmm.model.Turn;
 import net.jmhertlein.rsmm.model.TurnManager;
-import net.jmhertlein.rsmm.model.update.TradeUpdateManager;
+import net.jmhertlein.rsmm.view.quote.QuotePanel;
 import net.jmhertlein.rsmm.view.trade.TradePanel;
 
 import javax.swing.*;
@@ -53,8 +52,8 @@ public class TurnPanel extends JPanel {
         reload(turns);
     }
 
-    public void addTableSelectionListener(TradePanel p) {
-        turnsTable.getSelectionModel().addListSelectionListener(new TurnSelectedAction(turnsTable, model, p));
+    public void addTableSelectionListener(TradePanel tp, QuotePanel qp) {
+        turnsTable.getSelectionModel().addListSelectionListener(new TurnSelectedAction(turnsTable, model, tp, qp));
     }
 
     public JTable getTurnTable() {
