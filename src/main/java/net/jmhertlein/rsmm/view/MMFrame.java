@@ -29,6 +29,7 @@ import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
 import net.jmhertlein.rsmm.model.TurnManager;
 import net.jmhertlein.rsmm.model.update.TradeUpdateManager;
+import net.jmhertlein.rsmm.view.profit.ProfitPanel;
 import net.jmhertlein.rsmm.view.quote.QuotePanel;
 import net.jmhertlein.rsmm.view.trade.TradePanel;
 import net.jmhertlein.rsmm.view.turn.TurnPanel;
@@ -42,6 +43,7 @@ public class MMFrame extends JFrame {
     private final QuotePanel quotePanel;
     private final TurnPanel turnPanel;
     private final TradePanel tradePanel;
+    private final ProfitPanel profitPanel;
 
     public MMFrame(Connection conn) {
         super("RS Market Maker");
@@ -56,6 +58,7 @@ public class MMFrame extends JFrame {
 
         this.turnPanel = new TurnPanel(turns, quotes, items);
         this.tradePanel = new TradePanel();
+        this.profitPanel = new ProfitPanel(trades, turns, quotes);
         turnPanel.addTableSelectionListener(tradePanel, quotePanel);
 
         tradePanel.setBuyAction(new AddTradeAction(tradePanel, quotePanel, turnPanel, turns, trades, true));
@@ -96,20 +99,18 @@ public class MMFrame extends JFrame {
     }
 
     private void setupUI() {
-        setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        JSplitPane lrPanel = new JSplitPane(), rightPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        setLayout(new BorderLayout());
 
+        JSplitPane rightPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         rightPanel.setTopComponent(new FatPanel(quotePanel));
         rightPanel.setBottomComponent(turnPanel);
 
+        JSplitPane lrPanel = new JSplitPane();
         lrPanel.setRightComponent(rightPanel);
         lrPanel.setLeftComponent(tradePanel);
 
-        c.fill = GridBagConstraints.BOTH;
-        c.weightx = 1;
-        c.weighty = 1;
-        add(lrPanel, c);
+        add(profitPanel, BorderLayout.NORTH);
+        add(lrPanel, BorderLayout.CENTER);
     }
 
     private void setupMenus() {

@@ -18,10 +18,8 @@ package net.jmhertlein.rsmm.model;
 
 import net.jmhertlein.rsmm.model.update.UpdatableManager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -70,5 +68,67 @@ public class TurnManager extends UpdatableManager {
             }
         }
         return turns;
+    }
+
+    public Optional<RSInteger> getTotalClosedProfit() throws SQLException {
+        try (PreparedStatement p = conn.prepareStatement("SELECT SUM(price * (quantity*-1)) AS total_closed FROM Trade NATURAL JOIN Turn WHERE close_ts IS NOT NULL;")) {
+            try (ResultSet rs = p.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(new RSInteger(rs.getInt("total_closed")));
+                } else {
+                    return Optional.empty();
+                }
+            }
+        }
+    }
+
+    public Optional<RSInteger> getClosedProfitForDay(LocalDate now) throws SQLException {
+        try (PreparedStatement p = conn.prepareStatement("SELECT date_trunc('day', close_ts)::date AS day, SUM(price * (quantity*-1)) AS closed_profit " +
+                "FROM Trade NATURAL JOIN Turn " +
+                "WHERE close_ts BETWEEN date_trunc('day', ?::timestamp) AND (?::date+1)::timestamp " +
+                "GROUP BY day;")) {
+            p.setDate(1, Date.valueOf(now));
+            p.setDate(2, Date.valueOf(now));
+            try (ResultSet rs = p.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(new RSInteger(rs.getInt("closed_profit")));
+                } else {
+                    return Optional.empty();
+                }
+            }
+        }
+    }
+
+    public RSInteger getTotalOpenProfit(QuoteManager quotes) throws SQLException, NoQuoteException {
+        int profit = 0;
+        for (Turn t : getOpenTurns()) {
+            try {
+                profit += t.getOpenProfit(quotes).intValue();
+            } catch (ArithmeticException ignore) {
+            }
+        }
+        return new RSInteger(profit);
+    }
+
+    public RSInteger getOpenTurnClosedProfit() throws SQLException {
+        int profit = 0;
+        for (Turn t : getOpenTurns()) {
+            try {
+                profit += t.getClosedProfit().intValue();
+            } catch (ArithmeticException ignore) {
+            }
+        }
+        return new RSInteger(profit);
+    }
+
+    public RSInteger getTotalPositionCost(QuoteManager quotes) throws SQLException, NoQuoteException {
+        int cost = 0;
+        for (Turn t : getOpenTurns()) {
+            try {
+                cost += t.getPositionCost(quotes).intValue();
+            } catch (ArithmeticException ignore) {
+            }
+        }
+        return new RSInteger(cost);
     }
 }
