@@ -25,6 +25,7 @@ import javax.swing.*;
 import net.jmhertlein.rsmm.controller.AddQuoteAction;
 import net.jmhertlein.rsmm.controller.QuoteItemSelectedAction;
 import net.jmhertlein.rsmm.model.*;
+import net.jmhertlein.rsmm.view.ScalableJTable;
 import net.jmhertlein.rsmm.view.turn.TurnPanel;
 
 /**
@@ -43,7 +44,7 @@ public class QuotePanel extends JPanel {
         askField = new JTextField(10);
         addQuoteButton = new JButton();
         model = new RecentQuotesTableModel(quotes);
-        recentQuotes = new JTable(model);
+        recentQuotes = new ScalableJTable(model);
         itemChooser.addItemListener(new QuoteItemSelectedAction(quotes, itemChooser, model));
         syncQuoteButton = new JButton();
 
@@ -63,9 +64,12 @@ public class QuotePanel extends JPanel {
         c.weightx = 1;
         add(recentQuotes.getTableHeader(), c);
         c.gridy = 1;
+        c.weighty = 1;
+        c.fill = GridBagConstraints.BOTH;
         add(recentQuotes, c);
 
         c.weightx = 0;
+        c.weighty = 0;
         c.gridwidth = 1;
         c.gridy = 2;
         c.fill = GridBagConstraints.NONE;

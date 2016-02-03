@@ -34,7 +34,13 @@ public class RSMarketMaker {
         if (args.length > 0) {
             host = args[0];
         }
-        pickNimbus();
+
+
+        if (System.getProperties().getProperty("os.name").toLowerCase().contains("linux")) {
+            pickNimbus();
+        } else {
+            pickNative();
+        }
 
         System.out.println("Connecting to " + host + ".");
         Connection conn;
@@ -58,6 +64,13 @@ public class RSMarketMaker {
                     break;
                 }
             }
+        } catch (Exception e) {
+        }
+    }
+
+    public static void pickNative() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
         }
     }

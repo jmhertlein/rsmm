@@ -102,7 +102,7 @@ public class MMFrame extends JFrame {
         setLayout(new BorderLayout());
 
         JSplitPane rightPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        rightPanel.setTopComponent(new FatPanel(quotePanel));
+        rightPanel.setTopComponent(quotePanel);
         rightPanel.setBottomComponent(turnPanel);
 
         JSplitPane lrPanel = new JSplitPane();

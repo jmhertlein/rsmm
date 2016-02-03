@@ -4,6 +4,7 @@ import net.jmhertlein.rsmm.controller.BustTradeAction;
 import net.jmhertlein.rsmm.model.Trade;
 import net.jmhertlein.rsmm.model.Turn;
 import net.jmhertlein.rsmm.model.update.TradeUpdateManager;
+import net.jmhertlein.rsmm.view.ScalableJTable;
 import net.jmhertlein.rsmm.view.turn.TurnPanel;
 
 import javax.swing.*;
@@ -21,7 +22,7 @@ public class TradePanel extends JPanel {
 
     public TradePanel() {
         tradeTableModel = new TradeTableModel();
-        tradeTable = new JTable(tradeTableModel);
+        tradeTable = new ScalableJTable(tradeTableModel);
         buyButton = new JButton();
         sellButton = new JButton();
         qtyField = new JTextField(13);

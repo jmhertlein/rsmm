@@ -6,6 +6,7 @@ import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
 import net.jmhertlein.rsmm.model.Turn;
 import net.jmhertlein.rsmm.model.TurnManager;
+import net.jmhertlein.rsmm.view.ScalableJTable;
 import net.jmhertlein.rsmm.view.quote.QuotePanel;
 import net.jmhertlein.rsmm.view.trade.TradePanel;
 
@@ -23,7 +24,7 @@ public class TurnPanel extends JPanel {
 
     public TurnPanel(TurnManager turns, QuoteManager quotes, ItemManager items) {
         model = new TurnTableModel(quotes);
-        turnsTable = new JTable(model);
+        turnsTable = new ScalableJTable(model);
         openTurnButton = new JButton(new NewTurnAction(this, items, turns, model));
         closeTurnButton = new JButton();
 
