@@ -64,6 +64,8 @@ public class AddItemAction extends AbstractAction {
             }
 
             items.addItem(name, buyLimit);
+            nameField.setText("");
+            limitField.setText("");
             items.fireUpdateEvent();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(parent, ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
