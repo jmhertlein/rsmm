@@ -176,4 +176,17 @@ public class Turn {
             p.executeUpdate();
         }
     }
+
+    public int getBoughtVolume() throws SQLException {
+        try (PreparedStatement p = conn.prepareStatement("SELECT SUM(quantity) AS sum_qty FROM Trade NATURAL JOIN Turn WHERE quantity > 0 AND turn_id = ?")) {
+            p.setInt(1, turnId);
+            try (ResultSet rs = p.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("sum_qty");
+                } else {
+                    return 0;
+                }
+            }
+        }
+    }
 }

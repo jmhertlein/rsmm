@@ -31,7 +31,7 @@ public class TurnTableModel extends AbstractTableModel {
             case 1:
                 return "Position";
             case 2:
-                return "Closed Volume";
+                return "Bought Volume";
             case 3:
                 return "GE Limit";
             case 4:
@@ -68,7 +68,7 @@ public class TurnTableModel extends AbstractTableModel {
                 case 1:
                     return turn.getPosition();
                 case 2:
-                    return turn.getClosedPosition();
+                    return turn.getBoughtVolume();
                 case 3:
                     return items.getItem(turn.getItemName()).orElse(new Item("UNK", -1)).getBuyLimit();
                 case 4:
