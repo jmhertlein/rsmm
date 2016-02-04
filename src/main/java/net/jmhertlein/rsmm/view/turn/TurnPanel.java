@@ -23,7 +23,7 @@ public class TurnPanel extends JPanel {
     private final JButton openTurnButton, closeTurnButton;
 
     public TurnPanel(TurnManager turns, QuoteManager quotes, ItemManager items) {
-        model = new TurnTableModel(quotes);
+        model = new TurnTableModel(quotes, items);
         turnsTable = new ScalableJTable(model);
         openTurnButton = new JButton(new NewTurnAction(this, items, turns, model));
         closeTurnButton = new JButton();

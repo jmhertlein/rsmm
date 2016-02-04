@@ -14,10 +14,12 @@ import java.util.Optional;
  */
 public class TurnTableModel extends AbstractTableModel {
     private final QuoteManager quotes;
+    private final ItemManager items;
     private final List<Turn> turnsCache;
 
-    public TurnTableModel(QuoteManager quotes) {
+    public TurnTableModel(QuoteManager quotes, ItemManager items) {
         this.quotes = quotes;
+        this.items = items;
         turnsCache = new ArrayList<>();
     }
 
@@ -29,10 +31,14 @@ public class TurnTableModel extends AbstractTableModel {
             case 1:
                 return "Position";
             case 2:
-                return "Position Cost";
+                return "Closed Volume";
             case 3:
-                return "Open Profit";
+                return "GE Limit";
             case 4:
+                return "Position Cost";
+            case 5:
+                return "Open Profit";
+            case 6:
                 return "Closed Profit";
             default:
                 return "";
@@ -46,7 +52,7 @@ public class TurnTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 5;
+        return 7;
     }
 
     @Override
@@ -62,10 +68,14 @@ public class TurnTableModel extends AbstractTableModel {
                 case 1:
                     return turn.getPosition();
                 case 2:
-                    return turn.getPositionCost(quotes);
+                    return turn.getClosedPosition();
                 case 3:
-                    return new RSInteger(turn.getOpenProfit(quotes));
+                    return items.getItem(turn.getItemName()).orElse(new Item("UNK", -1)).getBuyLimit();
                 case 4:
+                    return turn.getPositionCost(quotes);
+                case 5:
+                    return new RSInteger(turn.getOpenProfit(quotes));
+                case 6:
                     return new RSInteger(turn.getClosedProfit());
                 default:
                     return null;
