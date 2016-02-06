@@ -45,7 +45,7 @@ public class QuotePanel extends JPanel {
         addQuoteButton = new JButton();
         model = new RecentQuotesTableModel(quotes);
         recentQuotes = new ScalableJTable(model);
-        itemChooser.addItemListener(new QuoteItemSelectedAction(quotes, itemChooser, model));
+        itemChooser.addItemListener(new QuoteItemSelectedAction(quotes, items, itemChooser, model));
         syncQuoteButton = new JButton();
 
         try {
@@ -110,8 +110,8 @@ public class QuotePanel extends JPanel {
         }
     }
 
-    public void reloadQuotes(QuoteManager quotes) {
-        model.showQuotesFor(itemChooser.getItemAt(itemChooser.getSelectedIndex()).getName(), quotes);
+    public void reloadQuotes(QuoteManager quotes, ItemManager items) {
+        model.showQuotesFor(itemChooser.getItemAt(itemChooser.getSelectedIndex()).getName(), quotes, items);
     }
 
     public void setAddQuoteAction(QuoteManager quotes, TurnPanel turnPanel) {

@@ -1,7 +1,9 @@
 package net.jmhertlein.rsmm.view.quote;
 
+import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.Quote;
 import net.jmhertlein.rsmm.model.QuoteManager;
+import net.jmhertlein.rsmm.model.RSInteger;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -12,6 +14,7 @@ import java.util.Optional;
 public class RecentQuotesTableModel extends AbstractTableModel {
     private static final SimpleDateFormat FMT = new SimpleDateFormat("MM/dd HH:mm");
     private final Quote[] quoteCache;
+    private Optional<Integer> geLimit;
 
     public RecentQuotesTableModel(QuoteManager quotes) {
         this.quoteCache = new Quote[5];
@@ -28,6 +31,8 @@ public class RecentQuotesTableModel extends AbstractTableModel {
                 return "Ask";
             case 3:
                 return "Spread";
+            case 4:
+                return "PPL";
             default:
                 return "";
         }
@@ -40,7 +45,7 @@ public class RecentQuotesTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 4;
+        return 5;
     }
 
     @Override
@@ -63,12 +68,24 @@ public class RecentQuotesTableModel extends AbstractTableModel {
                 return quote.getAsk();
             case 3:
                 return quote.getAsk().intValue() - quote.getBid().intValue();
+            case 4:
+                if (geLimit.isPresent()) {
+                    return new RSInteger((quote.getAsk().intValue() - quote.getBid().intValue()) * geLimit.get()).toString();
+                } else {
+                    return "N/A";
+                }
             default:
                 return null;
         }
     }
 
-    public void showQuotesFor(String itemName, QuoteManager quotes) {
+    public void showQuotesFor(String itemName, QuoteManager quotes, ItemManager items) {
+        try {
+            geLimit = items.getLimitFor(itemName);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error Getting GE Limit For " + itemName, JOptionPane.ERROR_MESSAGE);
+        }
+
         for (int i = 0; i < quoteCache.length; i++) {
             quoteCache[i] = null;
         }

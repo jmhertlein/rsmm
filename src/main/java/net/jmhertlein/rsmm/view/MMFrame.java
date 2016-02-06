@@ -73,7 +73,7 @@ public class MMFrame extends JFrame {
         trades.addListener(() -> turnPanel.reload(turns));
         trades.addListener(() -> turnPanel.getSelectedTurn().ifPresent(tradePanel::showTradesFor));
 
-        quotes.addListener(() -> quotePanel.reloadQuotes(quotes));
+        quotes.addListener(() -> quotePanel.reloadQuotes(quotes, items));
         quotes.addListener(() -> turnPanel.reload(turns));
 
         items.addListener(() -> quotePanel.refreshItems(items));
