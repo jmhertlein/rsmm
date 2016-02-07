@@ -31,6 +31,11 @@ public class CloseTurnAction extends AbstractAction {
         Optional<Turn> turnAtRow = turnPanel.getSelectedTurn();
         if (turnAtRow.isPresent()) {
             try {
+                if (!turnAtRow.get().isFlat()) {
+                    JOptionPane.showMessageDialog(turnPanel, "Turn is not flat!", "Error Closing Turn", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 turnAtRow.get().closeTurn();
                 tradePanel.clearCache();
                 turns.fireUpdateEvent();
