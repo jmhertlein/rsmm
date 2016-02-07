@@ -3,7 +3,7 @@ package net.jmhertlein.rsmm.controller;
 import net.jmhertlein.rsmm.model.Quote;
 import net.jmhertlein.rsmm.model.Turn;
 import net.jmhertlein.rsmm.model.TurnManager;
-import net.jmhertlein.rsmm.model.update.TradeUpdateManager;
+import net.jmhertlein.rsmm.model.TradeManager;
 import net.jmhertlein.rsmm.view.quote.QuotePanel;
 import net.jmhertlein.rsmm.view.trade.TradePanel;
 import net.jmhertlein.rsmm.view.turn.TurnPanel;
@@ -21,10 +21,10 @@ public class AddTradeAction extends AbstractAction {
     private final QuotePanel quotePanel;
     private final TurnPanel turnPanel;
     private final TurnManager turns;
-    private final TradeUpdateManager trades;
+    private final TradeManager trades;
     private final boolean buy;
 
-    public AddTradeAction(TradePanel tradePanel, QuotePanel quotePanel, TurnPanel turnPanel, TurnManager turns, TradeUpdateManager trades, boolean buy) {
+    public AddTradeAction(TradePanel tradePanel, QuotePanel quotePanel, TurnPanel turnPanel, TurnManager turns, TradeManager trades, boolean buy) {
         super(buy ? "Buy" : "Sell");
         this.turns = turns;
         this.trades = trades;

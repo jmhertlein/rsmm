@@ -1,11 +1,8 @@
 package net.jmhertlein.rsmm.controller;
 
 import net.jmhertlein.rsmm.model.Trade;
-import net.jmhertlein.rsmm.model.update.TradeUpdateManager;
+import net.jmhertlein.rsmm.model.TradeManager;
 import net.jmhertlein.rsmm.view.trade.TradePanel;
-import net.jmhertlein.rsmm.view.trade.TradeTableModel;
-import net.jmhertlein.rsmm.view.turn.TurnPanel;
-import net.jmhertlein.rsmm.view.turn.TurnTableModel;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -16,10 +13,10 @@ import java.util.Optional;
  * Created by joshua on 1/18/16.
  */
 public class BustTradeAction extends AbstractAction {
-    private final TradeUpdateManager trades;
+    private final TradeManager trades;
     private final TradePanel tradePanel;
 
-    public BustTradeAction(TradeUpdateManager trades, TradePanel tradePanel) {
+    public BustTradeAction(TradeManager trades, TradePanel tradePanel) {
         super("Bust Trade");
         this.tradePanel = tradePanel;
         this.trades = trades;

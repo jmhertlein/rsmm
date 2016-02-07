@@ -62,7 +62,9 @@
           <execution>
             <id>l4j-clui</id>
             <phase>package</phase>
-            <goals><goal>launch4j</goal></goals>
+            <goals>
+              <goal>launch4j</goal>
+            </goals>
             <configuration>
               <headerType>gui</headerType>
               <outfile>target/rsmm.exe</outfile>
@@ -75,6 +77,7 @@
               <jre>
                 <minVersion>1.8.0</minVersion>
               </jre>
+              <icon>coins.ico</icon>
               <versionInfo>
                 <fileVersion>1.0.0.0</fileVersion>
                 <txtFileVersion>1.0.0.0</txtFileVersion>

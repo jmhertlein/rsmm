@@ -4,10 +4,9 @@ import net.jmhertlein.rsmm.model.NoQuoteException;
 import net.jmhertlein.rsmm.model.QuoteManager;
 import net.jmhertlein.rsmm.model.RSInteger;
 import net.jmhertlein.rsmm.model.TurnManager;
-import net.jmhertlein.rsmm.model.update.TradeUpdateManager;
+import net.jmhertlein.rsmm.model.TradeManager;
 
 import javax.swing.*;
-import java.awt.*;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
@@ -17,7 +16,7 @@ import java.time.LocalDate;
 public class ProfitPanel extends JPanel {
     private final GPLabel totalProfitLabel, closedProfitLabel, openProfitLabel, pendingProfitLabel, positionCostLabel;
 
-    public ProfitPanel(TradeUpdateManager trades, TurnManager turns, QuoteManager quotes) {
+    public ProfitPanel(TradeManager trades, TurnManager turns, QuoteManager quotes) {
         totalProfitLabel = new GPLabel();
         closedProfitLabel = new GPLabel();
         openProfitLabel = new GPLabel();
@@ -56,7 +55,7 @@ public class ProfitPanel extends JPanel {
 
         add(new JLabel("Sum Position Cost: "));
         add(positionCostLabel);
-        
+
         add(Box.createHorizontalGlue());
     }
 

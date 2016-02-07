@@ -1,25 +1,26 @@
 package net.jmhertlein.rsmm.controller;
 
-import net.jmhertlein.rsmm.model.Item;
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
-import net.jmhertlein.rsmm.view.quote.RecentQuotesTableModel;
+import net.jmhertlein.rsmm.model.TradeManager;
+import net.jmhertlein.rsmm.view.quote.QuotePanel;
 
 import javax.swing.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.sql.SQLException;
 
 public class QuoteItemSelectedAction implements ItemListener {
     private final QuoteManager quotes;
     private final ItemManager items;
-    private final JComboBox<Item> chooser;
-    private final RecentQuotesTableModel tableModel;
+    private final TradeManager trades;
+    private final QuotePanel panel;
 
-    public QuoteItemSelectedAction(QuoteManager quotes, ItemManager items, JComboBox<Item> chooser, RecentQuotesTableModel tableModel) {
+    public QuoteItemSelectedAction(QuoteManager quotes, ItemManager items, TradeManager trades, QuotePanel panel) {
         this.quotes = quotes;
         this.items = items;
-        this.chooser = chooser;
-        this.tableModel = tableModel;
+        this.trades = trades;
+        this.panel = panel;
     }
 
     @Override
@@ -27,14 +28,12 @@ public class QuoteItemSelectedAction implements ItemListener {
         if (itemEvent.getStateChange() != ItemEvent.SELECTED) {
             return;
         }
-        Item item = chooser.getItemAt(chooser.getSelectedIndex());
-        String name;
-        if (item == null) {
-            return;
-        } else {
-            name = item.getName();
-        }
 
-        tableModel.showQuotesFor(name, quotes, items);
+        try {
+            panel.showQuotesForSelectedItem(quotes, items, trades);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(panel, e.getMessage(), "Error Looking Up Quotes", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 }

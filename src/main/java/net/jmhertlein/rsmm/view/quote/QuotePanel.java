@@ -16,8 +16,7 @@
  */
 package net.jmhertlein.rsmm.view.quote;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.*;
 import java.sql.SQLException;
 import java.util.Optional;
 import javax.swing.*;
@@ -32,21 +31,24 @@ import net.jmhertlein.rsmm.view.turn.TurnPanel;
  * @author joshua
  */
 public class QuotePanel extends JPanel {
+    private final JLabel maxGELimitSummaryLabel, usedGELimitLabel;
     private final JTable recentQuotes;
     private final RecentQuotesTableModel model;
     private final JComboBox<Item> itemChooser;
     private final JTextField bidField, askField;
     private final JButton addQuoteButton, syncQuoteButton;
 
-    public QuotePanel(ItemManager items, QuoteManager quotes) {
+    public QuotePanel(ItemManager items, QuoteManager quotes, TradeManager trades) {
         itemChooser = new JComboBox<>();
         bidField = new JTextField(10);
         askField = new JTextField(10);
         addQuoteButton = new JButton();
         model = new RecentQuotesTableModel(quotes);
         recentQuotes = new ScalableJTable(model);
-        itemChooser.addItemListener(new QuoteItemSelectedAction(quotes, items, itemChooser, model));
+        itemChooser.addItemListener(new QuoteItemSelectedAction(quotes, items, trades, this));
         syncQuoteButton = new JButton();
+        maxGELimitSummaryLabel = new JLabel();
+        usedGELimitLabel = new JLabel();
 
         try {
             refreshItems(items);
@@ -56,14 +58,14 @@ public class QuotePanel extends JPanel {
 
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
+        c.gridy = -1;
 
-
-        c.gridy = 0;
+        c.gridy++;
         c.gridwidth = 5;
         c.fill = GridBagConstraints.HORIZONTAL;
         c.weightx = 1;
         add(recentQuotes.getTableHeader(), c);
-        c.gridy = 1;
+        c.gridy++;
         c.weighty = 1;
         c.fill = GridBagConstraints.BOTH;
         add(recentQuotes, c);
@@ -71,7 +73,7 @@ public class QuotePanel extends JPanel {
         c.weightx = 0;
         c.weighty = 0;
         c.gridwidth = 1;
-        c.gridy = 2;
+        c.gridy++;
         c.fill = GridBagConstraints.NONE;
         add(syncQuoteButton, c);
 
@@ -89,18 +91,24 @@ public class QuotePanel extends JPanel {
         c.weightx = 0;
         c.fill = GridBagConstraints.NONE;
         add(addQuoteButton, c);
-    }
 
-    public JComboBox<Item> getItemChooser() {
-        return itemChooser;
-    }
+        c.gridy++;
+        c.gridx = 0;
+        c.gridwidth = 5;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 1;
+        {
+            JPanel geLimitPanel = new JPanel();
+            geLimitPanel.setLayout(new BoxLayout(geLimitPanel, BoxLayout.X_AXIS));
+            geLimitPanel.add(Box.createHorizontalGlue());
+            geLimitPanel.add(new JLabel("GE Limit Usage: "));
+            geLimitPanel.add(usedGELimitLabel);
+            geLimitPanel.add(new JLabel("/"));
+            geLimitPanel.add(maxGELimitSummaryLabel);
+            geLimitPanel.add(Box.createHorizontalGlue());
 
-    public JTable getQuoteTable() {
-        return recentQuotes;
-    }
-
-    public RecentQuotesTableModel getQuoteTableModel() {
-        return model;
+            add(geLimitPanel, c);
+        }
     }
 
     public void refreshItems(ItemManager items) throws SQLException {
@@ -126,12 +134,40 @@ public class QuotePanel extends JPanel {
         return model.getQuoteAt(recentQuotes.getSelectedRow());
     }
 
-    public void showQuotesFor(String itemName) {
+    public void showQuotesFor(String name, QuoteManager quotes, ItemManager items, TradeManager trades) throws SQLException {
+        int used = trades.getBoughtVolumeInGELimitWindow(name);
+        int max = items.getLimitFor(name).get();
+        usedGELimitLabel.setText(String.valueOf(used));
+        maxGELimitSummaryLabel.setText(Integer.toString(max));
+
+        float pctUsed = ((float) used) / max * 100;
+        if(pctUsed > 90) {
+            usedGELimitLabel.setForeground(Color.RED);
+        } else if(pctUsed > 50) {
+            usedGELimitLabel.setForeground(Color.ORANGE);
+        } else {
+            usedGELimitLabel.setForeground(Color.BLACK);
+        }
+
+        model.showQuotesFor(name, quotes, items);
+
         for (int i = 0; i < itemChooser.getItemCount(); i++) {
-            if (itemChooser.getItemAt(i).getName().equals(itemName)) {
+            if (itemChooser.getItemAt(i).getName().equals(name)) {
                 itemChooser.setSelectedIndex(i);
                 break;
             }
         }
+    }
+
+    public void showQuotesForSelectedItem(QuoteManager quotes, ItemManager items, TradeManager trades) throws SQLException {
+        Item item = itemChooser.getItemAt(itemChooser.getSelectedIndex());
+        String name;
+        if (item == null) {
+            return;
+        } else {
+            name = item.getName();
+        }
+
+        showQuotesFor(name, quotes, items, trades);
     }
 }

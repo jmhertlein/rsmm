@@ -24,11 +24,12 @@ import net.jmhertlein.rsmm.controller.AddTradeAction;
 import net.jmhertlein.rsmm.controller.BustTradeAction;
 import net.jmhertlein.rsmm.controller.ShowItemManagerAction;
 import net.jmhertlein.rsmm.controller.ShowQuotesForSelectedTurnAction;
+import net.jmhertlein.rsmm.controller.item.ShowGELimitUsageAction;
 import net.jmhertlein.rsmm.controller.turn.CloseTurnAction;
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
 import net.jmhertlein.rsmm.model.TurnManager;
-import net.jmhertlein.rsmm.model.update.TradeUpdateManager;
+import net.jmhertlein.rsmm.model.TradeManager;
 import net.jmhertlein.rsmm.view.profit.ProfitPanel;
 import net.jmhertlein.rsmm.view.quote.QuotePanel;
 import net.jmhertlein.rsmm.view.trade.TradePanel;
@@ -39,6 +40,7 @@ import net.jmhertlein.rsmm.view.turn.TurnPanel;
  */
 public class MMFrame extends JFrame {
     private final ShowItemManagerAction showItemManagerAction;
+    private final ShowGELimitUsageAction showGELimitUsageAction;
     private final BustTradeAction bustTradeAction;
     private final QuotePanel quotePanel;
     private final TurnPanel turnPanel;
@@ -51,10 +53,11 @@ public class MMFrame extends JFrame {
         ItemManager items = new ItemManager(conn);
         QuoteManager quotes = new QuoteManager(conn);
         TurnManager turns = new TurnManager(conn);
-        TradeUpdateManager trades = new TradeUpdateManager();
+        TradeManager trades = new TradeManager(conn);
 
-        this.quotePanel = new QuotePanel(items, quotes);
+        this.quotePanel = new QuotePanel(items, quotes, trades);
         this.showItemManagerAction = new ShowItemManagerAction(items, this, quotePanel);
+        this.showGELimitUsageAction = new ShowGELimitUsageAction(this, items, trades);
 
         this.turnPanel = new TurnPanel(turns, quotes, items);
         this.tradePanel = new TradePanel();
@@ -68,7 +71,7 @@ public class MMFrame extends JFrame {
         quotePanel.setAddQuoteAction(quotes, turnPanel);
         bustTradeAction = new BustTradeAction(trades, tradePanel);
 
-        quotePanel.setSyncQuoteAction(new ShowQuotesForSelectedTurnAction(turnPanel, quotePanel));
+        quotePanel.setSyncQuoteAction(new ShowQuotesForSelectedTurnAction(turnPanel, quotePanel, quotes, items, trades));
 
         trades.addListener(() -> turnPanel.reload(turns));
         trades.addListener(() -> turnPanel.getSelectedTurn().ifPresent(tradePanel::showTradesFor));
@@ -118,6 +121,7 @@ public class MMFrame extends JFrame {
 
         JMenu itemsMenu = new JMenu("Items");
         itemsMenu.add(showItemManagerAction);
+        itemsMenu.add(showGELimitUsageAction);
         bar.add(itemsMenu);
 
         JMenu tradesMenu = new JMenu("Trades");
