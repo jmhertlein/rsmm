@@ -118,8 +118,13 @@ public class QuotePanel extends JPanel {
         }
     }
 
-    public void reloadQuotes(QuoteManager quotes, ItemManager items) {
-        model.showQuotesFor(itemChooser.getItemAt(itemChooser.getSelectedIndex()).getName(), quotes, items);
+    public void reloadQuotes(QuoteManager quotes, ItemManager items, TradeManager trades) {
+        try {
+            showQuotesForSelectedItem(quotes, items, trades);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error Reloading Quotes", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 
     public void setAddQuoteAction(QuoteManager quotes, TurnPanel turnPanel) {
@@ -135,15 +140,16 @@ public class QuotePanel extends JPanel {
     }
 
     public void showQuotesFor(String name, QuoteManager quotes, ItemManager items, TradeManager trades) throws SQLException {
+        int currentRow = recentQuotes.getSelectedRow();
         int used = trades.getBoughtVolumeInGELimitWindow(name);
         int max = items.getLimitFor(name).get();
         usedGELimitLabel.setText(String.valueOf(used));
         maxGELimitSummaryLabel.setText(Integer.toString(max));
 
         float pctUsed = ((float) used) / max * 100;
-        if(pctUsed > 90) {
+        if (pctUsed > 90) {
             usedGELimitLabel.setForeground(Color.RED);
-        } else if(pctUsed > 50) {
+        } else if (pctUsed > 50) {
             usedGELimitLabel.setForeground(Color.ORANGE);
         } else {
             usedGELimitLabel.setForeground(Color.BLACK);
@@ -156,6 +162,11 @@ public class QuotePanel extends JPanel {
                 itemChooser.setSelectedIndex(i);
                 break;
             }
+        }
+
+        try {
+            recentQuotes.getSelectionModel().setSelectionInterval(currentRow, currentRow);
+        } catch (Throwable ignore) {
         }
     }
 
