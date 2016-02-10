@@ -35,12 +35,7 @@ public class RSMarketMaker {
             host = args[0];
         }
 
-
-        if (System.getProperties().getProperty("os.name").toLowerCase().contains("linux")) {
-            pickNimbus();
-        } else {
-            pickNative();
-        }
+        pickNimbus();
 
         System.out.println("Connecting to " + host + ".");
         Connection conn;
