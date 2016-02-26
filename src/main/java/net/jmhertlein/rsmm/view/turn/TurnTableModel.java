@@ -31,14 +31,10 @@ public class TurnTableModel extends AbstractTableModel {
             case 1:
                 return "Position";
             case 2:
-                return "Bought Volume";
-            case 3:
-                return "GE Limit";
-            case 4:
                 return "Position Cost";
-            case 5:
+            case 3:
                 return "Open Profit";
-            case 6:
+            case 4:
                 return "Closed Profit";
             default:
                 return "";
@@ -52,7 +48,7 @@ public class TurnTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 7;
+        return 5;
     }
 
     @Override
@@ -68,14 +64,10 @@ public class TurnTableModel extends AbstractTableModel {
                 case 1:
                     return turn.getPosition();
                 case 2:
-                    return turn.getBoughtVolume();
-                case 3:
-                    return items.getItem(turn.getItemName()).orElse(new Item("UNK", -1)).getBuyLimit();
-                case 4:
                     return turn.getPositionCost(quotes);
-                case 5:
+                case 3:
                     return new RSInteger(turn.getOpenProfit(quotes));
-                case 6:
+                case 4:
                     return new RSInteger(turn.getClosedProfit());
                 default:
                     return null;
