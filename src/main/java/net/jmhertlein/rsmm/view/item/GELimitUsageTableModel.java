@@ -27,6 +27,7 @@ public class GELimitUsageTableModel extends DefaultTableModel {
             names[row] = e.getKey();
             usages[row] = e.getValue();
             limits[row] = items.getLimitFor(e.getKey()).get();
+            row++;
         }
     }
 
