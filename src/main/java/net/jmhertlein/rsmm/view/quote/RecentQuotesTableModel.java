@@ -63,11 +63,11 @@ public class RecentQuotesTableModel extends AbstractTableModel {
             case 0:
                 return FMT.format(quote.getQuoteTS());
             case 1:
-                return quote.getBid();
+                return quote.getBid().intValue();
             case 2:
-                return quote.getAsk();
+                return quote.getAsk().intValue();
             case 3:
-                return quote.getAsk().intValue() - quote.getBid().intValue();
+                return new RSInteger(quote.getAsk().intValue() - quote.getBid().intValue());
             case 4:
                 if (geLimit.isPresent()) {
                     return new RSInteger((quote.getAsk().intValue() - quote.getBid().intValue()) * geLimit.get()).toString();
