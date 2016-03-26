@@ -16,6 +16,8 @@
  */
 package net.jmhertlein.rsmm.model;
 
+import javafx.beans.property.*;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -24,37 +26,38 @@ import java.sql.Timestamp;
  * @author joshua
  */
 public class Quote {
-    private final String itemName;
-    private final Timestamp quoteTS;
-    private final RSInteger bid, ask;
+    private final ReadOnlyStringProperty itemName;
+    private final ReadOnlyObjectProperty<Timestamp> quoteTS;
+    private final IntegerProperty bid, ask;
 
     public Quote(ResultSet rs) throws SQLException {
-        this.itemName = rs.getString("item_name");
-        this.quoteTS = rs.getTimestamp("quote_ts");
-        this.bid = new RSInteger(rs.getInt("bid1"));
-        this.ask = new RSInteger(rs.getInt("ask1"));
+        this(
+                rs.getString("item_name"),
+                rs.getTimestamp("quote_ts"),
+                rs.getInt("bid1"),
+                rs.getInt("ask1"));
     }
 
-    public Quote(String itemName, Timestamp quoteTS, RSInteger bid, RSInteger ask) {
-        this.itemName = itemName;
-        this.quoteTS = quoteTS;
-        this.bid = bid;
-        this.ask = ask;
+    public Quote(String itemName, Timestamp quoteTS, int bid, int ask) {
+        this.itemName = new SimpleStringProperty(itemName);
+        this.quoteTS = new SimpleObjectProperty<>(quoteTS);
+        this.bid = new SimpleIntegerProperty(bid);
+        this.ask = new SimpleIntegerProperty(ask);
     }
 
     public String getItemName() {
-        return itemName;
+        return itemName.get();
     }
 
     public Timestamp getQuoteTS() {
-        return quoteTS;
+        return quoteTS.get();
     }
 
-    public RSInteger getBid() {
-        return bid;
+    public int getBid() {
+        return bid.get();
     }
 
-    public RSInteger getAsk() {
-        return ask;
+    public int getAsk() {
+        return ask.get();
     }
 }

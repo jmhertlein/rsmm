@@ -16,6 +16,8 @@
  */
 package net.jmhertlein.rsmm.model;
 
+import javafx.beans.property.*;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -24,25 +26,24 @@ import java.sql.SQLException;
  * @author joshua
  */
 public class Item implements Comparable<Item> {
-    private final String name;
-    private final int buyLimit;
+    private final ReadOnlyStringProperty name;
+    private final ReadOnlyIntegerProperty buyLimit;
 
     public Item(ResultSet rs) throws SQLException {
-        this.name = rs.getString("item_name");
-        this.buyLimit = rs.getInt("ge_limit");
+        this(rs.getString("item_name"), rs.getInt("ge_limit"));
     }
 
     public Item(String name, int buyLimit) {
-        this.name = name;
-        this.buyLimit = buyLimit;
+        this.name = new SimpleStringProperty(name);
+        this.buyLimit = new SimpleIntegerProperty(buyLimit);
     }
 
     public String getName() {
-        return name;
+        return name.get();
     }
 
     public int getBuyLimit() {
-        return buyLimit;
+        return buyLimit.intValue();
     }
 
     @Override
@@ -52,6 +53,6 @@ public class Item implements Comparable<Item> {
 
     @Override
     public String toString() {
-        return name;
+        return name.get();
     }
 }

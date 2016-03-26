@@ -16,6 +16,10 @@
  */
 package net.jmhertlein.rsmm.model;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableArray;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import net.jmhertlein.rsmm.model.update.UpdatableManager;
 import net.jmhertlein.rsmm.model.update.UpdateListener;
 
@@ -32,8 +36,20 @@ import java.util.function.Supplier;
 public class ItemManager extends UpdatableManager {
     private final Connection conn;
 
-    public ItemManager(Connection conn) {
+    private final ObservableMap<String, Item> cache;
+
+    public ItemManager(Connection conn) throws SQLException {
         this.conn = conn;
+        cache = FXCollections.observableHashMap();
+
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Item ORDER BY item_name ASC")) {
+            try (ResultSet rs = p.executeQuery()) {
+                while (rs.next()) {
+                    Item i = new Item(rs);
+                    cache.put(i.getName(), i);
+                }
+            }
+        }
     }
 
     public void addItem(String name, int buyLimit) throws SQLException {
@@ -42,76 +58,24 @@ public class ItemManager extends UpdatableManager {
             p.setInt(2, buyLimit);
             p.executeUpdate();
         }
-    }
 
-    public Set<Item> matchItem(String match) throws SQLException {
-        Set<Item> ret = new HashSet<>();
-        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Item WHERE item_name LIKE ?")) {
-            p.setString(1, "%" + match + "%");
-            try (ResultSet rs = p.executeQuery()) {
-                while (rs.next()) {
-                    ret.add(new Item(rs));
-                }
-            }
-        }
-
-        return ret;
+        cache.put(name, new Item(name, buyLimit));
     }
 
     public Optional<Item> getItem(String name) throws SQLException {
-        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Item WHERE item_name=?")) {
-            p.setString(1, name);
-            try (ResultSet rs = p.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(new Item(rs));
-                } else {
-                    return Optional.empty();
-                }
-            }
-        }
+        return Optional.ofNullable(cache.get(name));
     }
 
     public Optional<Integer> getLimitFor(String name) throws SQLException {
-        try (PreparedStatement p = conn.prepareStatement("SELECT ge_limit FROM Item WHERE item_name=?")) {
-            p.setString(1, name);
-            try (ResultSet rs = p.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(rs.getInt("ge_limit"));
-                } else {
-                    return Optional.empty();
-                }
-            }
+        Optional<Item> i = getItem(name);
+        if (i.isPresent()) {
+            return Optional.of(i.get().getBuyLimit());
+        } else {
+            return Optional.empty();
         }
     }
 
-    public List<Item> getItems() throws SQLException {
-        List<Item> ret = new ArrayList<>();
-        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Item ORDER BY item_name ASC")) {
-            try (ResultSet rs = p.executeQuery()) {
-                while (rs.next()) {
-                    ret.add(new Item(rs));
-                }
-            }
-        }
-
-        return ret;
-    }
-
-    public Optional<Item> getItem(int i) throws SQLException {
-        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Item ORDER BY item_name ASC LIMIT 1 OFFSET ?")) {
-            p.setInt(1, i);
-            try (ResultSet rs = p.executeQuery()) {
-                return rs.next() ? Optional.of(new Item(rs)) : Optional.empty();
-            }
-        }
-    }
-
-    public int countItems() throws SQLException {
-        try (PreparedStatement p = conn.prepareStatement("SELECT COUNT(*) AS count FROM Item")) {
-            try (ResultSet rs = p.executeQuery()) {
-                rs.next();
-                return rs.getInt("count");
-            }
-        }
+    public Collection<Item> getItems() throws SQLException {
+        return cache.values();
     }
 }

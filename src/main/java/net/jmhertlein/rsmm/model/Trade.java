@@ -16,8 +16,11 @@
  */
 package net.jmhertlein.rsmm.model;
 
+import javafx.beans.property.*;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 /**
@@ -25,33 +28,29 @@ import java.time.LocalDateTime;
  */
 public class Trade {
     private final Turn turn;
-    private final LocalDateTime tradeTime;
-    private final int price, quantity;
+    private final ReadOnlyObjectProperty<Timestamp> tradeTime;
+    private final IntegerProperty price, quantity;
 
     public Trade(Turn parent, ResultSet rs) throws SQLException {
         this.turn = parent;
-        this.tradeTime = rs.getTimestamp("trade_ts").toLocalDateTime();
-        this.price = rs.getInt("price");
-        this.quantity = rs.getInt("quantity");
+        this.tradeTime = new SimpleObjectProperty<>(rs.getTimestamp("trade_ts"));
+        this.price = new SimpleIntegerProperty(rs.getInt("price"));
+        this.quantity = new SimpleIntegerProperty(rs.getInt("quantity"));
     }
 
     public Turn getTurn() {
         return turn;
     }
 
-    public LocalDateTime getTradeTime() {
-        return tradeTime;
+    public Timestamp getTradeTime() {
+        return tradeTime.get();
     }
 
     public int getPrice() {
-        return price;
+        return price.get();
     }
 
     public int getQuantity() {
-        return quantity;
-    }
-
-    public void bustTrade() throws SQLException {
-        turn.bustTrade(this);
+        return quantity.get();
     }
 }

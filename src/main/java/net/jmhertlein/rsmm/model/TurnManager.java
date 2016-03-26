@@ -131,4 +131,11 @@ public class TurnManager extends UpdatableManager {
         }
         return new RSInteger(cost);
     }
+
+    public void closeTurn() throws SQLException {
+        try (PreparedStatement p = conn.prepareStatement("UPDATE Turn SET close_ts=now() WHERE turn_id=?")) {
+            p.setInt(1, turnId);
+            p.executeUpdate();
+        }
+    }
 }

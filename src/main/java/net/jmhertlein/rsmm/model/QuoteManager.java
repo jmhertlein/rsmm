@@ -16,16 +16,14 @@
  */
 package net.jmhertlein.rsmm.model;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import net.jmhertlein.rsmm.model.update.UpdatableManager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.sql.*;
+import java.time.Instant;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -34,42 +32,57 @@ import java.util.function.Supplier;
 public class QuoteManager extends UpdatableManager {
     private final Connection conn;
 
+    private final ObservableMap<Item, ObservableList<Quote>> cache;
+
     public QuoteManager(Connection conn) {
         this.conn = conn;
+        cache = FXCollections.observableHashMap();
     }
 
-    public void addQuote(String name, int bid, int ask) throws SQLException {
-        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Quote(item_name,bid1,ask1) VALUES(?,?,?)")) {
-            p.setString(1, name);
+    public void addQuote(Item item, int bid, int ask) throws SQLException {
+        Timestamp quoteTs = Timestamp.from(Instant.now());
+        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Quote(item_name,quote_ts,bid1,ask1) VALUES(?,?,?,?)")) {
+            p.setString(1, item.getName());
+            p.setTimestamp(2, quoteTs);
             p.setInt(2, bid);
             p.setInt(3, ask);
             p.executeUpdate();
         }
+
+        getLatestQuotes(item);
+        cache.get(item).add(new Quote(item.getName(), quoteTs, bid, ask));
     }
 
-    public Optional<Quote> getLatestQuote(String item) throws SQLException {
-        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Quote WHERE item_name=? ORDER BY quote_ts DESC LIMIT 1")) {
-            p.setString(1, item);
-            try (ResultSet rs = p.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(new Quote(rs));
-                } else {
-                    return Optional.empty();
-                }
-            }
+    public Optional<Quote> getLatestQuote(Item item) throws SQLException {
+        List<Quote> latestQuotes = getLatestQuotes(item);
+
+        if(latestQuotes.isEmpty())
+        {
+            return Optional.empty();
+        }
+        else
+        {
+            return Optional.of(latestQuotes.get(latestQuotes.size()-1));
         }
     }
 
-    public List<Quote> getLatestQuotes(String item) throws SQLException {
-        List<Quote> quotes = new ArrayList<>();
-        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Quote WHERE item_name=? ORDER BY quote_ts DESC LIMIT 5")) {
-            p.setString(1, item);
-            try (ResultSet rs = p.executeQuery()) {
-                while (rs.next()) {
-                    quotes.add(new Quote(rs));
+    public List<Quote> getLatestQuotes(Item item) throws SQLException {
+        ObservableList<Quote> quotes = cache.get(item);
+        if(quotes == null)
+        {
+            quotes = FXCollections.observableArrayList();
+            cache.put(item, quotes);
+
+            try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Quote WHERE item_name=? ORDER BY quote_ts DESC LIMIT 5")) {
+                p.setString(1, item.getName());
+                try (ResultSet rs = p.executeQuery()) {
+                    while (rs.next()) {
+                        quotes.add(new Quote(rs));
+                    }
                 }
             }
         }
+
         return quotes;
     }
 }

@@ -2,11 +2,10 @@ package net.jmhertlein.rsmm.model;
 
 import net.jmhertlein.rsmm.model.update.UpdatableManager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,6 +46,39 @@ public class TradeManager extends UpdatableManager {
                 }
                 return ret;
             }
+        }
+    }
+
+    public void addTrade(int turnId, int price, int quantity) throws SQLException {
+        try (PreparedStatement p = conn.prepareStatement(
+                "INSERT INTO Trade(turn_id,price,quantity) VALUES(?,?,?)")) {
+            p.setInt(1, turnId);
+            p.setInt(2, price);
+            p.setInt(3, quantity);
+            p.executeUpdate();
+        }
+    }
+
+    public List<Trade> getTrades(Turn turn) throws SQLException {
+        List<Trade> ret = new ArrayList<>();
+        try (PreparedStatement p = conn.prepareStatement(
+                "SELECT * FROM Trade WHERe turn_id=? ORDER BY trade_ts ASC")) {
+            p.setInt(1, turn.getTurnId());
+            try (ResultSet rs = p.executeQuery()) {
+                while (rs.next()) {
+                    ret.add(new Trade(turn, rs));
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    public void bustTrade(Trade t) throws SQLException {
+        try (PreparedStatement p = conn.prepareStatement("DELETE FROM Trade WHERE turn_id=? AND trade_ts=?")) {
+            p.setInt(1, t.getTurn().getTurnId());
+            p.setTimestamp(2, t.getTradeTime());
+            p.executeUpdate();
         }
     }
 }
