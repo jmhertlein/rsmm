@@ -11,6 +11,7 @@ import net.jmhertlein.rsmm.model.*;
 import net.jmhertlein.rsmm.viewfx.util.Dialogs;
 import net.jmhertlein.rsmm.viewfx.util.FXMLSplitPane;
 
+import javax.swing.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -83,10 +84,14 @@ public class MMPane extends FXMLSplitPane {
         super("/fxml/mmpane.fxml");
         this.conn = conn;
 
-        items = new ItemManager(conn);
-        quotes = new QuoteManager(conn);
-        turns = new TurnManager(conn);
-        trades = new TradeManager(conn);
+        try {
+            items = new ItemManager(conn);
+            quotes = new QuoteManager(conn);
+            turns = new TurnManager(conn, items, quotes);
+        } catch (SQLException | NoSuchItemException | NoQuoteException e) {
+            Dialogs.showMessage("Load Error", "Error reading from database.", e);
+            return;
+        }
 
         itemList = FXCollections.observableArrayList();
         shownTrades = FXCollections.observableArrayList();
@@ -101,10 +106,6 @@ public class MMPane extends FXMLSplitPane {
             return;
         }
 
-        items.addListener(() -> itemList.setAll(items.getItems()));
-        turns.addListener(() -> openTurnsList.setAll(turns.getOpenTurns()));
-        quotes.addListener(new RepopulateQuotesListener(quoteItemChooser, shownQuotes, quotes));
-        trades.addListener(new RepopulateTradesListener(shownTrades, turnTable));
 
         turnTable.setItems(openTurnsList);
         tradeTable.setItems(shownTrades);
@@ -114,11 +115,9 @@ public class MMPane extends FXMLSplitPane {
         map(quoteDateColumn, "quoteTS");
         map(quoteAskColumn, "ask");
         map(quoteBidColumn, "bid");
-        quotePPLColumn.setCellValueFactory(features -> (features.getValue().getAsk().intValue() - features.getValue().getBid().intValue()) * items.getLimitFor(features.getValue().getItemName()));
     }
 
-    private static <S,T> void map(TableColumn<S,T> col, String field)
-    {
+    private static <S, T> void map(TableColumn<S, T> col, String field) {
         col.setCellValueFactory(new PropertyValueFactory<>(field));
     }
 

@@ -16,13 +16,19 @@
  */
 package net.jmhertlein.rsmm.model;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 import net.jmhertlein.rsmm.model.update.UpdatableManager;
 
 import java.sql.*;
-import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author joshua
@@ -30,87 +36,89 @@ import java.util.Optional;
 public class TurnManager extends UpdatableManager {
     private final Connection conn;
 
-    public TurnManager(Connection conn) {
+    private final ObservableSet<Turn> openTurns, closedTurnsToday;
+    private final IntegerProperty totalClosedProfit;
+
+    public TurnManager(Connection conn, ItemManager items, QuoteManager quotes) throws SQLException, NoSuchItemException, NoQuoteException {
         this.conn = conn;
-    }
+        this.openTurns = FXCollections.observableSet(new HashSet<Turn>());
+        this.closedTurnsToday = FXCollections.observableSet(new HashSet<Turn>());
 
-    public Optional<Turn> getOpenTurn(String itemName) throws SQLException {
-        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE item_name=? AND close_ts IS NULL")) {
-            p.setString(1, itemName);
-            try (ResultSet rs = p.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(new Turn(conn, rs));
-                } else {
-                    return Optional.empty();
-                }
-            }
-        }
-    }
 
-    public void newTurn(String itemName) throws SQLException, DuplicateOpenTurnException {
-        if (getOpenTurn(itemName).isPresent()) {
-            throw new DuplicateOpenTurnException(itemName);
-        }
-
-        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Turn(item_name) VALUES(?)")) {
-            p.setString(1, itemName);
-            p.executeUpdate();
-        }
-    }
-
-    public List<Turn> getOpenTurns() throws SQLException {
-        List<Turn> turns = new ArrayList<>();
         try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE close_ts IS NULL")) {
             try (ResultSet rs = p.executeQuery()) {
                 while (rs.next()) {
-                    turns.add(new Turn(conn, rs));
+                    openTurns.add(new Turn(conn, items, quotes, rs));
                 }
             }
         }
-        return turns;
-    }
 
-    public Optional<RSInteger> getTotalClosedProfit() throws SQLException {
+        totalClosedProfit = new SimpleIntegerProperty();
         try (PreparedStatement p = conn.prepareStatement("SELECT SUM(price * (quantity*-1)) AS total_closed FROM Trade NATURAL JOIN Turn WHERE close_ts IS NOT NULL;")) {
             try (ResultSet rs = p.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(new RSInteger(rs.getInt("total_closed")));
-                } else {
-                    return Optional.empty();
-                }
+                rs.next();
+                totalClosedProfit.set(rs.getInt("total_closed"));
             }
         }
-    }
 
-    public Optional<RSInteger> getClosedProfitForDay(LocalDate now) throws SQLException {
-        try (PreparedStatement p = conn.prepareStatement("SELECT date_trunc('day', close_ts)::date AS day, SUM(price * (quantity*-1)) AS closed_profit " +
-                "FROM Trade NATURAL JOIN Turn " +
-                "WHERE close_ts BETWEEN date_trunc('day', ?::timestamp) AND (?::date+1)::timestamp " +
-                "GROUP BY day;")) {
-            p.setDate(1, Date.valueOf(now));
-            p.setDate(2, Date.valueOf(now));
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE close_ts::date == now()::date")) {
             try (ResultSet rs = p.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(new RSInteger(rs.getInt("closed_profit")));
-                } else {
-                    return Optional.empty();
+                while (rs.next()) {
+                    closedTurnsToday.add(new Turn(conn, items, quotes, rs));
                 }
             }
         }
     }
 
-    public RSInteger getTotalOpenProfit(QuoteManager quotes) throws SQLException, NoQuoteException {
+    public Optional<Turn> getOpenTurn(String itemName) throws SQLException, NoSuchItemException, NoQuoteException {
+        return openTurns.stream().filter(t -> t.getItemName().equals(itemName)).findFirst();
+    }
+
+    public Turn newTurn(Item item, QuoteManager quotes) throws SQLException, DuplicateOpenTurnException, NoSuchItemException, NoQuoteException {
+        if (getOpenTurn(item.getName()).isPresent()) {
+            throw new DuplicateOpenTurnException(item.getName());
+        }
+
+        Timestamp openTs = Timestamp.from(Instant.now());
+
+        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Turn(item_name, open_ts) VALUES(?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+            p.setString(1, item.getName());
+            p.setTimestamp(2, openTs);
+            try (ResultSet keys = p.getGeneratedKeys()) {
+                keys.next();
+                int id = keys.getInt(1);
+
+                return new Turn(conn, quotes, id, item, openTs, null);
+            }
+        }
+    }
+
+    public List<Turn> getOpenTurns() {
+        return openTurns.stream().sorted().collect(Collectors.toList());
+    }
+
+    public IntegerProperty getTotalClosedProfit() throws SQLException {
+        return totalClosedProfit;
+    }
+
+    public int getClosedProfitForDay() throws SQLException {
+        int sum = 0;
+        for (Turn t : closedTurnsToday) {
+            sum += t.getClosedProfit().intValue();
+        }
+
+        return sum;
+    }
+
+    public RSInteger getTotalOpenProfit(QuoteManager quotes) throws SQLException, NoQuoteException, NoSuchItemException {
         int profit = 0;
         for (Turn t : getOpenTurns()) {
-            try {
-                profit += t.getOpenProfit(quotes).intValue();
-            } catch (ArithmeticException ignore) {
-            }
+            profit += t.getOpenProfit(quotes).intValue();
         }
         return new RSInteger(profit);
     }
 
-    public RSInteger getOpenTurnClosedProfit() throws SQLException {
+    public RSInteger getOpenTurnClosedProfit(QuoteManager quotes) throws SQLException {
         int profit = 0;
         for (Turn t : getOpenTurns()) {
             try {
@@ -121,21 +129,28 @@ public class TurnManager extends UpdatableManager {
         return new RSInteger(profit);
     }
 
-    public RSInteger getTotalPositionCost(QuoteManager quotes) throws SQLException, NoQuoteException {
+    public RSInteger getTotalPositionCost(QuoteManager quotes) throws SQLException, NoQuoteException, NoSuchItemException {
         int cost = 0;
         for (Turn t : getOpenTurns()) {
-            try {
-                cost += t.getPositionCost(quotes).intValue();
-            } catch (ArithmeticException ignore) {
-            }
+            cost += t.getPositionCost(quotes);
         }
         return new RSInteger(cost);
     }
 
-    public void closeTurn() throws SQLException {
-        try (PreparedStatement p = conn.prepareStatement("UPDATE Turn SET close_ts=now() WHERE turn_id=?")) {
-            p.setInt(1, turnId);
-            p.executeUpdate();
+    public void closeTurn(int turnId) throws SQLException {
+        Timestamp closeTs = Timestamp.from(Instant.now());
+        try (PreparedStatement p = conn.prepareStatement("UPDATE Turn SET close_ts=? WHERE turn_id=?")) {
+            p.setTimestamp(1, closeTs);
+            p.setInt(2, turnId);
+            int rows = p.executeUpdate();
+            if(rows > 0)
+            {
+                Turn turn = openTurns.stream().filter(t -> t.getTurnId() == turnId).findFirst().orElseThrow(() -> new NoSuchElementException("No such open turn for id: " + turnId));
+                turn.setClose(closeTs);
+                closedTurnsToday.add(turn);
+                openTurns.remove(turn);
+                totalClosedProfit.set(totalClosedProfit.get() + turn.getClosedProfit().intValue());
+            }
         }
     }
 }

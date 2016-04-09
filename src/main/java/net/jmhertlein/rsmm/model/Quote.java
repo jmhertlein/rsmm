@@ -60,4 +60,23 @@ public class Quote {
     public int getAsk() {
         return ask.get();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Quote quote = (Quote) o;
+
+        if (!itemName.equals(quote.itemName)) return false;
+        return quoteTS.equals(quote.quoteTS);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = itemName.hashCode();
+        result = 31 * result + quoteTS.get().hashCode();
+        return result;
+    }
 }

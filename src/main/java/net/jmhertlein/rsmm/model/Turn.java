@@ -17,51 +17,106 @@
 package net.jmhertlein.rsmm.model;
 
 import javafx.beans.property.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
+import net.jmhertlein.rsmm.viewfx.util.Dialogs;
 
 import java.math.BigDecimal;
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
  * @author joshua
  */
-public class Turn {
-    private final int turnId;
+public class Turn implements Comparable<Turn> {
+    private final Connection conn;
+    private final long turnId;
     private final ObjectProperty<Item> item;
     private final SimpleObjectProperty<Timestamp> open, close;
+    private final ObservableSet<Trade> trades;
 
-    private final ReadOnlyIntegerProperty openProfit, closedProfit, positionCost, position;
+    private final IntegerProperty openProfit, closedProfit, positionCost, position;
 
-    public Turn(ItemManager items, TradeManager trades, QuoteManager quotes, ResultSet rs) throws SQLException, NoSuchItemException, NoQuoteException {
-        this.turnId = rs.getInt("turn_id");
-        String itemName = rs.getString("item_name");
-        this.item = new SimpleObjectProperty<>(items.getItem(itemName).orElseThrow(() -> new NoSuchItemException(itemName)));
-        this.open = new SimpleObjectProperty<>(rs.getTimestamp("open_ts"));
-        this.close = new SimpleObjectProperty<>(rs.getTimestamp("close_ts"));
-
-        openProfit = new SimpleIntegerProperty(getOpenProfit(trades, quotes).intValue());
-        closedProfit = new SimpleIntegerProperty(getClosedProfit(trades).intValue());
-        positionCost = new SimpleIntegerProperty(getPositionCost(trades, quotes));
-        position = new SimpleIntegerProperty(getPosition(trades));
+    public Turn(Connection conn, ItemManager items, QuoteManager quotes, ResultSet rs) throws SQLException, NoSuchItemException, NoQuoteException {
+        this(conn, quotes, rs.getLong("turn_id"), getItemFromResults(rs, items), rs.getTimestamp("open_ts"), rs.getTimestamp("close_ts"));
     }
 
-    public Turn(ItemManager items, TradeManager trades, QuoteManager quotes, int turnId, Item item, Timestamp open, Timestamp close) throws SQLException, NoQuoteException {
+    private static Item getItemFromResults(ResultSet rs, ItemManager items) throws SQLException, NoSuchItemException {
+        String itemName = rs.getString("item_name");
+        return items.getItem(itemName).orElseThrow(() -> new NoSuchItemException(itemName));
+    }
+
+    public Turn(Connection conn, QuoteManager quotes, long turnId, Item item, Timestamp open, Timestamp close) throws SQLException, NoQuoteException {
+        this.conn = conn;
         this.turnId = turnId;
         this.item = new SimpleObjectProperty<>(item);
         this.open = new SimpleObjectProperty<>(open);
         this.close = new SimpleObjectProperty<>(close);
 
-        openProfit = new SimpleIntegerProperty(getOpenProfit(trades, quotes).intValue());
-        closedProfit = new SimpleIntegerProperty(getClosedProfit(trades).intValue());
-        positionCost = new SimpleIntegerProperty(getPositionCost(trades, quotes));
-        position = new SimpleIntegerProperty(getPosition(trades));
+        this.trades = FXCollections.observableSet(new HashSet<Trade>());
+        try(PreparedStatement p = conn.prepareStatement("SELECT * FROM Trade WHERE turn_id=?"))
+        {
+            p.setLong(1, turnId);
+            try(ResultSet rs = p.executeQuery())
+            {
+                while(rs.next())
+                {
+                    trades.add(new Trade(this, rs));
+                }
+            }
+        }
+
+        openProfit = new SimpleIntegerProperty();
+        closedProfit = new SimpleIntegerProperty();
+        positionCost = new SimpleIntegerProperty();
+        position = new SimpleIntegerProperty();
+        onTrade(quotes);
+
+        trades.addListener((SetChangeListener<? super Trade>) (change) -> {
+            try {
+                onTrade(quotes);
+            } catch (NoQuoteException | SQLException e) {
+                Dialogs.showMessage("Error Handling Trade", "Error Handling Trade", e);
+            }
+        });
     }
 
-    public int getTurnId() {
+    private void onTrade(QuoteManager quotes) throws NoQuoteException, SQLException {
+        openProfit.set(getOpenProfit( quotes).intValue());
+        closedProfit.set(getClosedProfit().intValue());
+        positionCost.set(getPositionCost(quotes));
+        position.set(getPosition());
+    }
+
+    public void addTrade(int price, int quantity) throws SQLException, NoQuoteException {
+        Trade trade = new Trade(this, Timestamp.from(Instant.now()), price, quantity);
+        try (PreparedStatement p = conn.prepareStatement(
+                "INSERT INTO Trade(turn_id,trade_ts,price,quantity) VALUES(?,?,?)")) {
+            p.setLong(1, trade.getTurn().getTurnId());
+            p.setTimestamp(2, trade.getTradeTime());
+            p.setInt(3, trade.getPrice());
+            p.setInt(4, trade.getQuantity());
+            p.executeUpdate();
+        }
+
+        trades.add(trade);
+    }
+
+    public void bustTrade(Trade t) throws SQLException {
+        try (PreparedStatement p = conn.prepareStatement("DELETE FROM Trade WHERE turn_id=? AND trade_ts=?")) {
+            p.setLong(1, t.getTurn().getTurnId());
+            p.setTimestamp(2, t.getTradeTime());
+            p.executeUpdate();
+        }
+
+        trades.remove(t);
+    }
+
+    public long getTurnId() {
         return turnId;
     }
 
@@ -77,18 +132,20 @@ public class Turn {
         return close.get();
     }
 
-    public boolean isFlat(TradeManager trades) throws SQLException {
-        return getPosition(trades) == 0;
+    public void setClose(Timestamp ts) {
+        close.set(ts);
     }
 
-    public BigDecimal entryVWAP(TradeManager trades) throws SQLException {
-        List<Trade> entries = trades.getTrades(this);
-        return vwapOf(entries.stream().filter(t -> t.getQuantity() > 0).collect(Collectors.toList()));
+    public boolean isFlat() {
+        return getPosition() == 0;
     }
 
-    public BigDecimal exitVWAP(TradeManager trades) throws SQLException {
-        List<Trade> exits = trades.getTrades(this);
-        return vwapOf(exits.stream().filter(t -> t.getQuantity() < 0).collect(Collectors.toList()));
+    public BigDecimal entryVWAP() {
+        return vwapOf(trades.stream().filter(t -> t.getQuantity() > 0).collect(Collectors.toList()));
+    }
+
+    public BigDecimal exitVWAP() {
+        return vwapOf(trades.stream().filter(t -> t.getQuantity() < 0).collect(Collectors.toList()));
     }
 
     private static BigDecimal vwapOf(List<Trade> trades) {
@@ -103,43 +160,41 @@ public class Turn {
         return numerator.divide(denominator, 4, BigDecimal.ROUND_HALF_EVEN);
     }
 
-    public int getPosition(TradeManager trades) throws SQLException {
-        return trades.getTrades(this)
-                .stream()
+    public int getPosition() {
+        return trades.stream()
                 .mapToInt(Trade::getQuantity)
                 .sum();
     }
 
-    public int getClosedPosition(TradeManager trades) throws SQLException {
-        boolean isShort = getPosition(trades) < 0;
-        return trades.getTrades(this)
-                .stream()
+    public int getClosedPosition() {
+        boolean isShort = getPosition() < 0;
+        return trades.stream()
                 .filter(t -> (t.getQuantity() > 0) == isShort)
                 .mapToInt(Trade::getQuantity)
                 .sum();
     }
 
-    public BigDecimal getOpenProfit(TradeManager trades, QuoteManager quotes) throws SQLException, NoQuoteException {
-        Quote quote = quotes.getLatestQuote(item.get().getName()).orElseThrow(() -> new NoQuoteException(item.get().getName()));
-        int pos = getPosition(trades);
+    public BigDecimal getOpenProfit(QuoteManager quotes) throws NoQuoteException, SQLException {
+        Quote quote = quotes.getLatestQuote(item.get()).orElseThrow(() -> new NoQuoteException(item.get().getName()));
+        int pos = getPosition();
 
         if (pos > 0) {
-            return new BigDecimal(pos * quote.getAsk()).subtract(entryVWAP(trades).multiply(BigDecimal.valueOf(pos)));
+            return new BigDecimal(pos * quote.getAsk()).subtract(entryVWAP().multiply(BigDecimal.valueOf(pos)));
         } else {
             pos = Math.abs(pos);
-            return exitVWAP(trades).subtract(BigDecimal.valueOf(quote.getBid())).multiply(BigDecimal.valueOf(pos));
+            return exitVWAP().subtract(BigDecimal.valueOf(quote.getBid())).multiply(BigDecimal.valueOf(pos));
         }
     }
 
-    public BigDecimal getClosedProfit(TradeManager trades) throws SQLException {
-        return exitVWAP(trades).subtract(entryVWAP(trades)).multiply(BigDecimal.valueOf(getClosedPosition(trades)));
+    public BigDecimal getClosedProfit() throws SQLException {
+        return exitVWAP().subtract(entryVWAP()).multiply(BigDecimal.valueOf(getClosedPosition()));
     }
 
-    public int getPositionCost(TradeManager trades, QuoteManager quotes) throws SQLException, NoQuoteException {
-        int pos = getPosition(trades);
+    public int getPositionCost(QuoteManager quotes) throws SQLException, NoQuoteException {
+        int pos = getPosition();
         int qty = Math.abs(pos);
 
-        Quote quote = quotes.getLatestQuote(item.get().getName()).orElseThrow(() -> new NoQuoteException(item.get().getName()));
+        Quote quote = quotes.getLatestQuote(item.get()).orElseThrow(() -> new NoQuoteException(item.get().getName()));
 
         int multiplicand;
         if (pos > 0) {
@@ -149,5 +204,26 @@ public class Turn {
         }
 
         return qty * multiplicand;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Turn turn = (Turn) o;
+
+        return turnId == turn.turnId;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (turnId ^ (turnId >>> 32));
+    }
+
+    @Override
+    public int compareTo(Turn o) {
+        return getOpen().compareTo(o.getOpen());
     }
 }

@@ -4,7 +4,6 @@ import net.jmhertlein.rsmm.model.NoQuoteException;
 import net.jmhertlein.rsmm.model.QuoteManager;
 import net.jmhertlein.rsmm.model.RSInteger;
 import net.jmhertlein.rsmm.model.TurnManager;
-import net.jmhertlein.rsmm.model.TradeManager;
 
 import javax.swing.*;
 import java.sql.SQLException;

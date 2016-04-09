@@ -17,11 +17,14 @@
 package net.jmhertlein.rsmm.model;
 
 import javafx.beans.property.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 
 /**
  * @author joshua
@@ -31,11 +34,17 @@ public class Trade {
     private final ReadOnlyObjectProperty<Timestamp> tradeTime;
     private final IntegerProperty price, quantity;
 
+
     public Trade(Turn parent, ResultSet rs) throws SQLException {
+        this(parent, rs.getTimestamp("trade_ts"), rs.getInt("price"), rs.getInt("quantity"));
+    }
+
+    public Trade(Turn parent, Timestamp tradeTs, int price, int quantity)
+    {
         this.turn = parent;
-        this.tradeTime = new SimpleObjectProperty<>(rs.getTimestamp("trade_ts"));
-        this.price = new SimpleIntegerProperty(rs.getInt("price"));
-        this.quantity = new SimpleIntegerProperty(rs.getInt("quantity"));
+        this.tradeTime = new SimpleObjectProperty<>(tradeTs);
+        this.price = new SimpleIntegerProperty(price);
+        this.quantity = new SimpleIntegerProperty(quantity);
     }
 
     public Turn getTurn() {
@@ -52,5 +61,24 @@ public class Trade {
 
     public int getQuantity() {
         return quantity.get();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Trade trade = (Trade) o;
+
+        if (!turn.equals(trade.turn)) return false;
+        return tradeTime.equals(trade.tradeTime);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = turn.hashCode();
+        result = 31 * result + tradeTime.get().hashCode();
+        return result;
     }
 }

@@ -19,9 +19,11 @@ package net.jmhertlein.rsmm.model;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import javafx.collections.ObservableSet;
 import net.jmhertlein.rsmm.model.update.UpdatableManager;
 
 import java.sql.*;
+import java.sql.Date;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Supplier;
@@ -32,7 +34,7 @@ import java.util.function.Supplier;
 public class QuoteManager extends UpdatableManager {
     private final Connection conn;
 
-    private final ObservableMap<Item, ObservableList<Quote>> cache;
+    private final ObservableMap<Date, ObservableMap<Item, ObservableSet<Quote>>> cache;
 
     public QuoteManager(Connection conn) {
         this.conn = conn;
@@ -49,32 +51,30 @@ public class QuoteManager extends UpdatableManager {
             p.executeUpdate();
         }
 
-        getLatestQuotes(item);
-        cache.get(item).add(new Quote(item.getName(), quoteTs, bid, ask));
+        getQuotesFor(item, new Date(new java.util.Date().getTime())).add(new Quote(item.getName(), quoteTs, bid, ask));
     }
 
     public Optional<Quote> getLatestQuote(Item item) throws SQLException {
-        List<Quote> latestQuotes = getLatestQuotes(item);
-
-        if(latestQuotes.isEmpty())
-        {
-            return Optional.empty();
-        }
-        else
-        {
-            return Optional.of(latestQuotes.get(latestQuotes.size()-1));
-        }
+        return getQuotesFor(item, new Date(new java.util.Date().getTime())).stream().min((l, r) -> l.getQuoteTS().compareTo(r.getQuoteTS()));
     }
 
-    public List<Quote> getLatestQuotes(Item item) throws SQLException {
-        ObservableList<Quote> quotes = cache.get(item);
+    public Set<Quote> getQuotesFor(Item item, Date date) throws SQLException {
+        ObservableMap<Item, ObservableSet<Quote>> itemsForDay = cache.get(date);
+        if(itemsForDay == null)
+        {
+            itemsForDay = FXCollections.observableHashMap();
+            cache.put(date, itemsForDay);
+        }
+
+        ObservableSet<Quote> quotes = itemsForDay.get(item);
         if(quotes == null)
         {
-            quotes = FXCollections.observableArrayList();
-            cache.put(item, quotes);
+            quotes = FXCollections.observableSet(new LinkedHashSet<Quote>());
+            itemsForDay.put(item, quotes);
 
-            try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Quote WHERE item_name=? ORDER BY quote_ts DESC LIMIT 5")) {
+            try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Quote WHERE item_name=? AND quote_ts::date = ? ORDER BY quote_ts DESC")) {
                 p.setString(1, item.getName());
+                p.setDate(2, date);
                 try (ResultSet rs = p.executeQuery()) {
                     while (rs.next()) {
                         quotes.add(new Quote(rs));

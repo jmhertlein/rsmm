@@ -29,7 +29,6 @@ import net.jmhertlein.rsmm.controller.turn.CloseTurnAction;
 import net.jmhertlein.rsmm.model.ItemManager;
 import net.jmhertlein.rsmm.model.QuoteManager;
 import net.jmhertlein.rsmm.model.TurnManager;
-import net.jmhertlein.rsmm.model.TradeManager;
 import net.jmhertlein.rsmm.view.profit.ProfitPanel;
 import net.jmhertlein.rsmm.view.quote.QuotePanel;
 import net.jmhertlein.rsmm.view.trade.TradePanel;

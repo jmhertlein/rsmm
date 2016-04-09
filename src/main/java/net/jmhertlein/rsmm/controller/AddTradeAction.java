@@ -3,7 +3,6 @@ package net.jmhertlein.rsmm.controller;
 import net.jmhertlein.rsmm.model.Quote;
 import net.jmhertlein.rsmm.model.Turn;
 import net.jmhertlein.rsmm.model.TurnManager;
-import net.jmhertlein.rsmm.model.TradeManager;
 import net.jmhertlein.rsmm.view.quote.QuotePanel;
 import net.jmhertlein.rsmm.view.trade.TradePanel;
 import net.jmhertlein.rsmm.view.turn.TurnPanel;

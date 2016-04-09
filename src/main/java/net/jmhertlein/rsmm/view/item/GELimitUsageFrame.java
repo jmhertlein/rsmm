@@ -1,7 +1,6 @@
 package net.jmhertlein.rsmm.view.item;
 
 import net.jmhertlein.rsmm.model.ItemManager;
-import net.jmhertlein.rsmm.model.TradeManager;
 
 import javax.swing.*;
 import java.awt.*;

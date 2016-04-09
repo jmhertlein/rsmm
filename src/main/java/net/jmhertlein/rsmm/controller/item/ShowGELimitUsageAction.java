@@ -1,7 +1,6 @@
 package net.jmhertlein.rsmm.controller.item;
 
 import net.jmhertlein.rsmm.model.ItemManager;
-import net.jmhertlein.rsmm.model.TradeManager;
 import net.jmhertlein.rsmm.view.item.GELimitUsageFrame;
 
 import javax.swing.*;

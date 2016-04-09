@@ -1,7 +1,6 @@
 package net.jmhertlein.rsmm.controller;
 
 import net.jmhertlein.rsmm.model.Trade;
-import net.jmhertlein.rsmm.model.TradeManager;
 import net.jmhertlein.rsmm.view.trade.TradePanel;
 
 import javax.swing.*;
