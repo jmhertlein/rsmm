@@ -17,53 +17,50 @@
 package net.jmhertlein.rsmm.model;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import net.jmhertlein.rsmm.model.update.UpdatableManager;
-import net.jmhertlein.rsmm.model.update.UpdateListener;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.function.Supplier;
 
 /**
  * @author joshua
  */
-public class ItemManager extends UpdatableManager {
+public class ItemManager {
     private final Connection conn;
 
-    private final ObservableMap<String, Item> cache;
+    private final ObservableList<Item> cache;
 
     public ItemManager(Connection conn) throws SQLException {
         this.conn = conn;
-        cache = FXCollections.observableHashMap();
+        cache = FXCollections.observableArrayList();
 
         try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Item ORDER BY item_name ASC")) {
             try (ResultSet rs = p.executeQuery()) {
                 while (rs.next()) {
                     Item i = new Item(rs);
-                    cache.put(i.getName(), i);
+                    cache.add(i);
                 }
             }
         }
     }
 
-    public void addItem(String name, int buyLimit) throws SQLException {
+    public Item addItem(String name, int buyLimit) throws SQLException {
         try (PreparedStatement p = conn.prepareStatement("INSERT INTO Item VALUES(?,?)")) {
             p.setString(1, name);
             p.setInt(2, buyLimit);
             p.executeUpdate();
         }
 
-        cache.put(name, new Item(name, buyLimit));
+        Item i = new Item(name, buyLimit);
+        cache.add(i);
+        return i;
     }
 
-    public Optional<Item> getItem(String name) throws SQLException {
-        return Optional.ofNullable(cache.get(name));
+    public Optional<Item> getItem(String name) {
+        return cache.stream().filter(i -> i.getName().equals(name)).findFirst();
     }
 
     public Optional<Integer> getLimitFor(String name) throws SQLException {
@@ -75,7 +72,7 @@ public class ItemManager extends UpdatableManager {
         }
     }
 
-    public Collection<Item> getItems() throws SQLException {
-        return cache.values();
+    public ObservableList<Item> getItems() {
+        return cache;
     }
 }

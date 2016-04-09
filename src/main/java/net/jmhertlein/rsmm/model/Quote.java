@@ -30,19 +30,24 @@ public class Quote {
     private final ReadOnlyObjectProperty<Timestamp> quoteTS;
     private final IntegerProperty bid, ask;
 
-    public Quote(ResultSet rs) throws SQLException {
+    private final ReadOnlyIntegerProperty spread, profitPerLimit;
+
+    public Quote(Item i, ResultSet rs) throws SQLException {
         this(
-                rs.getString("item_name"),
+                i,
                 rs.getTimestamp("quote_ts"),
                 rs.getInt("bid1"),
                 rs.getInt("ask1"));
     }
 
-    public Quote(String itemName, Timestamp quoteTS, int bid, int ask) {
-        this.itemName = new SimpleStringProperty(itemName);
+    public Quote(Item i, Timestamp quoteTS, int bid, int ask) {
+        this.itemName = new SimpleStringProperty(i.getName());
         this.quoteTS = new SimpleObjectProperty<>(quoteTS);
         this.bid = new SimpleIntegerProperty(bid);
         this.ask = new SimpleIntegerProperty(ask);
+
+        spread = new SimpleIntegerProperty(ask - bid);
+        profitPerLimit = new SimpleIntegerProperty((ask - bid) * i.getBuyLimit());
     }
 
     public String getItemName() {

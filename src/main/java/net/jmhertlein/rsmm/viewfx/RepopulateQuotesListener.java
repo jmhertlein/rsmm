@@ -5,7 +5,6 @@ import javafx.scene.control.ComboBox;
 import net.jmhertlein.rsmm.model.Item;
 import net.jmhertlein.rsmm.model.Quote;
 import net.jmhertlein.rsmm.model.QuoteManager;
-import net.jmhertlein.rsmm.model.update.UpdateListener;
 import net.jmhertlein.rsmm.viewfx.util.Dialogs;
 
 import java.sql.SQLException;

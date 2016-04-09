@@ -4,7 +4,6 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.TableView;
 import net.jmhertlein.rsmm.model.Trade;
 import net.jmhertlein.rsmm.model.Turn;
-import net.jmhertlein.rsmm.model.update.UpdateListener;
 import net.jmhertlein.rsmm.viewfx.util.Dialogs;
 
 import java.sql.SQLException;

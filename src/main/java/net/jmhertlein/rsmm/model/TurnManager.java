@@ -19,8 +19,9 @@ package net.jmhertlein.rsmm.model;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
-import net.jmhertlein.rsmm.model.update.UpdatableManager;
+import javafx.collections.SetChangeListener;
 
 import java.sql.*;
 import java.time.Instant;
@@ -33,16 +34,16 @@ import java.util.stream.Collectors;
 /**
  * @author joshua
  */
-public class TurnManager extends UpdatableManager {
+public class TurnManager {
     private final Connection conn;
 
-    private final ObservableSet<Turn> openTurns, closedTurnsToday;
+    private final ObservableList<Turn> openTurns, closedTurnsToday;
     private final IntegerProperty totalClosedProfit;
 
     public TurnManager(Connection conn, ItemManager items, QuoteManager quotes) throws SQLException, NoSuchItemException, NoQuoteException {
         this.conn = conn;
-        this.openTurns = FXCollections.observableSet(new HashSet<Turn>());
-        this.closedTurnsToday = FXCollections.observableSet(new HashSet<Turn>());
+        this.openTurns = FXCollections.observableArrayList();
+        this.closedTurnsToday = FXCollections.observableArrayList();
 
 
         try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE close_ts IS NULL")) {
@@ -93,8 +94,8 @@ public class TurnManager extends UpdatableManager {
         }
     }
 
-    public List<Turn> getOpenTurns() {
-        return openTurns.stream().sorted().collect(Collectors.toList());
+    public ObservableList<Turn> getOpenTurns() {
+        return openTurns;
     }
 
     public IntegerProperty getTotalClosedProfit() throws SQLException {
