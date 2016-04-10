@@ -27,6 +27,7 @@ import java.sql.*;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -45,6 +46,34 @@ public class Turn implements Comparable<Turn> {
         this(conn, quotes, rs.getLong("turn_id"), getItemFromResults(rs, items), rs.getTimestamp("open_ts"), rs.getTimestamp("close_ts"));
     }
 
+    public ObjectProperty<Item> itemProperty() {
+        return item;
+    }
+
+    public ObjectProperty<Timestamp> openProperty() {
+        return open;
+    }
+
+    public ObjectProperty<Timestamp> closeProperty() {
+        return close;
+    }
+
+    public IntegerProperty openProfitProperty() {
+        return openProfit;
+    }
+
+    public IntegerProperty closedProfitProperty() {
+        return closedProfit;
+    }
+
+    public IntegerProperty positionCostProperty() {
+        return positionCost;
+    }
+
+    public IntegerProperty positionProperty() {
+        return position;
+    }
+
     private static Item getItemFromResults(ResultSet rs, ItemManager items) throws SQLException, NoSuchItemException {
         String itemName = rs.getString("item_name");
         return items.getItem(itemName).orElseThrow(() -> new NoSuchItemException(itemName));
@@ -58,13 +87,10 @@ public class Turn implements Comparable<Turn> {
         this.close = new SimpleObjectProperty<>(close);
 
         this.trades = FXCollections.observableSet(new HashSet<Trade>());
-        try(PreparedStatement p = conn.prepareStatement("SELECT * FROM Trade WHERE turn_id=?"))
-        {
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Trade WHERE turn_id=?")) {
             p.setLong(1, turnId);
-            try(ResultSet rs = p.executeQuery())
-            {
-                while(rs.next())
-                {
+            try (ResultSet rs = p.executeQuery()) {
+                while (rs.next()) {
                     trades.add(new Trade(this, rs));
                 }
             }
@@ -86,7 +112,7 @@ public class Turn implements Comparable<Turn> {
     }
 
     private void onTrade(QuoteManager quotes) throws NoQuoteException, SQLException {
-        openProfit.set(getOpenProfit( quotes).intValue());
+        openProfit.set(getOpenProfit(quotes).intValue());
         closedProfit.set(getClosedProfit().intValue());
         positionCost.set(getPositionCost(quotes));
         position.set(getPosition());
@@ -157,7 +183,11 @@ public class Turn implements Comparable<Turn> {
         }
 
         BigDecimal numerator = new BigDecimal(sumVolumeWeightedPrices), denominator = new BigDecimal(totalShares);
-        return numerator.divide(denominator, 4, BigDecimal.ROUND_HALF_EVEN);
+        if (Objects.equals(denominator, BigDecimal.ZERO)) {
+            return BigDecimal.ZERO;
+        } else {
+            return numerator.divide(denominator, 4, BigDecimal.ROUND_HALF_EVEN);
+        }
     }
 
     public int getPosition() {

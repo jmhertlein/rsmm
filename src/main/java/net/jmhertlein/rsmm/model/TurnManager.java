@@ -62,7 +62,7 @@ public class TurnManager {
             }
         }
 
-        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE close_ts::date == now()::date")) {
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE close_ts::date = now()::date")) {
             try (ResultSet rs = p.executeQuery()) {
                 while (rs.next()) {
                     closedTurnsToday.add(new Turn(conn, items, quotes, rs));
@@ -85,11 +85,15 @@ public class TurnManager {
         try (PreparedStatement p = conn.prepareStatement("INSERT INTO Turn(item_name, open_ts) VALUES(?, ?)", Statement.RETURN_GENERATED_KEYS)) {
             p.setString(1, item.getName());
             p.setTimestamp(2, openTs);
+            p.executeUpdate();
             try (ResultSet keys = p.getGeneratedKeys()) {
                 keys.next();
                 int id = keys.getInt(1);
 
-                return new Turn(conn, quotes, id, item, openTs, null);
+                System.out.println("New turn has id " + id);
+                Turn newTurn = new Turn(conn, quotes, id, item, openTs, null);
+                openTurns.add(newTurn);
+                return newTurn;
             }
         }
     }
@@ -138,11 +142,11 @@ public class TurnManager {
         return new RSInteger(cost);
     }
 
-    public void closeTurn(int turnId) throws SQLException {
+    public void closeTurn(long turnId) throws SQLException {
         Timestamp closeTs = Timestamp.from(Instant.now());
         try (PreparedStatement p = conn.prepareStatement("UPDATE Turn SET close_ts=? WHERE turn_id=?")) {
             p.setTimestamp(1, closeTs);
-            p.setInt(2, turnId);
+            p.setLong(2, turnId);
             int rows = p.executeUpdate();
             if(rows > 0)
             {

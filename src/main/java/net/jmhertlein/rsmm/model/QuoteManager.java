@@ -24,6 +24,7 @@ import javafx.collections.ObservableSet;
 import java.sql.*;
 import java.sql.Date;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -32,7 +33,7 @@ import java.util.*;
 public class QuoteManager {
     private final Connection conn;
 
-    private final ObservableMap<Date, ObservableMap<Item, ObservableList<Quote>>> cache;
+    private final ObservableMap<LocalDate, ObservableMap<Item, ObservableList<Quote>>> cache;
 
     public QuoteManager(Connection conn) {
         this.conn = conn;
@@ -44,19 +45,20 @@ public class QuoteManager {
         try (PreparedStatement p = conn.prepareStatement("INSERT INTO Quote(item_name,quote_ts,bid1,ask1) VALUES(?,?,?,?)")) {
             p.setString(1, item.getName());
             p.setTimestamp(2, quoteTs);
-            p.setInt(2, bid);
-            p.setInt(3, ask);
+            p.setInt(3, bid);
+            p.setInt(4, ask);
             p.executeUpdate();
         }
 
-        getQuotesFor(item, new Date(new java.util.Date().getTime())).add(new Quote(item, quoteTs, bid, ask));
+        ObservableList<Quote> quotesList = getQuotesFor(item, LocalDate.now());
+        quotesList.add(new Quote(item, quoteTs, bid, ask));
     }
 
     public Optional<Quote> getLatestQuote(Item item) throws SQLException {
-        return getQuotesFor(item, new Date(new java.util.Date().getTime())).stream().min((l, r) -> l.getQuoteTS().compareTo(r.getQuoteTS()));
+        return getQuotesFor(item, LocalDate.now()).stream().min((l, r) -> l.getQuoteTS().compareTo(r.getQuoteTS()));
     }
 
-    public ObservableList<Quote> getQuotesFor(Item item, Date date) throws SQLException {
+    public ObservableList<Quote> getQuotesFor(Item item, LocalDate date) throws SQLException {
         ObservableMap<Item, ObservableList<Quote>> itemsForDay = cache.get(date);
         if(itemsForDay == null)
         {
@@ -70,9 +72,10 @@ public class QuoteManager {
             quotes = FXCollections.observableArrayList();
             itemsForDay.put(item, quotes);
 
-            try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Quote WHERE item_name=? AND quote_ts::date = ? ORDER BY quote_ts DESC")) {
+            System.out.println("Cache miss: Quotes for " + item.getName() + " for " + date.toString());
+            try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Quote WHERE item_name=? AND quote_ts::date = ? ORDER BY quote_ts ASC")) {
                 p.setString(1, item.getName());
-                p.setDate(2, date);
+                p.setDate(2, Date.valueOf(date));
                 try (ResultSet rs = p.executeQuery()) {
                     while (rs.next()) {
                         quotes.add(new Quote(item, rs));

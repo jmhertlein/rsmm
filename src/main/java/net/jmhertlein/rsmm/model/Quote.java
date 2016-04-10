@@ -40,6 +40,36 @@ public class Quote {
                 rs.getInt("ask1"));
     }
 
+    public ReadOnlyStringProperty itemNameProperty()
+    {
+        return itemName;
+    }
+
+    public ReadOnlyObjectProperty<Timestamp> quoteTSProperty()
+    {
+        return quoteTS;
+    }
+
+    public IntegerProperty bidProperty()
+    {
+        return bid;
+    }
+
+    public IntegerProperty askProperty()
+    {
+        return ask;
+    }
+
+    public ReadOnlyIntegerProperty spreadProperty()
+    {
+        return spread;
+    }
+
+    public ReadOnlyIntegerProperty profitPerLimitProperty()
+    {
+        return profitPerLimit;
+    }
+
     public Quote(Item i, Timestamp quoteTS, int bid, int ask) {
         this.itemName = new SimpleStringProperty(i.getName());
         this.quoteTS = new SimpleObjectProperty<>(quoteTS);

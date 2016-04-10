@@ -33,7 +33,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>net.jmhertlein.rsmm.RSMarketMaker</mainClass>
+              <mainClass>net.jmhertlein.rsmm.FXRSMarketMaker</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -70,7 +70,7 @@
               <outfile>target/rsmm.exe</outfile>
               <errTitle>RS Market Maker</errTitle>
               <classPath>
-                <mainClass>net.jmhertlein.rsmm.RSMarketMaker</mainClass>
+                <mainClass>net.jmhertlein.rsmm.FXRSMarketMaker</mainClass>
                 <addDependencies>false</addDependencies>
                 <preCp>anything</preCp>
               </classPath>

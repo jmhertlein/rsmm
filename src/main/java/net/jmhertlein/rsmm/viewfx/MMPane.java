@@ -9,6 +9,7 @@ import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.control.cell.PropertyValueFactory;
 import net.jmhertlein.rsmm.model.*;
 import net.jmhertlein.rsmm.viewfx.util.Dialogs;
+import net.jmhertlein.rsmm.viewfx.util.FXMLBorderPane;
 import net.jmhertlein.rsmm.viewfx.util.FXMLSplitPane;
 
 import javax.swing.*;
@@ -16,13 +17,14 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
  * Created by joshua on 3/11/16.
  */
-public class MMPane extends FXMLSplitPane {
+public class MMPane extends FXMLBorderPane {
     private final Connection conn;
     private final ItemManager items;
     private final QuoteManager quotes;
@@ -65,10 +67,6 @@ public class MMPane extends FXMLSplitPane {
     @FXML
     private TableColumn<Turn, Integer> turnPositionCostColumn;
     @FXML
-    private TableColumn<Turn, Integer> turnUsedLimitColumn;
-    @FXML
-    private TableColumn<Turn, Integer> turnMaxLimitColumn;
-    @FXML
     private TableColumn<Turn, RSInteger> turnOpenProfitColumn;
     @FXML
     private TableColumn<Turn, RSInteger> turnClosedProfitColumn;
@@ -97,6 +95,12 @@ public class MMPane extends FXMLSplitPane {
         map(quoteBidColumn, "bid");
         map(quoteSpreadColumn, "spread");
         map(quotePPLColumn, "profitPerLimit");
+
+        map(turnItemColumn, "item");
+        map(turnQuantityColumn, "position");
+        map(turnPositionCostColumn, "positionCost");
+        map(turnOpenProfitColumn, "openProfit");
+        map(turnClosedProfitColumn, "closedProfit");
     }
 
     private static <S, T> void map(TableColumn<S, T> col, String field) {
@@ -104,12 +108,11 @@ public class MMPane extends FXMLSplitPane {
     }
 
     @FXML
-    void addBuyTrade(ActionEvent event) {
-        System.out.println("CLICK");
+    void addBuyTrade() {
     }
 
     @FXML
-    void addQuote(ActionEvent event) {
+    void addQuote() {
         int bid, ask;
         try {
             bid = Integer.parseInt(quoteBidField.getText());
@@ -134,31 +137,44 @@ public class MMPane extends FXMLSplitPane {
             quotes.addQuote(selected, bid, ask);
             quoteBidField.setText("");
             quoteAskField.setText("");
+            quoteTable.refresh();
         } catch (SQLException ex) {
             Dialogs.showMessage("Error Adding Quote", "Error Adding Quote", ex);
         }
     }
 
     @FXML
-    void addSellTrade(ActionEvent event) {
-        System.out.println("CLICK");
+    void addSellTrade() {
     }
 
     @FXML
-    void closeTurn(ActionEvent event) {
-        System.out.println("CLICK");
+    void closeTurn() {
+        Optional.ofNullable(turnTable.getSelectionModel().getSelectedItem()).ifPresent((turn) -> {
+            try {
+                turns.closeTurn(turn.getTurnId());
+            } catch (SQLException e) {
+                Dialogs.showMessage("Error Closing Turn", "SQLException", e);
+            }
+        });
     }
 
     @FXML
-    void openTurn(ActionEvent event) {
-        System.out.println("CLICK");
+    void openTurn() {
+        Optional<Item> item = Optional.ofNullable(quoteItemChooser.getSelectionModel().getSelectedItem());
+        item.ifPresent((i) -> {
+            try {
+                turns.newTurn(i, quotes);
+            } catch (SQLException | DuplicateOpenTurnException | NoQuoteException | NoSuchItemException e) {
+                Dialogs.showMessage("Error Opening Turn", "Error Opening Turn", e);
+            }
+        });
     }
 
     @FXML
-    void showQuotesForItem(ActionEvent event) {
+    void showQuotesForItem() {
         Optional.ofNullable(quoteItemChooser.getSelectionModel().getSelectedItem()).ifPresent(item -> {
             try {
-                quoteTable.setItems(quotes.getQuotesFor(item, new Date(new java.util.Date().getTime())));
+                quoteTable.setItems(quotes.getQuotesFor(item, LocalDate.now()));
             } catch (SQLException e) {
                 Dialogs.showMessage("Error Showing Quotes", "Error showing quotes for " + item.getName(), e);
             }
@@ -166,14 +182,14 @@ public class MMPane extends FXMLSplitPane {
     }
 
     @FXML
-    void syncQuoteToTurn(ActionEvent event) {
+    void syncQuoteToTurn() {
         Optional.ofNullable(turnTable.getSelectionModel().getSelectedItem()).ifPresent(turn -> {
             quoteItemChooser.getSelectionModel().clearSelection();
             Optional<Item> item = items.getItem(turn.getItemName());
             item.ifPresent((i) -> {
                 quoteItemChooser.getSelectionModel().select(i);
                 try {
-                    quoteTable.setItems(quotes.getQuotesFor(i, new Date(new java.util.Date().getTime())));
+                    quoteTable.setItems(quotes.getQuotesFor(i, LocalDate.now()));
                 } catch (SQLException e) {
                     Dialogs.showMessage("Error Showing Quotes", "Error showing quotes for " + i.getName(), e);
                 }
@@ -181,5 +197,4 @@ public class MMPane extends FXMLSplitPane {
 
         });
     }
-
 }
