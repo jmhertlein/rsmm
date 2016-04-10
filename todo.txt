@@ -1,3 +1,4 @@
-centralize updates to turns, items, quotes, trades: use listeners or something
-add "closed volume" column to turns view
 add a "long term stats" frame that shows total profit all time, last month, last week, etc. Also shows for each item: total profit, total volume, avg profit per turn, avg turn volume
+make clicking a turn auto-sync the quotes table to quote for the item for that turn
+factor quotes into GE limit usage
+add support for "synthetic" quotes- a synthetic quote will have a flag in the db indicating it's fake (so research can exclude it), and only non-synthetic quotes will factor into GE limit usage
