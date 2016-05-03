@@ -1,0 +1,5 @@
+DROP TABLE Price;
+DROP TABLE Quote;
+DROP TABLE Trade;
+DROP TABLE Turn;
+DROP TABLE Item;
