@@ -1,20 +1,13 @@
 package net.jmhertlein.rsmm.viewfx;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.control.cell.PropertyValueFactory;
 import net.jmhertlein.rsmm.model.*;
 import net.jmhertlein.rsmm.viewfx.util.Dialogs;
 import net.jmhertlein.rsmm.viewfx.util.FXMLBorderPane;
-import net.jmhertlein.rsmm.viewfx.util.FXMLSplitPane;
 
-import javax.swing.*;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -49,9 +42,9 @@ public class MMPane extends FXMLBorderPane {
     @FXML
     private TableColumn<Quote, Integer> quoteAskColumn;
     @FXML
-    private TableColumn<Quote, RSInteger> quoteSpreadColumn;
+    private TableColumn<Quote, RSIntegers> quoteSpreadColumn;
     @FXML
-    private TableColumn<Quote, RSInteger> quotePPLColumn;
+    private TableColumn<Quote, RSIntegers> quotePPLColumn;
     @FXML
     private ComboBox<Item> quoteItemChooser;
     @FXML
@@ -67,11 +60,17 @@ public class MMPane extends FXMLBorderPane {
     @FXML
     private TableColumn<Turn, Integer> turnPositionCostColumn;
     @FXML
-    private TableColumn<Turn, RSInteger> turnOpenProfitColumn;
+    private TableColumn<Turn, RSIntegers> turnOpenProfitColumn;
     @FXML
-    private TableColumn<Turn, RSInteger> turnClosedProfitColumn;
+    private TableColumn<Turn, RSIntegers> turnClosedProfitColumn;
     @FXML
     private Button closeTurnButton;
+    @FXML
+    private TableView<?> limitTable;
+    @FXML
+    private TableColumn<?, ?> limitItemColumn;
+    @FXML
+    private TableColumn<?, ?> limitRemainingColumn;
 
 
     public MMPane(Connection conn) {
@@ -101,6 +100,10 @@ public class MMPane extends FXMLBorderPane {
         map(turnPositionCostColumn, "positionCost");
         map(turnOpenProfitColumn, "openProfit");
         map(turnClosedProfitColumn, "closedProfit");
+
+        map(tradeTimeColumn, "tradeTime");
+        map(tradeQuantityColumns, "quantity");
+        map(tradePriceColumn, "price");
     }
 
     private static <S, T> void map(TableColumn<S, T> col, String field) {

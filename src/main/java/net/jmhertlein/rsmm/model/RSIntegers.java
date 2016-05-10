@@ -21,40 +21,11 @@ import java.math.BigDecimal;
 /**
  * @author joshua
  */
-public class RSInteger extends Number {
+public class RSIntegers {
 
-    private int value;
+    private RSIntegers() {}
 
-    public RSInteger(int value) {
-        this.value = value;
-    }
-
-    public RSInteger(Number value) {
-        this.value = value.intValue();
-    }
-
-    @Override
-    public int intValue() {
-        return value;
-    }
-
-    @Override
-    public long longValue() {
-        return value;
-    }
-
-    @Override
-    public float floatValue() {
-        return value;
-    }
-
-    @Override
-    public double doubleValue() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
+    public static String toString(int value) {
         if (value >= 10000000) {
             return (value / 1000000) + "M";
         } else if (value >= 100000) {
@@ -64,7 +35,7 @@ public class RSInteger extends Number {
         }
     }
 
-    public static RSInteger parseInt(String s) {
+    public static int parseInt(String s) {
         s = s.toLowerCase();
 
         int multiplier;
@@ -81,8 +52,7 @@ public class RSInteger extends Number {
             multiplier = 1;
         }
 
-        int value = Integer.parseInt(s) * multiplier;
-        return new RSInteger(value);
+        return Integer.parseInt(s) * multiplier;
     }
 
 }

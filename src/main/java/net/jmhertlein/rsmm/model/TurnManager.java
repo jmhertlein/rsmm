@@ -20,16 +20,11 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
 
 import java.sql.*;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * @author joshua
@@ -115,15 +110,15 @@ public class TurnManager {
         return sum;
     }
 
-    public RSInteger getTotalOpenProfit(QuoteManager quotes) throws SQLException, NoQuoteException, NoSuchItemException {
+    public int getTotalOpenProfit(QuoteManager quotes) throws SQLException, NoQuoteException, NoSuchItemException {
         int profit = 0;
         for (Turn t : getOpenTurns()) {
             profit += t.getOpenProfit(quotes).intValue();
         }
-        return new RSInteger(profit);
+        return profit;
     }
 
-    public RSInteger getOpenTurnClosedProfit(QuoteManager quotes) throws SQLException {
+    public int getOpenTurnClosedProfit(QuoteManager quotes) throws SQLException {
         int profit = 0;
         for (Turn t : getOpenTurns()) {
             try {
@@ -131,15 +126,15 @@ public class TurnManager {
             } catch (ArithmeticException ignore) {
             }
         }
-        return new RSInteger(profit);
+        return profit;
     }
 
-    public RSInteger getTotalPositionCost(QuoteManager quotes) throws SQLException, NoQuoteException, NoSuchItemException {
+    public int getTotalPositionCost(QuoteManager quotes) throws SQLException, NoQuoteException, NoSuchItemException {
         int cost = 0;
         for (Turn t : getOpenTurns()) {
             cost += t.getPositionCost(quotes);
         }
-        return new RSInteger(cost);
+        return cost;
     }
 
     public void closeTurn(long turnId) throws SQLException {

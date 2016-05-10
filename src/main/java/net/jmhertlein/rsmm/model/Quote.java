@@ -29,6 +29,7 @@ public class Quote {
     private final ReadOnlyStringProperty itemName;
     private final ReadOnlyObjectProperty<Timestamp> quoteTS;
     private final IntegerProperty bid, ask;
+    private final BooleanProperty synthetic;
 
     private final ReadOnlyIntegerProperty spread, profitPerLimit;
 
@@ -37,47 +38,51 @@ public class Quote {
                 i,
                 rs.getTimestamp("quote_ts"),
                 rs.getInt("bid1"),
-                rs.getInt("ask1"));
+                rs.getInt("ask1"),
+                rs.getBoolean("synthetic"));
     }
 
-    public ReadOnlyStringProperty itemNameProperty()
-    {
-        return itemName;
-    }
-
-    public ReadOnlyObjectProperty<Timestamp> quoteTSProperty()
-    {
-        return quoteTS;
-    }
-
-    public IntegerProperty bidProperty()
-    {
-        return bid;
-    }
-
-    public IntegerProperty askProperty()
-    {
-        return ask;
-    }
-
-    public ReadOnlyIntegerProperty spreadProperty()
-    {
-        return spread;
-    }
-
-    public ReadOnlyIntegerProperty profitPerLimitProperty()
-    {
-        return profitPerLimit;
-    }
-
-    public Quote(Item i, Timestamp quoteTS, int bid, int ask) {
+    public Quote(Item i, Timestamp quoteTS, int bid, int ask, boolean synthetic) {
         this.itemName = new SimpleStringProperty(i.getName());
         this.quoteTS = new SimpleObjectProperty<>(quoteTS);
         this.bid = new SimpleIntegerProperty(bid);
         this.ask = new SimpleIntegerProperty(ask);
+        this.synthetic = new SimpleBooleanProperty(synthetic);
 
         spread = new SimpleIntegerProperty(ask - bid);
         profitPerLimit = new SimpleIntegerProperty((ask - bid) * i.getBuyLimit());
+    }
+
+    public ReadOnlyStringProperty itemNameProperty() {
+        return itemName;
+    }
+
+    public ReadOnlyObjectProperty<Timestamp> quoteTSProperty() {
+        return quoteTS;
+    }
+
+    public IntegerProperty bidProperty() {
+        return bid;
+    }
+
+    public IntegerProperty askProperty() {
+        return ask;
+    }
+
+    public ReadOnlyIntegerProperty spreadProperty() {
+        return spread;
+    }
+
+    public ReadOnlyIntegerProperty profitPerLimitProperty() {
+        return profitPerLimit;
+    }
+
+    public BooleanProperty syntheticProperty() {
+        return synthetic;
+    }
+
+    public boolean isSynthetic() {
+        return synthetic.get();
     }
 
     public String getItemName() {

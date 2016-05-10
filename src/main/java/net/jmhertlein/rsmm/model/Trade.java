@@ -39,12 +39,23 @@ public class Trade {
         this(parent, rs.getTimestamp("trade_ts"), rs.getInt("price"), rs.getInt("quantity"));
     }
 
-    public Trade(Turn parent, Timestamp tradeTs, int price, int quantity)
-    {
+    public Trade(Turn parent, Timestamp tradeTs, int price, int quantity) {
         this.turn = parent;
         this.tradeTime = new SimpleObjectProperty<>(tradeTs);
         this.price = new SimpleIntegerProperty(price);
         this.quantity = new SimpleIntegerProperty(quantity);
+    }
+
+    public ReadOnlyObjectProperty<Timestamp> tradeTimeProperty() {
+        return tradeTime;
+    }
+
+    public IntegerProperty priceProperty() {
+        return price;
+    }
+
+    public IntegerProperty quantityProperty() {
+        return quantity;
     }
 
     public Turn getTurn() {

@@ -22,20 +22,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- *
  * @author joshua
  */
 public class Item implements Comparable<Item> {
+    private final int itemId;
     private final ReadOnlyStringProperty name;
     private final ReadOnlyIntegerProperty buyLimit;
+    private final BooleanProperty favorite;
 
     public Item(ResultSet rs) throws SQLException {
-        this(rs.getString("item_name"), rs.getInt("ge_limit"));
+        this(rs.getInt("item_id"), rs.getString("item_name"), rs.getInt("ge_limit"), rs.getBoolean("favorite"));
     }
 
-    public Item(String name, int buyLimit) {
+    public Item(int itemId, String name, int buyLimit, boolean favorite) {
+        this.itemId = itemId;
         this.name = new SimpleStringProperty(name);
         this.buyLimit = new SimpleIntegerProperty(buyLimit);
+        this.favorite = new SimpleBooleanProperty(favorite);
     }
 
     public String getName() {
@@ -44,6 +47,10 @@ public class Item implements Comparable<Item> {
 
     public int getBuyLimit() {
         return buyLimit.intValue();
+    }
+
+    public boolean isFavorite() {
+        return favorite.get();
     }
 
     @Override
@@ -64,11 +71,18 @@ public class Item implements Comparable<Item> {
         Item item = (Item) o;
 
         return name.equals(item.name);
-
     }
 
     @Override
     public int hashCode() {
         return name.get().hashCode();
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite.setValue(favorite);
+    }
+
+    public int getId() {
+        return itemId;
     }
 }

@@ -40,22 +40,25 @@ public class QuoteManager {
         cache = FXCollections.observableHashMap();
     }
 
-    public void addQuote(Item item, int bid, int ask) throws SQLException {
+    public Quote addQuote(Item item, int bid, int ask) throws SQLException {
         Timestamp quoteTs = Timestamp.from(Instant.now());
-        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Quote(item_name,quote_ts,bid1,ask1) VALUES(?,?,?,?)")) {
+        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Quote(item_name,quote_ts,bid1,ask1,synthetic) VALUES(?,?,?,?,?)")) {
             p.setString(1, item.getName());
             p.setTimestamp(2, quoteTs);
             p.setInt(3, bid);
             p.setInt(4, ask);
+            p.setBoolean(5, false);
             p.executeUpdate();
         }
 
         ObservableList<Quote> quotesList = getQuotesFor(item, LocalDate.now());
-        quotesList.add(new Quote(item, quoteTs, bid, ask));
+        Quote ret = new Quote(item, quoteTs, bid, ask, false);
+        quotesList.add(ret);
+        return ret;
     }
 
     public Optional<Quote> getLatestQuote(Item item) throws SQLException {
-        return getQuotesFor(item, LocalDate.now()).stream().min((l, r) -> l.getQuoteTS().compareTo(r.getQuoteTS()));
+        return getQuotesFor(item, LocalDate.now()).stream().max((l, r) -> l.getQuoteTS().compareTo(r.getQuoteTS()));
     }
 
     public ObservableList<Quote> getQuotesFor(Item item, LocalDate date) throws SQLException {
@@ -73,8 +76,8 @@ public class QuoteManager {
             itemsForDay.put(item, quotes);
 
             System.out.println("Cache miss: Quotes for " + item.getName() + " for " + date.toString());
-            try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Quote WHERE item_name=? AND quote_ts::date = ? ORDER BY quote_ts ASC")) {
-                p.setString(1, item.getName());
+            try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Quote WHERE item_id=? AND quote_ts::date = ? ORDER BY quote_ts ASC")) {
+                p.setInt(1, item.getId());
                 p.setDate(2, Date.valueOf(date));
                 try (ResultSet rs = p.executeQuery()) {
                     while (rs.next()) {

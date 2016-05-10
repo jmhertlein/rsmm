@@ -1,29 +1,29 @@
 package net.jmhertlein.rsmm.controller.item;
 
-import net.jmhertlein.rsmm.model.RSInteger;
+import net.jmhertlein.rsmm.model.RSIntegers;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class RSIntegerTest {
     @Test
     public void testParsing() {
-        assertTrue(RSInteger.parseInt("2b").intValue() == 2000000000);
-        assertTrue(RSInteger.parseInt("100m").intValue() == 100000000);
-        assertTrue(RSInteger.parseInt("10m").intValue() == 10000000);
-        assertTrue(RSInteger.parseInt("1m").intValue() == 1000000);
-        assertTrue(RSInteger.parseInt("100k").intValue() == 100000);
-        assertTrue(RSInteger.parseInt("1k").intValue() == 1000);
-        assertTrue(RSInteger.parseInt("120").intValue() == 120);
+        assertTrue(RSIntegers.parseInt("2b") == 2000000000);
+        assertTrue(RSIntegers.parseInt("100m") == 100000000);
+        assertTrue(RSIntegers.parseInt("10m") == 10000000);
+        assertTrue(RSIntegers.parseInt("1m") == 1000000);
+        assertTrue(RSIntegers.parseInt("100k") == 100000);
+        assertTrue(RSIntegers.parseInt("1k") == 1000);
+        assertTrue(RSIntegers.parseInt("120") == 120);
     }
 
     @Test
     public void testPrinting() {
-        assertEquals("100k", new RSInteger(100000).toString());
-        assertEquals("1000k", new RSInteger(1000000).toString());
-        assertEquals("1100k", new RSInteger(1100000).toString());
-        assertEquals("10M", new RSInteger(10000000).toString());
-        assertEquals("1", new RSInteger(1).toString());
-        assertEquals("10", new RSInteger(10).toString());
-        assertEquals("2147M", new RSInteger(Integer.MAX_VALUE).toString());
+        assertEquals("100k", RSIntegers.toString(100000));
+        assertEquals("1000k", RSIntegers.toString(1000000));
+        assertEquals("1100k", RSIntegers.toString(1100000));
+        assertEquals("10M", RSIntegers.toString(10000000));
+        assertEquals("1", RSIntegers.toString(1));
+        assertEquals("10", RSIntegers.toString(10));
+        assertEquals("2147M", RSIntegers.toString(Integer.MAX_VALUE));
     }
 }

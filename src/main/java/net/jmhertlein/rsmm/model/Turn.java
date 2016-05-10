@@ -101,14 +101,6 @@ public class Turn implements Comparable<Turn> {
         positionCost = new SimpleIntegerProperty();
         position = new SimpleIntegerProperty();
         onTrade(quotes);
-
-        trades.addListener((SetChangeListener<? super Trade>) (change) -> {
-            try {
-                onTrade(quotes);
-            } catch (NoQuoteException | SQLException e) {
-                Dialogs.showMessage("Error Handling Trade", "Error Handling Trade", e);
-            }
-        });
     }
 
     private void onTrade(QuoteManager quotes) throws NoQuoteException, SQLException {

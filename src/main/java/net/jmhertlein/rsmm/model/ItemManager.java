@@ -47,24 +47,38 @@ public class ItemManager {
         }
     }
 
-    public Item addItem(String name, int buyLimit) throws SQLException {
-        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Item VALUES(?,?)")) {
-            p.setString(1, name);
-            p.setInt(2, buyLimit);
+    public void setFavorite(Item i, boolean favorite)
+    {
+        i.setFavorite(favorite);
+    }
+
+    public void updateFavorite(Item i, boolean favorite) throws SQLException {
+        try (PreparedStatement p = conn.prepareStatement("UPDATE Item SET favorite=? WHERE item_id=?")) {
+            p.setInt(1, i.getId());
+            p.setBoolean(2, favorite);
             p.executeUpdate();
         }
-
-        Item i = new Item(name, buyLimit);
-        cache.add(i);
-        return i;
     }
 
     public Optional<Item> getItem(String name) {
         return cache.stream().filter(i -> i.getName().equals(name)).findFirst();
     }
 
+    public Optional<Item> getItem(int id) {
+        return cache.stream().filter(i -> i.getId() == id).findFirst();
+    }
+
     public Optional<Integer> getLimitFor(String name) throws SQLException {
         Optional<Item> i = getItem(name);
+        if (i.isPresent()) {
+            return Optional.of(i.get().getBuyLimit());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Integer> getLimitFor(int id) throws SQLException {
+        Optional<Item> i = getItem(id);
         if (i.isPresent()) {
             return Optional.of(i.get().getBuyLimit());
         } else {
