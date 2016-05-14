@@ -4,3 +4,5 @@ jfx rewrite:
 mark synthetic
 bust trade
 mark favorite item
+view spot price alongside quote
+whenever i make 1M+ gp in one turn, when i close it, pop open the youtube video "Shrek's Dank Kush" and autoplay

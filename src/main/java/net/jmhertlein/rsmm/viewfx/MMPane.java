@@ -1,5 +1,7 @@
 package net.jmhertlein.rsmm.viewfx;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -39,6 +41,8 @@ public class MMPane extends FXMLBorderPane {
 
     private final ObservableList<ItemLimitUsageState> limitUsageStates;
 
+    private final IntegerProperty gePriceProperty;
+
     @FXML
     private TableView<Trade> tradeTable;
     @FXML
@@ -49,6 +53,8 @@ public class MMPane extends FXMLBorderPane {
     private TableColumn<Trade, Integer> tradePriceColumn;
     @FXML
     private TextField tradeQuantityField;
+    @FXML
+    private Label gePriceLabel;
     @FXML
     private TableView<Quote> quoteTable;
     @FXML
@@ -137,6 +143,9 @@ public class MMPane extends FXMLBorderPane {
         tradeTableTrades = FXCollections.observableArrayList();
         quoteTableQuotes = FXCollections.observableArrayList();
         limitUsageStates = FXCollections.observableArrayList();
+
+        gePriceProperty = new SimpleIntegerProperty();
+        gePriceLabel.textProperty().bindBidirectional(gePriceProperty, new NumberStringConverter());
 
         turnTableTurns.setAll(turns.getOpenTurns());
         quoteItemChooserItems.setAll(items.getItems().stream().filter(Item::isFavorite).collect(Collectors.toList()));
@@ -240,7 +249,7 @@ public class MMPane extends FXMLBorderPane {
         }
 
         limitUsageStates.clear();
-        for(Map.Entry<Item, Integer> e : usage.entrySet()) {
+        for (Map.Entry<Item, Integer> e : usage.entrySet()) {
             limitUsageStates.add(new ItemLimitUsageState(e.getKey(), e.getKey().getBuyLimit() - e.getValue()));
         }
     }
@@ -350,6 +359,16 @@ public class MMPane extends FXMLBorderPane {
         Optional.ofNullable(quoteItemChooser.getSelectionModel().getSelectedItem()).ifPresent(item -> {
             try {
                 quoteTableQuotes.setAll(quotes.getQuotesFor(item, LocalDate.now()));
+                try (PreparedStatement ps = conn.prepareStatement("SELECT price FROM Price WHERE item_id=? ORDER BY day DESC LIMIT 1;")) {
+                    ps.setInt(1, item.getId());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            gePriceProperty.set(rs.getInt("price"));
+                        } else {
+                            gePriceProperty.set(-1);
+                        }
+                    }
+                }
             } catch (SQLException e) {
                 Dialogs.showMessage("Error Showing Quotes", "Error showing quotes for " + item.getName(), e);
             }
