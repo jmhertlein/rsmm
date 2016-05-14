@@ -7,6 +7,9 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.converter.NumberStringConverter;
 import net.jmhertlein.rsmm.controller.*;
@@ -15,6 +18,10 @@ import net.jmhertlein.rsmm.model.*;
 import net.jmhertlein.rsmm.viewfx.util.Dialogs;
 import net.jmhertlein.rsmm.viewfx.util.FXMLBorderPane;
 
+import java.awt.*;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.URI;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -325,6 +332,17 @@ public class MMPane extends FXMLBorderPane {
             try {
                 if (turn.isFlat()) {
                     turns.closeTurn(turn.getTurnId());
+                    if(turn.getClosedProfit().compareTo(BigDecimal.valueOf(1000000)) > 0) {
+                        try {
+                            Desktop.getDesktop().browse(URI.create("https://www.youtube.com/watch?v=A1a5QQoHh60"));
+                        } catch (Throwable e) {
+                            try {
+                                Runtime.getRuntime().exec("chromium https://www.youtube.com/watch?v=A1a5QQoHh60");
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+                            }
+                        }
+                    }
                 } else {
                     Dialogs.showMessage("Error Closing Turn", "Turn Is Not Flat", "Turns must be flat to be able to close them.");
                 }
