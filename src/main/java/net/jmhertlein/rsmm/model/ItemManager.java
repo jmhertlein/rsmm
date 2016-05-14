@@ -18,12 +18,14 @@ package net.jmhertlein.rsmm.model;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import net.jmhertlein.rsmm.model.update.ItemListener;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author joshua
@@ -31,25 +33,34 @@ import java.util.*;
 public class ItemManager {
     private final Connection conn;
 
-    private final ObservableList<Item> cache;
+    private final List<Item> items;
+
+    private final List<ItemListener> itemListeners;
 
     public ItemManager(Connection conn) throws SQLException {
         this.conn = conn;
-        cache = FXCollections.observableArrayList();
+        items = new ArrayList<>();
+        itemListeners = new ArrayList<>();
 
         try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Item ORDER BY item_name ASC")) {
             try (ResultSet rs = p.executeQuery()) {
                 while (rs.next()) {
                     Item i = new Item(rs);
-                    cache.add(i);
+                    items.add(i);
                 }
             }
         }
     }
 
-    public void setFavorite(Item i, boolean favorite)
-    {
+    public void setFavorite(Item i, boolean favorite) throws SQLException {
         i.setFavorite(favorite);
+        updateFavorite(i, favorite);
+        itemListeners.stream().forEach(l -> l.onItemFavorited(i));
+    }
+
+    public void addListener(ItemListener l)
+    {
+        itemListeners.add(l);
     }
 
     public void updateFavorite(Item i, boolean favorite) throws SQLException {
@@ -61,11 +72,11 @@ public class ItemManager {
     }
 
     public Optional<Item> getItem(String name) {
-        return cache.stream().filter(i -> i.getName().equals(name)).findFirst();
+        return items.stream().filter(i -> i.getName().equals(name)).findFirst();
     }
 
     public Optional<Item> getItem(int id) {
-        return cache.stream().filter(i -> i.getId() == id).findFirst();
+        return items.stream().filter(i -> i.getId() == id).findFirst();
     }
 
     public Optional<Integer> getLimitFor(String name) throws SQLException {
@@ -86,7 +97,7 @@ public class ItemManager {
         }
     }
 
-    public ObservableList<Item> getItems() {
-        return cache;
+    public List<Item> getItems() {
+        return items;
     }
 }

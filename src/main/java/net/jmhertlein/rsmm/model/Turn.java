@@ -17,10 +17,7 @@
 package net.jmhertlein.rsmm.model;
 
 import javafx.beans.property.*;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
-import net.jmhertlein.rsmm.viewfx.util.Dialogs;
+import net.jmhertlein.rsmm.model.update.TurnListener;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -28,6 +25,7 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -38,7 +36,7 @@ public class Turn implements Comparable<Turn> {
     private final long turnId;
     private final ObjectProperty<Item> item;
     private final SimpleObjectProperty<Timestamp> open, close;
-    private final ObservableSet<Trade> trades;
+    private final Set<Trade> trades;
 
     private final IntegerProperty openProfit, closedProfit, positionCost, position;
 
@@ -75,8 +73,8 @@ public class Turn implements Comparable<Turn> {
     }
 
     private static Item getItemFromResults(ResultSet rs, ItemManager items) throws SQLException, NoSuchItemException {
-        String itemName = rs.getString("item_name");
-        return items.getItem(itemName).orElseThrow(() -> new NoSuchItemException(itemName));
+        int itemId = rs.getInt("item_id");
+        return items.getItem(itemId).orElseThrow(() -> new NoSuchItemException(itemId));
     }
 
     public Turn(Connection conn, QuoteManager quotes, long turnId, Item item, Timestamp open, Timestamp close) throws SQLException, NoQuoteException {
@@ -86,7 +84,7 @@ public class Turn implements Comparable<Turn> {
         this.open = new SimpleObjectProperty<>(open);
         this.close = new SimpleObjectProperty<>(close);
 
-        this.trades = FXCollections.observableSet(new HashSet<Trade>());
+        this.trades = new HashSet<>();
         try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Trade WHERE turn_id=?")) {
             p.setLong(1, turnId);
             try (ResultSet rs = p.executeQuery()) {
@@ -100,20 +98,20 @@ public class Turn implements Comparable<Turn> {
         closedProfit = new SimpleIntegerProperty();
         positionCost = new SimpleIntegerProperty();
         position = new SimpleIntegerProperty();
-        onTrade(quotes);
+        recalculateProfit(quotes);
     }
 
-    private void onTrade(QuoteManager quotes) throws NoQuoteException, SQLException {
+    private void recalculateProfit(QuoteManager quotes) throws NoQuoteException, SQLException {
         openProfit.set(getOpenProfit(quotes).intValue());
         closedProfit.set(getClosedProfit().intValue());
         positionCost.set(getPositionCost(quotes));
         position.set(getPosition());
     }
 
-    public void addTrade(int price, int quantity) throws SQLException, NoQuoteException {
+    public void addTrade(int price, int quantity) throws SQLException {
         Trade trade = new Trade(this, Timestamp.from(Instant.now()), price, quantity);
         try (PreparedStatement p = conn.prepareStatement(
-                "INSERT INTO Trade(turn_id,trade_ts,price,quantity) VALUES(?,?,?)")) {
+                "INSERT INTO Trade(turn_id,trade_ts,price,quantity) VALUES(?,?,?,?)")) {
             p.setLong(1, trade.getTurn().getTurnId());
             p.setTimestamp(2, trade.getTradeTime());
             p.setInt(3, trade.getPrice());
@@ -140,6 +138,10 @@ public class Turn implements Comparable<Turn> {
 
     public String getItemName() {
         return item.get().getName();
+    }
+
+    public Item getItem() {
+        return item.get();
     }
 
     public Timestamp getOpen() {
@@ -226,6 +228,10 @@ public class Turn implements Comparable<Turn> {
         }
 
         return qty * multiplicand;
+    }
+
+    public Set<Trade> getTrades() {
+        return trades;
     }
 
     @Override

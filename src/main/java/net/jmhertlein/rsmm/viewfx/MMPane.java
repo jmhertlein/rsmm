@@ -1,8 +1,11 @@
 package net.jmhertlein.rsmm.viewfx;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import net.jmhertlein.rsmm.controller.util.Side;
 import net.jmhertlein.rsmm.model.*;
 import net.jmhertlein.rsmm.viewfx.util.Dialogs;
 import net.jmhertlein.rsmm.viewfx.util.FXMLBorderPane;
@@ -13,6 +16,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by joshua on 3/11/16.
@@ -25,6 +29,11 @@ public class MMPane extends FXMLBorderPane {
 
     private Optional<Integer> geLimitForShownQuoteItem;
 
+    private final ObservableList<Quote> quoteTableQuotes;
+    private final ObservableList<Item> quoteItemChooserItems;
+    private final ObservableList<Turn> turnTableTurns;
+    private final ObservableList<Trade> tradeTableTrades;
+
     @FXML
     private TableView<Trade> tradeTable;
     @FXML
@@ -33,6 +42,8 @@ public class MMPane extends FXMLBorderPane {
     private TableColumn<Trade, Integer> tradeQuantityColumns;
     @FXML
     private TableColumn<Trade, Integer> tradePriceColumn;
+    @FXML
+    private TextField tradeQuantityField;
     @FXML
     private TableView<Quote> quoteTable;
     @FXML
@@ -86,8 +97,18 @@ public class MMPane extends FXMLBorderPane {
             throw new RuntimeException("Couldn't load startup data.");
         }
 
-        turnTable.setItems(turns.getOpenTurns());
-        quoteItemChooser.setItems(items.getItems());
+        quoteItemChooserItems = FXCollections.observableArrayList();
+        turnTableTurns = FXCollections.observableArrayList();
+        tradeTableTrades = FXCollections.observableArrayList();
+        quoteTableQuotes = FXCollections.observableArrayList();
+
+        turnTableTurns.setAll(turns.getOpenTurns());
+        quoteItemChooserItems.setAll(items.getItems().stream().filter(Item::isFavorite).collect(Collectors.toList()));
+
+        turnTable.setItems(turnTableTurns);
+        quoteItemChooser.setItems(quoteItemChooserItems);
+        tradeTable.setItems(tradeTableTrades);
+        quoteTable.setItems(quoteTableQuotes);
 
         map(quoteDateColumn, "quoteTS");
         map(quoteAskColumn, "ask");
@@ -104,6 +125,8 @@ public class MMPane extends FXMLBorderPane {
         map(tradeTimeColumn, "tradeTime");
         map(tradeQuantityColumns, "quantity");
         map(tradePriceColumn, "price");
+
+        turnTable.getSelectionModel().selectedItemProperty().addListener((obs, old, nu) -> tradeTableTrades.setAll(nu.getTrades()));
     }
 
     private static <S, T> void map(TableColumn<S, T> col, String field) {
@@ -112,6 +135,41 @@ public class MMPane extends FXMLBorderPane {
 
     @FXML
     void addBuyTrade() {
+        addTrade(Side.BID);
+    }
+
+    private void addTrade(Side side)
+    {
+        Optional.ofNullable(turnTable.getSelectionModel().getSelectedItem()).ifPresent(turn -> {
+            int qty;
+            try {
+                qty = Integer.parseInt(tradeQuantityField.getText());
+            } catch (NumberFormatException e) {
+                Dialogs.showMessage("Invalid Trade Quantity", "Invalid Trade Quantity", e);
+                return;
+            }
+
+            qty *= side.getMultiplier();
+
+            Optional<Quote> quote = Optional.ofNullable(quoteTable.getSelectionModel().getSelectedItem());
+            if(!quote.isPresent())
+            {
+                Dialogs.showMessage("No Quote Selected", "No Quote Selected", "You need to select a quote.");
+                return;
+            }
+
+            if(!quote.get().getItem().equals(turn.getItem()))
+            {
+                Dialogs.showMessage("Quote Item Mismatch", "Quote Doesn't Match Turn", "The selected quote is not for the same item as the current turn.");
+                return;
+            }
+
+            try {
+                turn.addTrade(quote.get().getBid(), qty);
+            } catch (SQLException e) {
+                Dialogs.showMessage("Error Adding Trade", "Error Adding Trade", e);
+            }
+        });
     }
 
     @FXML
@@ -148,6 +206,7 @@ public class MMPane extends FXMLBorderPane {
 
     @FXML
     void addSellTrade() {
+        addTrade(Side.ASK);
     }
 
     @FXML
@@ -177,7 +236,7 @@ public class MMPane extends FXMLBorderPane {
     void showQuotesForItem() {
         Optional.ofNullable(quoteItemChooser.getSelectionModel().getSelectedItem()).ifPresent(item -> {
             try {
-                quoteTable.setItems(quotes.getQuotesFor(item, LocalDate.now()));
+                quoteTableQuotes.setAll(quotes.getQuotesFor(item, LocalDate.now()));
             } catch (SQLException e) {
                 Dialogs.showMessage("Error Showing Quotes", "Error showing quotes for " + item.getName(), e);
             }
@@ -192,7 +251,7 @@ public class MMPane extends FXMLBorderPane {
             item.ifPresent((i) -> {
                 quoteItemChooser.getSelectionModel().select(i);
                 try {
-                    quoteTable.setItems(quotes.getQuotesFor(i, LocalDate.now()));
+                    quoteTableQuotes.setAll(quotes.getQuotesFor(i, LocalDate.now()));
                 } catch (SQLException e) {
                     Dialogs.showMessage("Error Showing Quotes", "Error showing quotes for " + i.getName(), e);
                 }

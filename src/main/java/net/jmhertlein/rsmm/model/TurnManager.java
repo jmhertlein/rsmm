@@ -18,11 +18,12 @@ package net.jmhertlein.rsmm.model;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import net.jmhertlein.rsmm.model.update.TurnListener;
 
 import java.sql.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -32,13 +33,16 @@ import java.util.Optional;
 public class TurnManager {
     private final Connection conn;
 
-    private final ObservableList<Turn> openTurns, closedTurnsToday;
+    private final List<Turn> openTurns, closedTurnsToday;
     private final IntegerProperty totalClosedProfit;
+
+    private final List<TurnListener> turnListeners;
 
     public TurnManager(Connection conn, ItemManager items, QuoteManager quotes) throws SQLException, NoSuchItemException, NoQuoteException {
         this.conn = conn;
-        this.openTurns = FXCollections.observableArrayList();
-        this.closedTurnsToday = FXCollections.observableArrayList();
+        this.openTurns = new ArrayList<>();
+        this.closedTurnsToday = new ArrayList<>();
+        turnListeners = new ArrayList<>();
 
 
         try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE close_ts IS NULL")) {
@@ -66,6 +70,11 @@ public class TurnManager {
         }
     }
 
+    public void addListener(TurnListener l)
+    {
+        turnListeners.add(l);
+    }
+
     public Optional<Turn> getOpenTurn(String itemName) throws SQLException, NoSuchItemException, NoQuoteException {
         return openTurns.stream().filter(t -> t.getItemName().equals(itemName)).findFirst();
     }
@@ -77,8 +86,8 @@ public class TurnManager {
 
         Timestamp openTs = Timestamp.from(Instant.now());
 
-        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Turn(item_name, open_ts) VALUES(?, ?)", Statement.RETURN_GENERATED_KEYS)) {
-            p.setString(1, item.getName());
+        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Turn(item_id, open_ts) VALUES(?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+            p.setInt(1, item.getId());
             p.setTimestamp(2, openTs);
             p.executeUpdate();
             try (ResultSet keys = p.getGeneratedKeys()) {
@@ -88,12 +97,14 @@ public class TurnManager {
                 System.out.println("New turn has id " + id);
                 Turn newTurn = new Turn(conn, quotes, id, item, openTs, null);
                 openTurns.add(newTurn);
+
+                turnListeners.stream().forEach(l -> l.onTurnOpen(newTurn));
                 return newTurn;
             }
         }
     }
 
-    public ObservableList<Turn> getOpenTurns() {
+    public List<Turn> getOpenTurns() {
         return openTurns;
     }
 
@@ -150,6 +161,7 @@ public class TurnManager {
                 closedTurnsToday.add(turn);
                 openTurns.remove(turn);
                 totalClosedProfit.set(totalClosedProfit.get() + turn.getClosedProfit().intValue());
+                turnListeners.stream().forEach(l -> l.onTurnClose(turn));
             }
         }
     }

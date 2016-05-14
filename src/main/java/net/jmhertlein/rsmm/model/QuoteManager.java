@@ -16,10 +16,8 @@
  */
 package net.jmhertlein.rsmm.model;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.collections.ObservableSet;
+
+import net.jmhertlein.rsmm.model.update.QuoteListener;
 
 import java.sql.*;
 import java.sql.Date;
@@ -33,17 +31,20 @@ import java.util.*;
 public class QuoteManager {
     private final Connection conn;
 
-    private final ObservableMap<LocalDate, ObservableMap<Item, ObservableList<Quote>>> cache;
+    private final Map<LocalDate, Map<Item, List<Quote>>> cache;
+
+    private final List<QuoteListener> quoteListeners;
 
     public QuoteManager(Connection conn) {
         this.conn = conn;
-        cache = FXCollections.observableHashMap();
+        cache = new HashMap<>();
+        quoteListeners = new ArrayList<>();
     }
 
     public Quote addQuote(Item item, int bid, int ask) throws SQLException {
         Timestamp quoteTs = Timestamp.from(Instant.now());
-        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Quote(item_name,quote_ts,bid1,ask1,synthetic) VALUES(?,?,?,?,?)")) {
-            p.setString(1, item.getName());
+        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Quote(item_id,quote_ts,bid1,ask1,synthetic) VALUES(?,?,?,?,?)")) {
+            p.setInt(1, item.getId());
             p.setTimestamp(2, quoteTs);
             p.setInt(3, bid);
             p.setInt(4, ask);
@@ -51,28 +52,35 @@ public class QuoteManager {
             p.executeUpdate();
         }
 
-        ObservableList<Quote> quotesList = getQuotesFor(item, LocalDate.now());
+        List<Quote> quotesList = getQuotesFor(item, LocalDate.now());
         Quote ret = new Quote(item, quoteTs, bid, ask, false);
         quotesList.add(ret);
+
+        quoteListeners.stream().forEach(l -> l.onQuote(ret));
         return ret;
+    }
+
+    public void addListener(QuoteListener l)
+    {
+        quoteListeners.add(l);
     }
 
     public Optional<Quote> getLatestQuote(Item item) throws SQLException {
         return getQuotesFor(item, LocalDate.now()).stream().max((l, r) -> l.getQuoteTS().compareTo(r.getQuoteTS()));
     }
 
-    public ObservableList<Quote> getQuotesFor(Item item, LocalDate date) throws SQLException {
-        ObservableMap<Item, ObservableList<Quote>> itemsForDay = cache.get(date);
+    public List<Quote> getQuotesFor(Item item, LocalDate date) throws SQLException {
+        Map<Item, List<Quote>> itemsForDay = cache.get(date);
         if(itemsForDay == null)
         {
-            itemsForDay = FXCollections.observableHashMap();
+            itemsForDay = new HashMap<>();
             cache.put(date, itemsForDay);
         }
 
-        ObservableList<Quote> quotes = itemsForDay.get(item);
+        List<Quote> quotes = itemsForDay.get(item);
         if(quotes == null)
         {
-            quotes = FXCollections.observableArrayList();
+            quotes = new ArrayList<>();
             itemsForDay.put(item, quotes);
 
             System.out.println("Cache miss: Quotes for " + item.getName() + " for " + date.toString());

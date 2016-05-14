@@ -26,7 +26,7 @@ import java.sql.Timestamp;
  * @author joshua
  */
 public class Quote {
-    private final ReadOnlyStringProperty itemName;
+    private final Item item;
     private final ReadOnlyObjectProperty<Timestamp> quoteTS;
     private final IntegerProperty bid, ask;
     private final BooleanProperty synthetic;
@@ -43,7 +43,7 @@ public class Quote {
     }
 
     public Quote(Item i, Timestamp quoteTS, int bid, int ask, boolean synthetic) {
-        this.itemName = new SimpleStringProperty(i.getName());
+        this.item = i;
         this.quoteTS = new SimpleObjectProperty<>(quoteTS);
         this.bid = new SimpleIntegerProperty(bid);
         this.ask = new SimpleIntegerProperty(ask);
@@ -53,9 +53,6 @@ public class Quote {
         profitPerLimit = new SimpleIntegerProperty((ask - bid) * i.getBuyLimit());
     }
 
-    public ReadOnlyStringProperty itemNameProperty() {
-        return itemName;
-    }
 
     public ReadOnlyObjectProperty<Timestamp> quoteTSProperty() {
         return quoteTS;
@@ -85,10 +82,6 @@ public class Quote {
         return synthetic.get();
     }
 
-    public String getItemName() {
-        return itemName.get();
-    }
-
     public Timestamp getQuoteTS() {
         return quoteTS.get();
     }
@@ -101,6 +94,10 @@ public class Quote {
         return ask.get();
     }
 
+    public Item getItem() {
+        return item;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -108,15 +105,21 @@ public class Quote {
 
         Quote quote = (Quote) o;
 
-        if (!itemName.equals(quote.itemName)) return false;
-        return quoteTS.equals(quote.quoteTS);
+        if (!item.equals(quote.item)) return false;
+        if (!quoteTS.equals(quote.quoteTS)) return false;
+        if (!bid.equals(quote.bid)) return false;
+        if (!ask.equals(quote.ask)) return false;
+        return synthetic.equals(quote.synthetic);
 
     }
 
     @Override
     public int hashCode() {
-        int result = itemName.hashCode();
-        result = 31 * result + quoteTS.get().hashCode();
+        int result = item.hashCode();
+        result = 31 * result + quoteTS.hashCode();
+        result = 31 * result + bid.hashCode();
+        result = 31 * result + ask.hashCode();
+        result = 31 * result + synthetic.hashCode();
         return result;
     }
 }

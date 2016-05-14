@@ -23,9 +23,9 @@
                   </TableView>
                   <HBox VBox.vgrow="NEVER">
                      <children>
-                        <TextField prefHeight="26.0" prefWidth="169.0" HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" onAction="#addBuyTrade" prefHeight="26.0" prefWidth="45.0" text="Buy" HBox.hgrow="NEVER" />
-                        <Button mnemonicParsing="false" onAction="#addSellTrade" prefHeight="26.0" prefWidth="48.0" text="Sell" HBox.hgrow="NEVER" />
+                        <TextField fx:id="tradeQuantityField" prefHeight="26.0" prefWidth="169.0" HBox.hgrow="ALWAYS" />
+                        <Button ellipsisString="BUY" mnemonicParsing="false" onAction="#addBuyTrade" prefHeight="26.0" prefWidth="45.0" text="Buy" HBox.hgrow="NEVER" />
+                        <Button ellipsisString="Sell" mnemonicParsing="false" onAction="#addSellTrade" prefHeight="26.0" prefWidth="48.0" text="Sell" HBox.hgrow="NEVER" />
                      </children>
                   </HBox>
                </children>
@@ -89,15 +89,27 @@
                   </VBox>
               </items>
             </SplitPane>
-            <TableView fx:id="limitTable" prefHeight="200.0" prefWidth="200.0">
-              <columns>
-                <TableColumn fx:id="limitItemColumn" prefWidth="75.0" text="Item" />
-                <TableColumn fx:id="limitRemainingColumn" prefWidth="113.0" text="Limit Remaining" />
-              </columns>
-               <columnResizePolicy>
-                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-               </columnResizePolicy>
-            </TableView>
+            <VBox>
+               <children>
+                  <TableView fx:id="limitTable">
+                    <columns>
+                      <TableColumn fx:id="limitItemColumn" prefWidth="75.0" text="Item" />
+                      <TableColumn fx:id="limitRemainingColumn" prefWidth="113.0" text="Limit Remaining" />
+                    </columns>
+                     <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                     </columnResizePolicy>
+                  </TableView>
+                  <HBox VBox.vgrow="NEVER">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                     <children>
+                        <Button alignment="CENTER" mnemonicParsing="false" prefHeight="26.0" prefWidth="290.0" text="Refresh" textAlignment="CENTER" HBox.hgrow="ALWAYS" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
         </items>
       </javafx.scene.control.SplitPane>
    </center>
