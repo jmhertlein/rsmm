@@ -216,7 +216,7 @@ public class Turn implements Comparable<Turn> {
         }
     }
 
-    public BigDecimal getClosedProfit() throws SQLException {
+    public BigDecimal getClosedProfit() {
         return exitVWAP().subtract(entryVWAP()).multiply(BigDecimal.valueOf(getClosedPosition()));
     }
 

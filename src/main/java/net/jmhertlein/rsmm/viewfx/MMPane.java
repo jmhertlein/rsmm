@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.converter.NumberStringConverter;
 import net.jmhertlein.rsmm.controller.RecalculateProfitOnTradeListener;
 import net.jmhertlein.rsmm.controller.TradeTableTradeListener;
 import net.jmhertlein.rsmm.controller.TurnTableTurnListener;
@@ -29,8 +30,6 @@ public class MMPane extends FXMLBorderPane {
     private final ItemManager items;
     private final QuoteManager quotes;
     private final TurnManager turns;
-
-    private Optional<Integer> geLimitForShownQuoteItem;
 
     private final ObservableList<Quote> quoteTableQuotes;
     private final ObservableList<Item> quoteItemChooserItems;
@@ -85,6 +84,16 @@ public class MMPane extends FXMLBorderPane {
     private TableColumn<?, ?> limitItemColumn;
     @FXML
     private TableColumn<?, ?> limitRemainingColumn;
+    @FXML
+    private Label totalProfitLabel;
+    @FXML
+    private Label todayProfitLabel;
+    @FXML
+    private Label pendingProfitLabel;
+    @FXML
+    private Label openProfitLabel;
+    @FXML
+    private Label sumPositionCostLabel;
 
 
     public MMPane(Connection conn) {
@@ -99,6 +108,15 @@ public class MMPane extends FXMLBorderPane {
             Dialogs.showMessage("Load Error", "Error reading from database.", e);
             throw new RuntimeException("Couldn't load startup data.");
         }
+
+        GlobalStatsManager statsManager = new GlobalStatsManager(conn, turns, quotes);
+
+        totalProfitLabel.textProperty().bindBidirectional(statsManager.totalClosedProfitProperty(), new NumberStringConverter());
+        todayProfitLabel.textProperty().bindBidirectional(statsManager.profitTodayProperty(), new NumberStringConverter());
+        pendingProfitLabel.textProperty().bindBidirectional(statsManager.pendingProfitProperty(), new NumberStringConverter());
+        openProfitLabel.textProperty().bindBidirectional(statsManager.openProfitProperty(), new NumberStringConverter());
+        sumPositionCostLabel.textProperty().bindBidirectional(statsManager.sumPositionCostProperty(), new NumberStringConverter());
+
 
         quoteItemChooserItems = FXCollections.observableArrayList();
         turnTableTurns = FXCollections.observableArrayList();
@@ -152,6 +170,10 @@ public class MMPane extends FXMLBorderPane {
 
         turns.addTradeListener(new TradeTableTradeListener(tradeTableTrades, turnTable.getSelectionModel().selectedItemProperty()));
         turns.addTurnListener(new TurnTableTurnListener(turnTableTurns));
+
+        quotes.addListener(statsManager);
+        turns.addTurnListener(statsManager);
+        turns.addTradeListener(statsManager);
 
 
     }
@@ -243,7 +265,11 @@ public class MMPane extends FXMLBorderPane {
     void closeTurn() {
         Optional.ofNullable(turnTable.getSelectionModel().getSelectedItem()).ifPresent((turn) -> {
             try {
-                turns.closeTurn(turn.getTurnId());
+                if(turn.isFlat()) {
+                    turns.closeTurn(turn.getTurnId());
+                } else {
+                    Dialogs.showMessage("Error Closing Turn", "Turn Is Not Flat", "Turns must be flat to be able to close them.");
+                }
             } catch (SQLException e) {
                 Dialogs.showMessage("Error Closing Turn", "SQLException", e);
             }

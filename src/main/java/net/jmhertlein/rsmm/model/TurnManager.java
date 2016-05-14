@@ -16,8 +16,6 @@
  */
 package net.jmhertlein.rsmm.model;
 
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import net.jmhertlein.rsmm.model.update.TradeListener;
 import net.jmhertlein.rsmm.model.update.TurnListener;
 
@@ -35,7 +33,6 @@ public class TurnManager {
     private final Connection conn;
 
     private final List<Turn> openTurns, closedTurnsToday;
-    private final IntegerProperty totalClosedProfit;
 
     private final List<TurnListener> turnListeners;
     private final List<TradeListener> tradeListeners;
@@ -53,14 +50,6 @@ public class TurnManager {
                 while (rs.next()) {
                     openTurns.add(new Turn(conn, tradeListeners, items, quotes, rs));
                 }
-            }
-        }
-
-        totalClosedProfit = new SimpleIntegerProperty();
-        try (PreparedStatement p = conn.prepareStatement("SELECT SUM(price * (quantity*-1)) AS total_closed FROM Trade NATURAL JOIN Turn WHERE close_ts IS NOT NULL;")) {
-            try (ResultSet rs = p.executeQuery()) {
-                rs.next();
-                totalClosedProfit.set(rs.getInt("total_closed"));
             }
         }
 
@@ -118,11 +107,7 @@ public class TurnManager {
         return openTurns;
     }
 
-    public IntegerProperty getTotalClosedProfit() throws SQLException {
-        return totalClosedProfit;
-    }
-
-    public int getClosedProfitForDay() throws SQLException {
+    public int getClosedProfitForDay() {
         int sum = 0;
         for (Turn t : closedTurnsToday) {
             sum += t.getClosedProfit().intValue();
@@ -131,7 +116,7 @@ public class TurnManager {
         return sum;
     }
 
-    public int getTotalOpenProfit(QuoteManager quotes) throws SQLException, NoQuoteException, NoSuchItemException {
+    public int getTotalOpenProfit(QuoteManager quotes) throws NoQuoteException, NoSuchItemException, SQLException {
         int profit = 0;
         for (Turn t : getOpenTurns()) {
             profit += t.getOpenProfit(quotes).intValue();
@@ -139,7 +124,7 @@ public class TurnManager {
         return profit;
     }
 
-    public int getOpenTurnClosedProfit(QuoteManager quotes) throws SQLException {
+    public int getOpenTurnClosedProfit() {
         int profit = 0;
         for (Turn t : getOpenTurns()) {
             try {
@@ -169,7 +154,6 @@ public class TurnManager {
                 turn.setClose(closeTs);
                 closedTurnsToday.add(turn);
                 openTurns.remove(turn);
-                totalClosedProfit.set(totalClosedProfit.get() + turn.getClosedProfit().intValue());
                 turnListeners.stream().forEach(l -> l.onTurnClose(turn));
             }
         }
