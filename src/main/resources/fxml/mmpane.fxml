@@ -20,6 +20,13 @@
                      <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                      </columnResizePolicy>
+                     <contextMenu>
+                        <ContextMenu>
+                          <items>
+                            <MenuItem mnemonicParsing="false" onAction="#bustTrade" text="Bust Trade" />
+                          </items>
+                        </ContextMenu>
+                     </contextMenu>
                   </TableView>
                   <HBox VBox.vgrow="NEVER">
                      <children>
@@ -53,6 +60,13 @@
                                  <columnResizePolicy>
                                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                                  </columnResizePolicy>
+                                 <contextMenu>
+                                    <ContextMenu>
+                                      <items>
+                                        <MenuItem mnemonicParsing="false" onAction="#markQuoteSynthetic" text="Mark Synthetic" />
+                                      </items>
+                                    </ContextMenu>
+                                 </contextMenu>
                               </TableView>
                            </children>
                         </VBox>

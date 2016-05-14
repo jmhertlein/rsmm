@@ -4,14 +4,12 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.converter.NumberStringConverter;
-import net.jmhertlein.rsmm.controller.RecalculateProfitOnTradeListener;
-import net.jmhertlein.rsmm.controller.RefreshLimitUsagesTradeListener;
-import net.jmhertlein.rsmm.controller.TradeTableTradeListener;
-import net.jmhertlein.rsmm.controller.TurnTableTurnListener;
+import net.jmhertlein.rsmm.controller.*;
 import net.jmhertlein.rsmm.controller.util.Side;
 import net.jmhertlein.rsmm.model.*;
 import net.jmhertlein.rsmm.viewfx.util.Dialogs;
@@ -184,14 +182,8 @@ public class MMPane extends FXMLBorderPane {
         });
 
         turns.addTradeListener(new RecalculateProfitOnTradeListener(quotes));
-        quotes.addListener(quoteTableQuotes::add);
-        quotes.addListener(q -> turns.getOpenTurn(q.getItem()).ifPresent(turn -> {
-            try {
-                turn.recalculateProfit(quotes);
-            } catch (NoQuoteException | SQLException e) {
-                Dialogs.showMessage("Error Handling Quote", "Error Updating Profit on Quote", e);
-            }
-        }));
+        quotes.addListener(new QuoteTableQuoteListener(quoteTableQuotes));
+        quotes.addListener(new RecalculateTurnStatsOnQuoteListener(turns, quotes));
 
         turns.addTradeListener(new TradeTableTradeListener(tradeTableTrades, turnTable.getSelectionModel().selectedItemProperty()));
         turns.addTurnListener(new TurnTableTurnListener(turnTableTurns));
@@ -389,6 +381,30 @@ public class MMPane extends FXMLBorderPane {
                 }
             });
 
+        });
+    }
+
+    @FXML
+    void bustTrade() {
+        Optional<Trade> trade = Optional.ofNullable(tradeTable.getSelectionModel().getSelectedItem());
+        trade.ifPresent(t -> {
+            try {
+                t.getTurn().bustTrade(t);
+            } catch (SQLException e) {
+                Dialogs.showMessage("Error Busting Trade", "Error Busting Trade", e);
+            }
+        });
+    }
+
+    @FXML
+    void markQuoteSynthetic() {
+        Optional<Quote> quote = Optional.ofNullable(quoteTable.getSelectionModel().getSelectedItem());
+        quote.ifPresent(q -> {
+            try {
+                quotes.setQuoteSynthetic(q);
+            } catch (SQLException e) {
+                Dialogs.showMessage("Error Marking Quote", "Could Not Mark Quote Synthetic", e);
+            }
         });
     }
 }

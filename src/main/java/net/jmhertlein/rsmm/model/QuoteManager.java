@@ -60,8 +60,7 @@ public class QuoteManager {
         return ret;
     }
 
-    public void addListener(QuoteListener l)
-    {
+    public void addListener(QuoteListener l) {
         quoteListeners.add(l);
     }
 
@@ -69,17 +68,31 @@ public class QuoteManager {
         return getQuotesFor(item, LocalDate.now()).stream().max((l, r) -> l.getQuoteTS().compareTo(r.getQuoteTS()));
     }
 
+    public void setQuoteSynthetic(Quote q) throws SQLException {
+        q.syntheticProperty().set(!q.isSynthetic());
+        boolean isSynthetic = q.isSynthetic();
+
+        try (PreparedStatement ps = conn.prepareStatement("UPDATE Quote SET synthetic=? WHERE quote_ts=? AND item_id=?")) {
+            ps.setBoolean(1, isSynthetic);
+            ps.setTimestamp(2, q.getQuoteTS());
+            ps.setInt(3, q.getItem().getId());
+            if (ps.executeUpdate() == 0) {
+                throw new SQLException("Error: no rows updated for " + q.toString());
+            }
+        }
+
+        quoteListeners.stream().forEach(l -> l.onMarkSynthetic(q));
+    }
+
     public List<Quote> getQuotesFor(Item item, LocalDate date) throws SQLException {
         Map<Item, List<Quote>> itemsForDay = cache.get(date);
-        if(itemsForDay == null)
-        {
+        if (itemsForDay == null) {
             itemsForDay = new HashMap<>();
             cache.put(date, itemsForDay);
         }
 
         List<Quote> quotes = itemsForDay.get(item);
-        if(quotes == null)
-        {
+        if (quotes == null) {
             quotes = new ArrayList<>();
             itemsForDay.put(item, quotes);
 

@@ -1,8 +1,5 @@
 add a "long term stats" frame that shows total profit all time, last month, last week, etc. Also shows for each item: total profit, total volume, avg profit per turn, avg turn volume
 
 jfx rewrite:
-mark synthetic
-bust trade
 mark favorite item
-view spot price alongside quote
 whenever i make 1M+ gp in one turn, when i close it, pop open the youtube video "Shrek's Dank Kush" and autoplay
