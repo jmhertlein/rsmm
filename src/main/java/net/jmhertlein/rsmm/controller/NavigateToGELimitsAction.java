@@ -1,4 +1,4 @@
-package net.jmhertlein.rsmm.controller.item;
+package net.jmhertlein.rsmm.controller;
 
 import javax.swing.*;
 import java.awt.*;

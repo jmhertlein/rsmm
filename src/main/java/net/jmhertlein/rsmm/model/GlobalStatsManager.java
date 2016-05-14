@@ -23,6 +23,7 @@ public class GlobalStatsManager implements TradeListener, TurnListener, QuoteLis
     private final IntegerProperty pendingprofit;
     private final IntegerProperty openProfit;
     private final IntegerProperty sumPositionCost;
+    private final IntegerProperty dailyQuoteCost;
 
     private final Connection conn;
     private final TurnManager turns;
@@ -37,6 +38,7 @@ public class GlobalStatsManager implements TradeListener, TurnListener, QuoteLis
         pendingprofit = new SimpleIntegerProperty();
         openProfit = new SimpleIntegerProperty();
         sumPositionCost = new SimpleIntegerProperty();
+        dailyQuoteCost = new SimpleIntegerProperty();
     }
 
     public LongProperty totalClosedProfitProperty() {
@@ -57,6 +59,10 @@ public class GlobalStatsManager implements TradeListener, TurnListener, QuoteLis
 
     public IntegerProperty sumPositionCostProperty() {
         return sumPositionCost;
+    }
+
+    public IntegerProperty dailyQuoteCostProperty() {
+        return dailyQuoteCost;
     }
 
     public void recalculateTotalProfit() throws SQLException {
@@ -84,7 +90,16 @@ public class GlobalStatsManager implements TradeListener, TurnListener, QuoteLis
         sumPositionCost.set(turns.getTotalPositionCost(quotes));
     }
 
-    public void recalculateAll() throws NoQuoteException, SQLException, NoSuchItemException {
+    public void recalculateDailyQuoteCost() throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement("SELECT SUM(ask1 - bid1) AS daily_quote_cost FROM Quote WHERE quote_ts::date = now()::date AND NOT synthetic;")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                dailyQuoteCost.set(rs.getInt("daily_quote_cost"));
+            }
+        }
+    }
+
+    public void recalculateProfit() throws NoQuoteException, SQLException, NoSuchItemException {
         recalculateTotalProfit();
         recalculateOpenProfit();
         recalculatePendingProfit();
@@ -95,7 +110,8 @@ public class GlobalStatsManager implements TradeListener, TurnListener, QuoteLis
     @Override
     public void onQuote(Quote q) {
         try {
-            recalculateAll();
+            recalculateProfit();
+            recalculateDailyQuoteCost();
         } catch (NoQuoteException | SQLException | NoSuchItemException e) {
             Dialogs.showMessage("Error Calculating Global Stats", "Error Calculating Global Stats", e);
         }
@@ -104,7 +120,7 @@ public class GlobalStatsManager implements TradeListener, TurnListener, QuoteLis
     @Override
     public void onTrade(Trade t) {
         try {
-            recalculateAll();
+            recalculateProfit();
         } catch (NoQuoteException | SQLException | NoSuchItemException e) {
             Dialogs.showMessage("Error Calculating Global Stats", "Error Calculating Global Stats", e);
         }
@@ -113,7 +129,7 @@ public class GlobalStatsManager implements TradeListener, TurnListener, QuoteLis
     @Override
     public void onBust(Trade t) {
         try {
-            recalculateAll();
+            recalculateProfit();
         } catch (NoQuoteException | SQLException | NoSuchItemException e) {
             Dialogs.showMessage("Error Calculating Global Stats", "Error Calculating Global Stats", e);
         }
@@ -122,7 +138,7 @@ public class GlobalStatsManager implements TradeListener, TurnListener, QuoteLis
     @Override
     public void onTurnOpen(Turn t) {
         try {
-            recalculateAll();
+            recalculateProfit();
         } catch (NoQuoteException | SQLException | NoSuchItemException e) {
             Dialogs.showMessage("Error Calculating Global Stats", "Error Calculating Global Stats", e);
         }
@@ -131,7 +147,7 @@ public class GlobalStatsManager implements TradeListener, TurnListener, QuoteLis
     @Override
     public void onTurnClose(Turn t) {
         try {
-            recalculateAll();
+            recalculateProfit();
         } catch (NoQuoteException | SQLException | NoSuchItemException e) {
             Dialogs.showMessage("Error Calculating Global Stats", "Error Calculating Global Stats", e);
         }

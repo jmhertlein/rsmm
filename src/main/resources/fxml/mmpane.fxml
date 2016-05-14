@@ -105,7 +105,7 @@
                         <Insets />
                      </VBox.margin>
                      <children>
-                        <Button alignment="CENTER" mnemonicParsing="false" prefHeight="26.0" prefWidth="290.0" text="Refresh" textAlignment="CENTER" HBox.hgrow="ALWAYS" />
+                        <Button alignment="CENTER" mnemonicParsing="false" onAction="#refreshLimitUsages" prefHeight="26.0" prefWidth="290.0" text="Refresh" textAlignment="CENTER" HBox.hgrow="ALWAYS" />
                      </children>
                   </HBox>
                </children>
@@ -144,6 +144,12 @@
                <children>
                   <Label text="Sum Position Cost:" />
                   <Label fx:id="sumPositionCostLabel" text="0" />
+               </children>
+            </HBox>
+            <HBox spacing="5.0">
+               <children>
+                  <Label text="Daily Quote Cost:" />
+                  <Label fx:id="quoteCostLabel" text="0" />
                </children>
             </HBox>
          </children>

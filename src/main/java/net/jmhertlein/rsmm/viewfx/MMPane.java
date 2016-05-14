@@ -7,6 +7,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.converter.NumberStringConverter;
 import net.jmhertlein.rsmm.controller.RecalculateProfitOnTradeListener;
+import net.jmhertlein.rsmm.controller.RefreshLimitUsagesTradeListener;
 import net.jmhertlein.rsmm.controller.TradeTableTradeListener;
 import net.jmhertlein.rsmm.controller.TurnTableTurnListener;
 import net.jmhertlein.rsmm.controller.util.Side;
@@ -14,11 +15,11 @@ import net.jmhertlein.rsmm.model.*;
 import net.jmhertlein.rsmm.viewfx.util.Dialogs;
 import net.jmhertlein.rsmm.viewfx.util.FXMLBorderPane;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -35,6 +36,8 @@ public class MMPane extends FXMLBorderPane {
     private final ObservableList<Item> quoteItemChooserItems;
     private final ObservableList<Turn> turnTableTurns;
     private final ObservableList<Trade> tradeTableTrades;
+
+    private final ObservableList<ItemLimitUsageState> limitUsageStates;
 
     @FXML
     private TableView<Trade> tradeTable;
@@ -55,9 +58,9 @@ public class MMPane extends FXMLBorderPane {
     @FXML
     private TableColumn<Quote, Integer> quoteAskColumn;
     @FXML
-    private TableColumn<Quote, RSIntegers> quoteSpreadColumn;
+    private TableColumn<Quote, Integer> quoteSpreadColumn;
     @FXML
-    private TableColumn<Quote, RSIntegers> quotePPLColumn;
+    private TableColumn<Quote, Integer> quotePPLColumn;
     @FXML
     private ComboBox<Item> quoteItemChooser;
     @FXML
@@ -73,17 +76,17 @@ public class MMPane extends FXMLBorderPane {
     @FXML
     private TableColumn<Turn, Integer> turnPositionCostColumn;
     @FXML
-    private TableColumn<Turn, RSIntegers> turnOpenProfitColumn;
+    private TableColumn<Turn, Integer> turnOpenProfitColumn;
     @FXML
-    private TableColumn<Turn, RSIntegers> turnClosedProfitColumn;
+    private TableColumn<Turn, Integer> turnClosedProfitColumn;
     @FXML
     private Button closeTurnButton;
     @FXML
-    private TableView<?> limitTable;
+    private TableView<ItemLimitUsageState> limitTable;
     @FXML
-    private TableColumn<?, ?> limitItemColumn;
+    private TableColumn<ItemLimitUsageState, Item> limitItemColumn;
     @FXML
-    private TableColumn<?, ?> limitRemainingColumn;
+    private TableColumn<ItemLimitUsageState, Integer> limitRemainingColumn;
     @FXML
     private Label totalProfitLabel;
     @FXML
@@ -94,6 +97,8 @@ public class MMPane extends FXMLBorderPane {
     private Label openProfitLabel;
     @FXML
     private Label sumPositionCostLabel;
+    @FXML
+    private Label quoteCostLabel;
 
 
     public MMPane(Connection conn) {
@@ -111,17 +116,27 @@ public class MMPane extends FXMLBorderPane {
 
         GlobalStatsManager statsManager = new GlobalStatsManager(conn, turns, quotes);
 
+        try {
+            statsManager.recalculateProfit();
+            statsManager.recalculateDailyQuoteCost();
+        } catch (SQLException | NoSuchItemException | NoQuoteException e) {
+            Dialogs.showMessage("Load Error", "Error reading from database.", e);
+            throw new RuntimeException("Couldn't load startup data.");
+        }
+
         totalProfitLabel.textProperty().bindBidirectional(statsManager.totalClosedProfitProperty(), new NumberStringConverter());
         todayProfitLabel.textProperty().bindBidirectional(statsManager.profitTodayProperty(), new NumberStringConverter());
         pendingProfitLabel.textProperty().bindBidirectional(statsManager.pendingProfitProperty(), new NumberStringConverter());
         openProfitLabel.textProperty().bindBidirectional(statsManager.openProfitProperty(), new NumberStringConverter());
         sumPositionCostLabel.textProperty().bindBidirectional(statsManager.sumPositionCostProperty(), new NumberStringConverter());
+        quoteCostLabel.textProperty().bindBidirectional(statsManager.dailyQuoteCostProperty(), new NumberStringConverter());
 
 
         quoteItemChooserItems = FXCollections.observableArrayList();
         turnTableTurns = FXCollections.observableArrayList();
         tradeTableTrades = FXCollections.observableArrayList();
         quoteTableQuotes = FXCollections.observableArrayList();
+        limitUsageStates = FXCollections.observableArrayList();
 
         turnTableTurns.setAll(turns.getOpenTurns());
         quoteItemChooserItems.setAll(items.getItems().stream().filter(Item::isFavorite).collect(Collectors.toList()));
@@ -130,6 +145,7 @@ public class MMPane extends FXMLBorderPane {
         quoteItemChooser.setItems(quoteItemChooserItems);
         tradeTable.setItems(tradeTableTrades);
         quoteTable.setItems(quoteTableQuotes);
+        limitTable.setItems(limitUsageStates);
 
         map(quoteDateColumn, "quoteTS");
         map(quoteAskColumn, "ask");
@@ -147,13 +163,13 @@ public class MMPane extends FXMLBorderPane {
         map(tradeQuantityColumns, "quantity");
         map(tradePriceColumn, "price");
 
+        map(limitItemColumn, "item");
+        map(limitRemainingColumn, "limitLeft");
+
         turnTable.getSelectionModel().selectedItemProperty().addListener((obs, old, nu) -> {
-            if(nu != null)
-            {
+            if (nu != null) {
                 tradeTableTrades.setAll(nu.getTrades());
-            }
-            else
-            {
+            } else {
                 tradeTableTrades.clear();
             }
         });
@@ -175,7 +191,10 @@ public class MMPane extends FXMLBorderPane {
         turns.addTurnListener(statsManager);
         turns.addTradeListener(statsManager);
 
+        quotes.addListener(q -> refreshLimitUsages());
+        turns.addTradeListener(new RefreshLimitUsagesTradeListener(this::refreshLimitUsages));
 
+        refreshLimitUsages();
     }
 
     private static <S, T> void map(TableColumn<S, T> col, String field) {
@@ -185,6 +204,45 @@ public class MMPane extends FXMLBorderPane {
     @FXML
     void addBuyTrade() {
         addTrade(Side.BID);
+    }
+
+    @FXML
+    void refreshLimitUsages() {
+        Map<Item, Integer> usage = new HashMap<>();
+        try {
+            try (PreparedStatement ps = conn.prepareStatement("select item_id, count(quote_ts) from quote where quote_ts > now() - interval '4 hours' and not synthetic group by item_id;");
+                 ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Optional<Item> i = items.getItem(rs.getInt("item_id"));
+                    if (!i.isPresent()) {
+                        throw new NoSuchItemException(rs.getInt("item_id"));
+                    }
+
+                    usage.put(i.get(), usage.getOrDefault(i.get(), 0) + rs.getInt("count"));
+                }
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement("select item_id, sum(quantity) from trade natural join turn where trade_ts > now() - interval '4 hours' and quantity > 0 group by item_id;");
+                 ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Optional<Item> i = items.getItem(rs.getInt("item_id"));
+                    if (!i.isPresent()) {
+                        throw new NoSuchItemException(rs.getInt("item_id"));
+                    }
+
+                    usage.put(i.get(), usage.getOrDefault(i.get(), 0) + rs.getInt("sum"));
+                }
+            }
+        } catch (SQLException | NoSuchItemException e) {
+            Dialogs.showMessage("Error Retrieving Limit Usages", "Error Retrieving Limit Usages", e);
+            limitUsageStates.clear();
+            return;
+        }
+
+        limitUsageStates.clear();
+        for(Map.Entry<Item, Integer> e : usage.entrySet()) {
+            limitUsageStates.add(new ItemLimitUsageState(e.getKey(), e.getKey().getBuyLimit() - e.getValue()));
+        }
     }
 
     private void addTrade(Side side) {
@@ -250,7 +308,6 @@ public class MMPane extends FXMLBorderPane {
             quotes.addQuote(selected, bid, ask);
             quoteBidField.setText("");
             quoteAskField.setText("");
-            quoteTable.refresh();
         } catch (SQLException ex) {
             Dialogs.showMessage("Error Adding Quote", "Error Adding Quote", ex);
         }
@@ -265,7 +322,7 @@ public class MMPane extends FXMLBorderPane {
     void closeTurn() {
         Optional.ofNullable(turnTable.getSelectionModel().getSelectedItem()).ifPresent((turn) -> {
             try {
-                if(turn.isFlat()) {
+                if (turn.isFlat()) {
                     turns.closeTurn(turn.getTurnId());
                 } else {
                     Dialogs.showMessage("Error Closing Turn", "Turn Is Not Flat", "Turns must be flat to be able to close them.");
