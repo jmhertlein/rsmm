@@ -140,6 +140,8 @@ public class MMPane extends FXMLBorderPane {
             throw new RuntimeException("Couldn't load startup data.");
         }
 
+        quoteTable.setRowFactory(new QuoteTableRowFactory());
+
         totalProfitLabel.textProperty().bindBidirectional(statsManager.totalClosedProfitProperty(), new NumberStringConverter());
         todayProfitLabel.textProperty().bindBidirectional(statsManager.profitTodayProperty(), new NumberStringConverter());
         pendingProfitLabel.textProperty().bindBidirectional(statsManager.pendingProfitProperty(), new NumberStringConverter());
