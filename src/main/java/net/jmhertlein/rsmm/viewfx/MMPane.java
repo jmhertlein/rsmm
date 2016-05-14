@@ -5,6 +5,9 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import net.jmhertlein.rsmm.controller.RecalculateProfitOnTradeListener;
+import net.jmhertlein.rsmm.controller.TradeTableTradeListener;
+import net.jmhertlein.rsmm.controller.TurnTableTurnListener;
 import net.jmhertlein.rsmm.controller.util.Side;
 import net.jmhertlein.rsmm.model.*;
 import net.jmhertlein.rsmm.viewfx.util.Dialogs;
@@ -126,7 +129,31 @@ public class MMPane extends FXMLBorderPane {
         map(tradeQuantityColumns, "quantity");
         map(tradePriceColumn, "price");
 
-        turnTable.getSelectionModel().selectedItemProperty().addListener((obs, old, nu) -> tradeTableTrades.setAll(nu.getTrades()));
+        turnTable.getSelectionModel().selectedItemProperty().addListener((obs, old, nu) -> {
+            if(nu != null)
+            {
+                tradeTableTrades.setAll(nu.getTrades());
+            }
+            else
+            {
+                tradeTableTrades.clear();
+            }
+        });
+
+        turns.addTradeListener(new RecalculateProfitOnTradeListener(quotes));
+        quotes.addListener(quoteTableQuotes::add);
+        quotes.addListener(q -> turns.getOpenTurn(q.getItem()).ifPresent(turn -> {
+            try {
+                turn.recalculateProfit(quotes);
+            } catch (NoQuoteException | SQLException e) {
+                Dialogs.showMessage("Error Handling Quote", "Error Updating Profit on Quote", e);
+            }
+        }));
+
+        turns.addTradeListener(new TradeTableTradeListener(tradeTableTrades, turnTable.getSelectionModel().selectedItemProperty()));
+        turns.addTurnListener(new TurnTableTurnListener(turnTableTurns));
+
+
     }
 
     private static <S, T> void map(TableColumn<S, T> col, String field) {
@@ -138,8 +165,7 @@ public class MMPane extends FXMLBorderPane {
         addTrade(Side.BID);
     }
 
-    private void addTrade(Side side)
-    {
+    private void addTrade(Side side) {
         Optional.ofNullable(turnTable.getSelectionModel().getSelectedItem()).ifPresent(turn -> {
             int qty;
             try {
@@ -152,20 +178,24 @@ public class MMPane extends FXMLBorderPane {
             qty *= side.getMultiplier();
 
             Optional<Quote> quote = Optional.ofNullable(quoteTable.getSelectionModel().getSelectedItem());
-            if(!quote.isPresent())
-            {
+            if (!quote.isPresent()) {
                 Dialogs.showMessage("No Quote Selected", "No Quote Selected", "You need to select a quote.");
                 return;
             }
 
-            if(!quote.get().getItem().equals(turn.getItem()))
-            {
+            if (!quote.get().getItem().equals(turn.getItem())) {
                 Dialogs.showMessage("Quote Item Mismatch", "Quote Doesn't Match Turn", "The selected quote is not for the same item as the current turn.");
                 return;
             }
 
             try {
-                turn.addTrade(quote.get().getBid(), qty);
+                if (side == Side.BID) {
+                    turn.addTrade(quote.get().getBid(), qty);
+                } else {
+                    turn.addTrade(quote.get().getAsk(), qty);
+                }
+
+                tradeQuantityField.clear();
             } catch (SQLException e) {
                 Dialogs.showMessage("Error Adding Trade", "Error Adding Trade", e);
             }

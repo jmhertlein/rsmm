@@ -17,6 +17,7 @@
 package net.jmhertlein.rsmm.model;
 
 import javafx.beans.property.*;
+import net.jmhertlein.rsmm.model.update.TradeListener;
 import net.jmhertlein.rsmm.model.update.TurnListener;
 
 import java.math.BigDecimal;
@@ -40,8 +41,10 @@ public class Turn implements Comparable<Turn> {
 
     private final IntegerProperty openProfit, closedProfit, positionCost, position;
 
-    public Turn(Connection conn, ItemManager items, QuoteManager quotes, ResultSet rs) throws SQLException, NoSuchItemException, NoQuoteException {
-        this(conn, quotes, rs.getLong("turn_id"), getItemFromResults(rs, items), rs.getTimestamp("open_ts"), rs.getTimestamp("close_ts"));
+    private final List<TradeListener>  tradeListeners;
+
+    public Turn(Connection conn, List<TradeListener> listeners, ItemManager items, QuoteManager quotes, ResultSet rs) throws SQLException, NoSuchItemException, NoQuoteException {
+        this(conn, listeners, quotes, rs.getLong("turn_id"), getItemFromResults(rs, items), rs.getTimestamp("open_ts"), rs.getTimestamp("close_ts"));
     }
 
     public ObjectProperty<Item> itemProperty() {
@@ -77,12 +80,13 @@ public class Turn implements Comparable<Turn> {
         return items.getItem(itemId).orElseThrow(() -> new NoSuchItemException(itemId));
     }
 
-    public Turn(Connection conn, QuoteManager quotes, long turnId, Item item, Timestamp open, Timestamp close) throws SQLException, NoQuoteException {
+    public Turn(Connection conn, List<TradeListener> listeners, QuoteManager quotes, long turnId, Item item, Timestamp open, Timestamp close) throws SQLException, NoQuoteException {
         this.conn = conn;
         this.turnId = turnId;
         this.item = new SimpleObjectProperty<>(item);
         this.open = new SimpleObjectProperty<>(open);
         this.close = new SimpleObjectProperty<>(close);
+        this.tradeListeners = listeners;
 
         this.trades = new HashSet<>();
         try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Trade WHERE turn_id=?")) {
@@ -101,7 +105,7 @@ public class Turn implements Comparable<Turn> {
         recalculateProfit(quotes);
     }
 
-    private void recalculateProfit(QuoteManager quotes) throws NoQuoteException, SQLException {
+    public void recalculateProfit(QuoteManager quotes) throws NoQuoteException, SQLException {
         openProfit.set(getOpenProfit(quotes).intValue());
         closedProfit.set(getClosedProfit().intValue());
         positionCost.set(getPositionCost(quotes));
@@ -120,6 +124,7 @@ public class Turn implements Comparable<Turn> {
         }
 
         trades.add(trade);
+        tradeListeners.stream().forEach(l -> l.onTrade(trade));
     }
 
     public void bustTrade(Trade t) throws SQLException {
@@ -130,6 +135,7 @@ public class Turn implements Comparable<Turn> {
         }
 
         trades.remove(t);
+        tradeListeners.stream().forEach(l -> l.onBust(t));
     }
 
     public long getTurnId() {
@@ -172,8 +178,8 @@ public class Turn implements Comparable<Turn> {
         int sumVolumeWeightedPrices = 0;
         int totalShares = 0;
         for (Trade t : trades) {
-            sumVolumeWeightedPrices += t.getPrice() * t.getQuantity();
-            totalShares += t.getQuantity();
+            sumVolumeWeightedPrices += t.getPrice() * Math.abs(t.getQuantity());
+            totalShares += Math.abs(t.getQuantity());
         }
 
         BigDecimal numerator = new BigDecimal(sumVolumeWeightedPrices), denominator = new BigDecimal(totalShares);
@@ -195,7 +201,7 @@ public class Turn implements Comparable<Turn> {
         return trades.stream()
                 .filter(t -> (t.getQuantity() > 0) == isShort)
                 .mapToInt(Trade::getQuantity)
-                .sum();
+                .sum() * (isShort ? 1 : -1);
     }
 
     public BigDecimal getOpenProfit(QuoteManager quotes) throws NoQuoteException, SQLException {

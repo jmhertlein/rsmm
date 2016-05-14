@@ -18,6 +18,7 @@ package net.jmhertlein.rsmm.model;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import net.jmhertlein.rsmm.model.update.TradeListener;
 import net.jmhertlein.rsmm.model.update.TurnListener;
 
 import java.sql.*;
@@ -37,18 +38,20 @@ public class TurnManager {
     private final IntegerProperty totalClosedProfit;
 
     private final List<TurnListener> turnListeners;
+    private final List<TradeListener> tradeListeners;
 
     public TurnManager(Connection conn, ItemManager items, QuoteManager quotes) throws SQLException, NoSuchItemException, NoQuoteException {
         this.conn = conn;
         this.openTurns = new ArrayList<>();
         this.closedTurnsToday = new ArrayList<>();
-        turnListeners = new ArrayList<>();
+        this.turnListeners = new ArrayList<>();
+        this.tradeListeners = new ArrayList<>();
 
 
         try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE close_ts IS NULL")) {
             try (ResultSet rs = p.executeQuery()) {
                 while (rs.next()) {
-                    openTurns.add(new Turn(conn, items, quotes, rs));
+                    openTurns.add(new Turn(conn, tradeListeners, items, quotes, rs));
                 }
             }
         }
@@ -64,19 +67,26 @@ public class TurnManager {
         try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE close_ts::date = now()::date")) {
             try (ResultSet rs = p.executeQuery()) {
                 while (rs.next()) {
-                    closedTurnsToday.add(new Turn(conn, items, quotes, rs));
+                    closedTurnsToday.add(new Turn(conn, tradeListeners, items, quotes, rs));
                 }
             }
         }
     }
 
-    public void addListener(TurnListener l)
-    {
+    public void addTurnListener(TurnListener l) {
         turnListeners.add(l);
     }
 
-    public Optional<Turn> getOpenTurn(String itemName) throws SQLException, NoSuchItemException, NoQuoteException {
+    public void addTradeListener(TradeListener l) {
+        tradeListeners.add(l);
+    }
+
+    public Optional<Turn> getOpenTurn(String itemName) {
         return openTurns.stream().filter(t -> t.getItemName().equals(itemName)).findFirst();
+    }
+
+    public Optional<Turn> getOpenTurn(Item i) {
+        return openTurns.stream().filter(t -> t.getItem().equals(i)).findFirst();
     }
 
     public Turn newTurn(Item item, QuoteManager quotes) throws SQLException, DuplicateOpenTurnException, NoSuchItemException, NoQuoteException {
@@ -95,7 +105,7 @@ public class TurnManager {
                 int id = keys.getInt(1);
 
                 System.out.println("New turn has id " + id);
-                Turn newTurn = new Turn(conn, quotes, id, item, openTs, null);
+                Turn newTurn = new Turn(conn, tradeListeners, quotes, id, item, openTs, null);
                 openTurns.add(newTurn);
 
                 turnListeners.stream().forEach(l -> l.onTurnOpen(newTurn));
@@ -154,8 +164,7 @@ public class TurnManager {
             p.setTimestamp(1, closeTs);
             p.setLong(2, turnId);
             int rows = p.executeUpdate();
-            if(rows > 0)
-            {
+            if (rows > 0) {
                 Turn turn = openTurns.stream().filter(t -> t.getTurnId() == turnId).findFirst().orElseThrow(() -> new NoSuchElementException("No such open turn for id: " + turnId));
                 turn.setClose(closeTs);
                 closedTurnsToday.add(turn);
