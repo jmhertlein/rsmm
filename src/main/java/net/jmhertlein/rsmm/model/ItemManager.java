@@ -58,15 +58,14 @@ public class ItemManager {
         itemListeners.stream().forEach(l -> l.onItemFavorited(i));
     }
 
-    public void addListener(ItemListener l)
-    {
+    public void addListener(ItemListener l) {
         itemListeners.add(l);
     }
 
     public void updateFavorite(Item i, boolean favorite) throws SQLException {
         try (PreparedStatement p = conn.prepareStatement("UPDATE Item SET favorite=? WHERE item_id=?")) {
-            p.setInt(1, i.getId());
-            p.setBoolean(2, favorite);
+            p.setBoolean(1, favorite);
+            p.setInt(2, i.getId());
             p.executeUpdate();
         }
     }

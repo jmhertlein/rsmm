@@ -2,4 +2,3 @@ add a "long term stats" frame that shows total profit all time, last month, last
 
 jfx rewrite:
 mark favorite item
-whenever i make 1M+ gp in one turn, when i close it, pop open the youtube video "Shrek's Dank Kush" and autoplay

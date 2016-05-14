@@ -6,11 +6,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.*;
+import javafx.scene.image.Image;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.converter.NumberStringConverter;
 import net.jmhertlein.rsmm.controller.*;
 import net.jmhertlein.rsmm.controller.util.Side;
@@ -202,6 +207,14 @@ public class MMPane extends FXMLBorderPane {
         quotes.addListener(q -> refreshLimitUsages());
         turns.addTradeListener(new RefreshLimitUsagesTradeListener(this::refreshLimitUsages));
 
+        items.addListener(i -> {
+            if (i.isFavorite()) {
+                quoteItemChooserItems.add(i);
+            } else {
+                quoteItemChooserItems.remove(i);
+            }
+        });
+
         refreshLimitUsages();
     }
 
@@ -332,7 +345,7 @@ public class MMPane extends FXMLBorderPane {
             try {
                 if (turn.isFlat()) {
                     turns.closeTurn(turn.getTurnId());
-                    if(turn.getClosedProfit().compareTo(BigDecimal.valueOf(1000000)) > 0) {
+                    if (turn.getClosedProfit().compareTo(BigDecimal.valueOf(1000000)) > 0) {
                         try {
                             Desktop.getDesktop().browse(URI.create("https://www.youtube.com/watch?v=A1a5QQoHh60"));
                         } catch (Throwable e) {
@@ -424,5 +437,15 @@ public class MMPane extends FXMLBorderPane {
                 Dialogs.showMessage("Error Marking Quote", "Could Not Mark Quote Synthetic", e);
             }
         });
+    }
+
+    @FXML
+    void showItemWindow() {
+        Stage s = new Stage();
+        s.setScene(new Scene(new FavoriteItemPane(items)));
+        s.setTitle("Favorite Items");
+        s.initModality(Modality.APPLICATION_MODAL);
+        s.getIcons().add(new Image("/coins.png"));
+        s.showAndWait();
     }
 }

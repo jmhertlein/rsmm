@@ -72,7 +72,14 @@
                         </VBox>
                         <HBox prefHeight="10.0" prefWidth="471.0">
                            <children>
-                              <Button mnemonicParsing="false" onAction="#syncQuoteToTurn" text="&gt;" />
+                              <Button mnemonicParsing="false" onAction="#syncQuoteToTurn" text="&gt;">
+                                 <contextMenu>
+                                    <ContextMenu>
+                                      <items>
+                                        <MenuItem mnemonicParsing="false" onAction="#showItemWindow" text="Manage Items" />
+                                      </items>
+                                    </ContextMenu>
+                                 </contextMenu></Button>
                               <ComboBox fx:id="quoteItemChooser" onAction="#showQuotesForItem" prefHeight="26.0" prefWidth="139.0" HBox.hgrow="ALWAYS" />
                               <TextField fx:id="quoteBidField" prefHeight="26.0" prefWidth="115.0" HBox.hgrow="ALWAYS" />
                               <TextField fx:id="quoteAskField" prefHeight="26.0" prefWidth="122.0" HBox.hgrow="ALWAYS" />

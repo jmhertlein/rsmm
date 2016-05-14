@@ -4,6 +4,7 @@ package net.jmhertlein.rsmm;/**
 
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import net.jmhertlein.rsmm.viewfx.MMPane;
 import net.jmhertlein.rsmm.viewfx.util.Dialogs;
@@ -31,8 +32,9 @@ public class FXRSMarketMaker extends Application {
             return;
         }
 
-        stage.setTitle("RS Market Maker");
         stage.setScene(new Scene(new MMPane(conn)));
+        stage.setTitle("RS Market Maker");
+        stage.getIcons().add(new Image("/coins.png"));
         stage.show();
     }
 }
