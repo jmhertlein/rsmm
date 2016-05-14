@@ -12,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.*;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
@@ -22,6 +23,8 @@ import net.jmhertlein.rsmm.controller.util.Side;
 import net.jmhertlein.rsmm.model.*;
 import net.jmhertlein.rsmm.viewfx.util.Dialogs;
 import net.jmhertlein.rsmm.viewfx.util.FXMLBorderPane;
+import net.jmhertlein.rsmm.viewfx.util.RSIntegerStringConverter;
+import net.jmhertlein.rsmm.viewfx.util.RSNumberStringConverter;
 
 import java.awt.*;
 import java.io.IOException;
@@ -141,13 +144,16 @@ public class MMPane extends FXMLBorderPane {
         }
 
         quoteTable.setRowFactory(new QuoteTableRowFactory());
+        turnOpenProfitColumn.setCellFactory(TextFieldTableCell.forTableColumn(new RSIntegerStringConverter()));
+        turnClosedProfitColumn.setCellFactory(TextFieldTableCell.forTableColumn(new RSIntegerStringConverter()));
+        turnPositionCostColumn.setCellFactory(TextFieldTableCell.forTableColumn(new RSIntegerStringConverter()));
 
-        totalProfitLabel.textProperty().bindBidirectional(statsManager.totalClosedProfitProperty(), new NumberStringConverter());
-        todayProfitLabel.textProperty().bindBidirectional(statsManager.profitTodayProperty(), new NumberStringConverter());
-        pendingProfitLabel.textProperty().bindBidirectional(statsManager.pendingProfitProperty(), new NumberStringConverter());
-        openProfitLabel.textProperty().bindBidirectional(statsManager.openProfitProperty(), new NumberStringConverter());
-        sumPositionCostLabel.textProperty().bindBidirectional(statsManager.sumPositionCostProperty(), new NumberStringConverter());
-        quoteCostLabel.textProperty().bindBidirectional(statsManager.dailyQuoteCostProperty(), new NumberStringConverter());
+        totalProfitLabel.textProperty().bindBidirectional(statsManager.totalClosedProfitProperty(), new RSNumberStringConverter());
+        todayProfitLabel.textProperty().bindBidirectional(statsManager.profitTodayProperty(), new RSNumberStringConverter());
+        pendingProfitLabel.textProperty().bindBidirectional(statsManager.pendingProfitProperty(), new RSNumberStringConverter());
+        openProfitLabel.textProperty().bindBidirectional(statsManager.openProfitProperty(), new RSNumberStringConverter());
+        sumPositionCostLabel.textProperty().bindBidirectional(statsManager.sumPositionCostProperty(), new RSNumberStringConverter());
+        quoteCostLabel.textProperty().bindBidirectional(statsManager.dailyQuoteCostProperty(), new RSNumberStringConverter());
 
 
         quoteItemChooserItems = FXCollections.observableArrayList();

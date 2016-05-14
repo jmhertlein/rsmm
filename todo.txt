@@ -1,5 +1,4 @@
 add a "long term stats" frame that shows total profit all time, last month, last week, etc. Also shows for each item: total profit, total volume, avg profit per turn, avg turn volume
 
-make various prices format w/ RSIntegers
 make various prices be green/red
 make negatives render in ()'s instead of -'s
