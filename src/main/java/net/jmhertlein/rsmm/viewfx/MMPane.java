@@ -147,6 +147,7 @@ public class MMPane extends FXMLBorderPane {
         turnOpenProfitColumn.setCellFactory(TextFieldTableCell.forTableColumn(new RSIntegerStringConverter()));
         turnClosedProfitColumn.setCellFactory(TextFieldTableCell.forTableColumn(new RSIntegerStringConverter()));
         turnPositionCostColumn.setCellFactory(TextFieldTableCell.forTableColumn(new RSIntegerStringConverter()));
+        quotePPLColumn.setCellFactory(TextFieldTableCell.forTableColumn(new RSIntegerStringConverter()));
 
         totalProfitLabel.textProperty().bindBidirectional(statsManager.totalClosedProfitProperty(), new RSNumberStringConverter());
         todayProfitLabel.textProperty().bindBidirectional(statsManager.profitTodayProperty(), new RSNumberStringConverter());
