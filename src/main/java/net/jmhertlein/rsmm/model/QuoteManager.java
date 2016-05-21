@@ -113,6 +113,13 @@ public class QuoteManager {
     }
 
     public void deleteQuote(Quote q) throws SQLException {
+        List<Quote> quotes = getQuotesFor(q.getItem(), q.getQuoteTS().toLocalDateTime().toLocalDate());
+        if(quotes.size() == 1 && quotes.get(0).equals(q))
+        {
+            Dialogs.showMessage("Error Deleting Quote", "Cannot Delete Last Quote of Day", "You always need at least 1 quote once one's been added for the day.");
+            return;
+        }
+
         try (PreparedStatement ps = conn.prepareStatement("DELETE FROM Quote WHERE quote_ts=? AND item_id=?")) {
             ps.setTimestamp(1, q.getQuoteTS());
             ps.setInt(2, q.getItem().getId());
@@ -120,8 +127,8 @@ public class QuoteManager {
                 throw new SQLException("Error: no rows updated for " + q.toString());
             }
         }
-
-        if(!getQuotesFor(q.getItem(), q.getQuoteTS().toLocalDateTime().toLocalDate()).remove(q))
+        
+        if(!quotes.remove(q))
         {
             Dialogs.showMessage("Error Deleting Quote", "Weirdness When Deleting Quote", "The DB update seems to have gone fine but deleting it from the in-memory cache did not actually delete anything.", q.toString());
         }
