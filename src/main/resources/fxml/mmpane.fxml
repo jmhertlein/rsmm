@@ -73,7 +73,7 @@
                         </VBox>
                         <HBox prefHeight="10.0" prefWidth="471.0">
                            <children>
-                              <Button mnemonicParsing="false" onAction="#syncQuoteToTurn" text="&gt;">
+                              <Button ellipsisString="&gt;" mnemonicParsing="false" onAction="#syncQuoteToTurn" text="&gt;">
                                  <contextMenu>
                                     <ContextMenu>
                                       <items>
