@@ -22,4 +22,9 @@ public class QuoteTableQuoteListener implements QuoteListener {
     @Override
     public void onMarkSynthetic(Quote q) {
     }
+
+    @Override
+    public void quoteDeleted(Quote q) {
+        visibleQuotes.removeAll(q);
+    }
 }

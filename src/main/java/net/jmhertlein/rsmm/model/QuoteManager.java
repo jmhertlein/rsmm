@@ -18,6 +18,7 @@ package net.jmhertlein.rsmm.model;
 
 
 import net.jmhertlein.rsmm.model.update.QuoteListener;
+import net.jmhertlein.rsmm.viewfx.util.Dialogs;
 
 import java.sql.*;
 import java.sql.Date;
@@ -109,5 +110,22 @@ public class QuoteManager {
         }
 
         return quotes;
+    }
+
+    public void deleteQuote(Quote q) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM Quote WHERE quote_ts=? AND item_id=?")) {
+            ps.setTimestamp(1, q.getQuoteTS());
+            ps.setInt(2, q.getItem().getId());
+            if (ps.executeUpdate() == 0) {
+                throw new SQLException("Error: no rows updated for " + q.toString());
+            }
+        }
+
+        if(!getQuotesFor(q.getItem(), q.getQuoteTS().toLocalDateTime().toLocalDate()).remove(q))
+        {
+            Dialogs.showMessage("Error Deleting Quote", "Weirdness When Deleting Quote", "The DB update seems to have gone fine but deleting it from the in-memory cache did not actually delete anything.", q.toString());
+        }
+
+        quoteListeners.stream().forEach(l -> l.quoteDeleted(q));
     }
 }

@@ -11,4 +11,8 @@ public interface QuoteListener {
     public default void onMarkSynthetic(Quote q) {
         onQuote(q);
     }
+
+    public default void quoteDeleted(Quote q) {
+        onQuote(q);
+    }
 }

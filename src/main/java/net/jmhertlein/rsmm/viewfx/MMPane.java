@@ -457,4 +457,16 @@ public class MMPane extends FXMLBorderPane {
         s.getIcons().add(new Image("/coins.png"));
         s.showAndWait();
     }
+
+    @FXML
+    void deleteSelectedQuote() {
+        Optional<Quote> quote = Optional.ofNullable(quoteTable.getSelectionModel().getSelectedItem());
+        quote.ifPresent(q -> {
+            try {
+                quotes.deleteQuote(q);
+            } catch (SQLException e) {
+                Dialogs.showMessage("Error Marking Quote", "Could Not Mark Quote Synthetic", e);
+            }
+        });
+    }
 }

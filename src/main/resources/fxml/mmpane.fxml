@@ -64,6 +64,7 @@
                                     <ContextMenu>
                                       <items>
                                         <MenuItem mnemonicParsing="false" onAction="#markQuoteSynthetic" text="Mark Synthetic" />
+                                          <MenuItem mnemonicParsing="false" onAction="#deleteSelectedQuote" text="Delete" />
                                       </items>
                                     </ContextMenu>
                                  </contextMenu>
