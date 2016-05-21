@@ -416,6 +416,8 @@ public class MMPane extends FXMLBorderPane {
                 quoteItemChooser.getSelectionModel().select(i);
                 try {
                     quoteTableQuotes.setAll(quotes.getQuotesFor(i, LocalDate.now()));
+                    quoteTableQuotes.stream().max((a, b) -> a.getQuoteTS().compareTo(b.getQuoteTS()))
+                            .ifPresent(q -> quoteTable.getSelectionModel().select(q));
                 } catch (SQLException e) {
                     Dialogs.showMessage("Error Showing Quotes", "Error showing quotes for " + i.getName(), e);
                 }

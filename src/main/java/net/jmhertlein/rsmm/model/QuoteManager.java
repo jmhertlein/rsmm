@@ -127,7 +127,7 @@ public class QuoteManager {
                 throw new SQLException("Error: no rows updated for " + q.toString());
             }
         }
-        
+
         if(!quotes.remove(q))
         {
             Dialogs.showMessage("Error Deleting Quote", "Weirdness When Deleting Quote", "The DB update seems to have gone fine but deleting it from the in-memory cache did not actually delete anything.", q.toString());
