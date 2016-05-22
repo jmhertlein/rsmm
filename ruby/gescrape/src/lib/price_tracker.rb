@@ -9,7 +9,7 @@ class PriceTracker
   end
 
   def price_for itemid, date=Date.today
-    res = @conn.exec_params('SELECT price FROM Price WHERE itemid=$1 AND day=$2', [itemid,date])
+    res = @conn.exec_params('SELECT price FROM Price WHERE item_id=$1 AND day=$2', [itemid,date])
 
     return res.ntuples == 0 ? nil : res[0]["price"].to_i
   end
@@ -19,7 +19,7 @@ class PriceTracker
   end
 
   def latest_price_for itemid
-    res = @conn.exec_params('SELECT price FROM Price WHERE itemid = $1 AND day=(SELECT MAX(day) FROM Price WHERE itemid=$1)', [itemid])
+    res = @conn.exec_params('SELECT price FROM Price WHERE item_id = $1 AND day=(SELECT MAX(day) FROM Price WHERE item_id=$1)', [itemid])
     if res.ntuples == 0
       raise "missing latest price for #{itemid}"
     end
@@ -31,7 +31,7 @@ class PriceTracker
   end
 
   def prices_for itemid, date=Date.today, n_days=180
-    res = @conn.exec_params('SELECT day,price FROM Price WHERE itemid = $1 AND day BETWEEN $3 AND $2 ORDER BY day ASC', [itemid, date, date-(n_days-1)])
+    res = @conn.exec_params('SELECT day,price FROM Price WHERE item_id = $1 AND day BETWEEN $3 AND $2 ORDER BY day ASC', [itemid, date, date-(n_days-1)])
     raise "not enough price data (found #{res.ntuples}, needed #{n_days})" if res.ntuples != n_days
     return res.each.map{|tup| tup["price"].to_i}
   end

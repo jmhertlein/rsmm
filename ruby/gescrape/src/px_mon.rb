@@ -8,13 +8,9 @@ require 'mail'
 require 'pg'
 require_relative 'lib/html/table.rb'
 require_relative 'lib/ge/ge_api.rb'
-require_relative 'lib/summarize.rb'
 require_relative 'lib/price_tracker.rb'
 require_relative 'lib/item_tracker.rb'
 require_relative 'lib/target_tracker.rb'
-require_relative 'lib/position_tracker.rb'
-require_relative 'lib/profit_tracker.rb'
-require_relative 'lib/traded_day_tracker.rb'
 require_relative '../config/db.rb'
 require_relative '../config/mail.rb'
 
@@ -22,9 +18,6 @@ conn = PG.connect(DB_INFO)
 items = ItemTracker.new conn
 prices = PriceTracker.new conn
 targets = TargetTracker.new conn
-position = PositionTracker.new conn
-profit = ProfitTracker.new conn, prices, position
-days = TradedDayTracker.new conn
 
 # price updates
 missing = []

@@ -7,7 +7,6 @@ require "uri"
 require 'mail'
 require 'pg'
 require_relative 'lib/getjson.rb'
-require_relative 'lib/summarize.rb'
 require_relative 'lib/price_tracker.rb'
 require_relative 'lib/item_tracker.rb'
 require_relative 'lib/target_tracker.rb'
@@ -60,9 +59,9 @@ conn.transaction do |txn|
             page["items"].each {|item| items.record_id(item["id"], item["name"])}
           end
           page_no += 1
-        rescue
+        rescue Exception => e
           attempts += 1
-          puts "ERROR, RETRYING in 5s"
+          puts "ERROR: #{e.to_s}, RETRYING in 5s"
           sleep 5
         end
       end

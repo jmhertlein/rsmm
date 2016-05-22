@@ -1,16 +1,16 @@
 class Table
   attr_reader :headers, :rows
 
-  def initialize headers
+  def initialize headers, rows=[[]]
     @headers = headers
-    @rows = Array.new
-    @rows << Array.new
+    @rows = rows
   end
   
   def << value
     @rows << Array.new if @rows[-1].size == @headers.size
     @rows[-1] << value
   end
+
 
   def [] row_no
     return @rows[row_no]
