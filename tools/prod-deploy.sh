@@ -1,3 +1,3 @@
 #!/usr/bin/bash
 
-scp target/rsmm.exe joshua@claudius:/srv/bin
+scp ../java/target/rsmm.exe joshua@claudius:/srv/bin
