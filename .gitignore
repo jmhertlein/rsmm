@@ -1,3 +1,4 @@
 /target/
-/rsmm.iml
-/.idea
+/java/rsmm.iml
+*.iml
+/java/.idea

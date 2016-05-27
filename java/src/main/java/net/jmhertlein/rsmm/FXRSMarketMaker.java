@@ -26,8 +26,16 @@ public class FXRSMarketMaker extends Application {
         System.out.println("Connecting to " + host + ".");
         Connection conn;
         try {
-            conn = DriverManager.getConnection("jdbc:postgresql://" + host + "/rsmm", "rsmm", "");
+            if(getParameters().getNamed().getOrDefault("lax", "false").equalsIgnoreCase("true"))
+            {
+                conn = DriverManager.getConnection("jdbc:postgresql://" + host + "/rsmm?ssl=true&sslfactory=org.postgresql.ssl.jdbc4.LibPQFactory", "rsmm", "");
+            }
+            else
+            {
+                conn = DriverManager.getConnection("jdbc:postgresql://" + host + "/rsmm?ssl=true&sslfactory=org.postgresql.ssl.jdbc4.LibPQFactory&sslmode=verify-full", "rsmm", "");
+            }
         } catch (SQLException ex) {
+            ex.printStackTrace();
             Dialogs.showMessage("Database Error", "Error connecting to postgresql", ex);
             return;
         }
