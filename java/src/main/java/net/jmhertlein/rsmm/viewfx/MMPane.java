@@ -21,10 +21,7 @@ import javafx.util.converter.NumberStringConverter;
 import net.jmhertlein.rsmm.controller.*;
 import net.jmhertlein.rsmm.controller.util.Side;
 import net.jmhertlein.rsmm.model.*;
-import net.jmhertlein.rsmm.viewfx.util.Dialogs;
-import net.jmhertlein.rsmm.viewfx.util.FXMLBorderPane;
-import net.jmhertlein.rsmm.viewfx.util.RSIntegerStringConverter;
-import net.jmhertlein.rsmm.viewfx.util.RSNumberStringConverter;
+import net.jmhertlein.rsmm.viewfx.util.*;
 
 import java.awt.*;
 import java.io.IOException;
@@ -59,7 +56,7 @@ public class MMPane extends FXMLBorderPane {
     @FXML
     private TableView<Trade> tradeTable;
     @FXML
-    private TableColumn<Trade, LocalDateTime> tradeTimeColumn;
+    private TableColumn<Trade, Timestamp> tradeTimeColumn;
     @FXML
     private TableColumn<Trade, Integer> tradeQuantityColumns;
     @FXML
@@ -148,6 +145,8 @@ public class MMPane extends FXMLBorderPane {
         turnClosedProfitColumn.setCellFactory(TextFieldTableCell.forTableColumn(new RSIntegerStringConverter()));
         turnPositionCostColumn.setCellFactory(TextFieldTableCell.forTableColumn(new RSIntegerStringConverter()));
         quotePPLColumn.setCellFactory(TextFieldTableCell.forTableColumn(new RSIntegerStringConverter()));
+        quoteDateColumn.setCellFactory(TextFieldTableCell.forTableColumn(new TimestampStringConverter()));
+        tradeTimeColumn.setCellFactory(TextFieldTableCell.forTableColumn(new TimestampStringConverter()));
 
         totalProfitLabel.textProperty().bindBidirectional(statsManager.totalClosedProfitProperty(), new RSNumberStringConverter());
         todayProfitLabel.textProperty().bindBidirectional(statsManager.profitTodayProperty(), new RSNumberStringConverter());
