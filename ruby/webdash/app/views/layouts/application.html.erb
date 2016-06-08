@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Trading Dashboard</title>
+  <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
+  <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+  <%= csrf_meta_tags %>
+</head>
+<body>
+<div class="body-wrapper">
+
+<nav id="navbar" class="line-border" >
+  <%= link_to 'Trading', trading_path, {class: "nav-item"} %>
+  <%= link_to 'Processes', trading_path, {class: "nav-item"} %>
+  <%= link_to 'Strategy', trading_path, {class: "nav-item"} %>
+  <%= link_to 'Open Problems', trading_path, {class: "nav-item"} %>
+</nav>
+
+<%= yield %>
+
+</div>
+</body>
+</html>

@@ -1,4 +1,7 @@
-java/target/
-/java/rsmm.iml
+/java/target/
 *.iml
+*.swp
 /java/.idea
+/.idea
+/target
+

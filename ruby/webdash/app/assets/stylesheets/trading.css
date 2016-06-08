@@ -1,0 +1,43 @@
+.totals-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.totals-item {
+  padding: 1em 1em 1em 1em;
+  min-width: 10%;
+  text-align: center;
+  margin: 1em;
+}
+
+.totals-label {
+  color: white;
+}
+
+
+.daily-stats {
+  margin: 0em 1em 1em 1em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.daily-stats > p {
+  padding: 0;
+  color: white;
+}
+
+.daily-stats > table {
+  border-collapse: collapse;
+  border: 1px solid black;
+}
+
+.daily-stats > th,td {
+  text-align: center;
+  padding: 5px;
+  border: 1px solid black;
+}

@@ -1,0 +1,16 @@
+<div class="totals-row">
+  <div class="totals-item line-border"><span class="totals-label">Total Profit: </span><span><%= commas(@total_profit) %>gp</span></div>
+  <div class="totals-item line-border"><span class="totals-label">Total Volume: </span><span><%= commas(@total_volume) %> Items</span></div>
+  <div class="totals-item line-border"><span class="totals-label">Total Notional: </span><span><%= commas(@total_notional) %>gp</span></div>
+</div>
+
+<div class="daily-stats line-border">
+  <p>Current Day</p>
+  <table>
+    <tr><td>Closed Profit</td><td> <%= commas @daily_closed %>gp</td></tr>
+    <tr><td>Volume</td><td> <%= commas @daily_volume %> items</td></tr>
+    <tr><td>Notional</td><td> <%= commas @daily_notional %>gp</td></tr>
+    <tr><td>Avg Profit/Item</td><td> <%= @daily_avg_profit_per_item %>gp</td></tr>
+    <tr><td>Quotes</td><td> <%= @quotes %></td></tr>
+  </table>
+</div>
