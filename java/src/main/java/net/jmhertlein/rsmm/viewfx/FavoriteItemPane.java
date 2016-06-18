@@ -47,8 +47,8 @@ public class FavoriteItemPane extends FXMLBorderPane {
         filteredFavorites = new FilteredList<>(favorites);
         filteredNonFavorites = new FilteredList<>(nonFavorites);
 
-        itemsList.setItems(nonFavorites);
-        favoritesList.setItems(favorites);
+        itemsList.setItems(filteredNonFavorites);
+        favoritesList.setItems(filteredFavorites);
 
         favorites.setAll(items.getItems().stream().filter(Item::isFavorite).collect(Collectors.toList()));
         nonFavorites.setAll(items.getItems().stream().filter(i -> !i.isFavorite()).collect(Collectors.toList()));
