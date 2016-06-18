@@ -12,6 +12,7 @@
             <Insets left="20.0" top="20.0" />
          </BorderPane.margin>
          <children>
+            <TextField fx:id="searchItemsField" onKeyTyped="#onItemsSearch" promptText="Search Items..." />
             <Label text="All Items" />
             <ListView fx:id="itemsList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="377.0" prefWidth="200.0">
                <VBox.margin>
@@ -28,6 +29,7 @@
             <Insets right="20.0" top="20.0" />
          </BorderPane.margin>
          <children>
+            <TextField fx:id="searchFavoritesField" onKeyTyped="#onFavoritesSearch" promptText="Search Favorites..." />
             <Label text="Favorites" />
             <ListView fx:id="favoritesList" prefHeight="377.0" prefWidth="200.0" />
          </children>

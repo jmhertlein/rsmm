@@ -2,8 +2,10 @@ package net.jmhertlein.rsmm.viewfx;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import net.jmhertlein.rsmm.model.Item;
 import net.jmhertlein.rsmm.model.ItemManager;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class FavoriteItemPane extends FXMLBorderPane {
 
     private final ObservableList<Item> nonFavorites, favorites;
+    private final FilteredList<Item> filteredNonFavorites, filteredFavorites;
 
     private final ItemManager items;
 
@@ -28,6 +31,12 @@ public class FavoriteItemPane extends FXMLBorderPane {
     @FXML
     private ListView<Item> favoritesList;
 
+    @FXML
+    private TextField searchFavoritesField;
+
+    @FXML
+    private TextField searchItemsField;
+
 
     public FavoriteItemPane(ItemManager items) {
         super("/fxml/itempane.fxml");
@@ -35,6 +44,8 @@ public class FavoriteItemPane extends FXMLBorderPane {
 
         nonFavorites = FXCollections.observableArrayList();
         favorites = FXCollections.observableArrayList();
+        filteredFavorites = new FilteredList<>(favorites);
+        filteredNonFavorites = new FilteredList<>(nonFavorites);
 
         itemsList.setItems(nonFavorites);
         favoritesList.setItems(favorites);
@@ -67,6 +78,17 @@ public class FavoriteItemPane extends FXMLBorderPane {
                 Dialogs.showMessage("Error Setting Favorite", "Error Setting Favorite", e);
             }
         });
+    }
+
+
+    @FXML
+    void onFavoritesSearch() {
+        filteredFavorites.setPredicate(i -> i.getName().contains(searchFavoritesField.getText()));
+    }
+
+    @FXML
+    void onItemsSearch() {
+        filteredNonFavorites.setPredicate(i -> i.getName().contains(searchItemsField.getText()));
     }
 
     @FXML
