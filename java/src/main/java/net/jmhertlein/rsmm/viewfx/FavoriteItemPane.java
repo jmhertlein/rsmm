@@ -83,12 +83,12 @@ public class FavoriteItemPane extends FXMLBorderPane {
 
     @FXML
     void onFavoritesSearch() {
-        filteredFavorites.setPredicate(i -> i.getName().contains(searchFavoritesField.getText()));
+        filteredFavorites.setPredicate(i -> i.getName().toLowerCase().contains(searchFavoritesField.getText().toLowerCase()));
     }
 
     @FXML
     void onItemsSearch() {
-        filteredNonFavorites.setPredicate(i -> i.getName().contains(searchItemsField.getText()));
+        filteredNonFavorites.setPredicate(i -> i.getName().toLowerCase().contains(searchItemsField.getText().toLowerCase()));
     }
 
     @FXML
