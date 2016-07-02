@@ -115,6 +115,8 @@ public class MMPane extends FXMLBorderPane {
     private Label sumPositionCostLabel;
     @FXML
     private Label quoteCostLabel;
+    @FXML
+    private CheckBox sellModeCheckBox;
 
 
     public MMPane(Connection conn) {
@@ -284,8 +286,6 @@ public class MMPane extends FXMLBorderPane {
                 return;
             }
 
-            qty *= side.getMultiplier();
-
             Optional<Quote> quote = Optional.ofNullable(quoteTable.getSelectionModel().getSelectedItem());
             if (!quote.isPresent()) {
                 Dialogs.showMessage("No Quote Selected", "No Quote Selected", "You need to select a quote.");
@@ -297,13 +297,25 @@ public class MMPane extends FXMLBorderPane {
                 return;
             }
 
-            try {
-                if (side == Side.BID) {
-                    turn.addTrade(quote.get().getBid(), qty);
-                } else {
-                    turn.addTrade(quote.get().getAsk(), qty);
+            final int realQty, px;
+            if (side == Side.BID) {
+                realQty = qty;
+                px = quote.get().getBid();
+            } else if (sellModeCheckBox.isSelected()) {
+                int ask = quote.get().getAsk();
+                if (qty % ask != 0) {
+                    Dialogs.showMessage("Invalid Sum", "Invalid Sum", "Your gold amount (" + qty + ") divided by the ask (" + ask + ") does not divide evenly.");
+                    return;
                 }
-
+                realQty = qty / ask;
+                px = ask;
+            } else {
+                realQty = qty;
+                px = quote.get().getAsk();
+            }
+            
+            try {
+                turn.addTrade(px, realQty * side.getMultiplier());
                 tradeQuantityField.clear();
             } catch (SQLException e) {
                 Dialogs.showMessage("Error Adding Trade", "Error Adding Trade", e);

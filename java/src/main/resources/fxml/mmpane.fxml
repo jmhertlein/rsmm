@@ -33,6 +33,14 @@
                         <TextField fx:id="tradeQuantityField" prefHeight="26.0" prefWidth="169.0" HBox.hgrow="ALWAYS" />
                         <Button ellipsisString="BUY" mnemonicParsing="false" onAction="#addBuyTrade" prefHeight="26.0" prefWidth="45.0" text="Buy" HBox.hgrow="NEVER" />
                         <Button ellipsisString="Sell" mnemonicParsing="false" onAction="#addSellTrade" prefHeight="26.0" prefWidth="48.0" text="Sell" HBox.hgrow="NEVER" />
+                        <CheckBox fx:id="sellModeCheckBox" alignment="CENTER" contentDisplay="CENTER" ellipsisString="SM" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Sell Mode" textAlignment="CENTER">
+                           <HBox.margin>
+                              <Insets left="5.0" />
+                           </HBox.margin>
+                           <tooltip>
+                              <Tooltip text="Sell Mode" />
+                           </tooltip>
+                        </CheckBox>
                      </children>
                   </HBox>
                </children>
@@ -73,14 +81,7 @@
                         </VBox>
                         <HBox prefHeight="10.0" prefWidth="471.0">
                            <children>
-                              <Button ellipsisString="&gt;" mnemonicParsing="false" onAction="#syncQuoteToTurn" text="&gt;">
-                                 <contextMenu>
-                                    <ContextMenu>
-                                      <items>
-                                        <MenuItem mnemonicParsing="false" onAction="#showItemWindow" text="Manage Items" />
-                                      </items>
-                                    </ContextMenu>
-                                 </contextMenu></Button>
+                              <Button ellipsisString="&gt;" mnemonicParsing="false" onAction="#syncQuoteToTurn" text="&gt;" />
                               <ComboBox fx:id="quoteItemChooser" onAction="#showQuotesForItem" prefHeight="26.0" prefWidth="139.0" HBox.hgrow="ALWAYS" />
                               <TextField fx:id="quoteBidField" prefHeight="26.0" prefWidth="115.0" HBox.hgrow="ALWAYS" />
                               <TextField fx:id="quoteAskField" prefHeight="26.0" prefWidth="122.0" HBox.hgrow="ALWAYS" />
@@ -146,48 +147,63 @@
       </javafx.scene.control.SplitPane>
    </center>
    <top>
-      <HBox alignment="CENTER" spacing="40.0" BorderPane.alignment="CENTER">
-         <children>
-            <HBox spacing="5.0">
-               <children>
-                  <Label text="Total:" />
-                  <Label fx:id="totalProfitLabel" text="2147M" />
-               </children>
-            </HBox>
-            <HBox spacing="5.0">
-               <children>
-                  <Label text="Today:" />
-                  <Label fx:id="todayProfitLabel" text="1M" />
-               </children>
-            </HBox>
-            <HBox spacing="5.0">
-               <children>
-                  <Label text="Pending:" />
-                  <Label fx:id="pendingProfitLabel" text="2M" />
-               </children>
-            </HBox>
-            <HBox spacing="5.0">
-               <children>
-                  <Label text="Open:" />
-                  <Label fx:id="openProfitLabel" text="0" />
-               </children>
-            </HBox>
-            <HBox spacing="5.0">
-               <children>
-                  <Label text="Sum Position Cost:" />
-                  <Label fx:id="sumPositionCostLabel" text="0" />
-               </children>
-            </HBox>
-            <HBox spacing="5.0">
-               <children>
-                  <Label text="Daily Quote Cost:" />
-                  <Label fx:id="quoteCostLabel" text="0" />
-               </children>
-            </HBox>
-         </children>
+      <BorderPane BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets />
          </BorderPane.margin>
-      </HBox>
+         <center>
+            <HBox alignment="CENTER" fillHeight="false" spacing="40.0" BorderPane.alignment="CENTER_LEFT">
+               <children>
+                  <HBox spacing="5.0">
+                     <children>
+                        <Label text="Total:" />
+                        <Label fx:id="totalProfitLabel" text="2147M" />
+                     </children>
+                  </HBox>
+                  <HBox spacing="5.0">
+                     <children>
+                        <Label text="Today:" />
+                        <Label fx:id="todayProfitLabel" text="1M" />
+                     </children>
+                  </HBox>
+                  <HBox spacing="5.0">
+                     <children>
+                        <Label text="Pending:" />
+                        <Label fx:id="pendingProfitLabel" text="2M" />
+                     </children>
+                  </HBox>
+                  <HBox spacing="5.0">
+                     <children>
+                        <Label text="Open:" />
+                        <Label fx:id="openProfitLabel" text="0" />
+                     </children>
+                  </HBox>
+                  <HBox spacing="5.0">
+                     <children>
+                        <Label text="Sum Position Cost:" />
+                        <Label fx:id="sumPositionCostLabel" text="0" />
+                     </children>
+                  </HBox>
+                  <HBox spacing="5.0">
+                     <children>
+                        <Label text="Daily Quote Cost:" />
+                        <Label fx:id="quoteCostLabel" text="0" />
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+         </center>
+         <right>
+            <Button mnemonicParsing="false" text="..." BorderPane.alignment="CENTER">
+               <contextMenu>
+                  <ContextMenu>
+                    <items>
+                      <MenuItem mnemonicParsing="false" onAction="#showItemWindow" text="Manage Items" />
+                    </items>
+                  </ContextMenu>
+               </contextMenu>
+            </Button>
+         </right>
+      </BorderPane>
    </top>
 </fx:root>
