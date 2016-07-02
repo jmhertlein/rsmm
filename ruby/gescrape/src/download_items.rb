@@ -20,6 +20,7 @@ mail = Mail.new do
   subject "Item Table Update For #{Date.today.strftime("%d/%m/%Y")}"
   body "Starting update."
 end
+mail.delivery_method :smtp, address: MAIL_INFO[:mail_host]
 mail.deliver!
 
 puts "Connecting to db..."
@@ -83,6 +84,7 @@ mail = Mail.new do
   subject "Item Table Update For #{Date.today.strftime("%d/%m/%Y")}"
   body "Item update finished.\n\nStart Count: #{initial_count}, End Count: #{final_count}\nItems Processed: #{total_processed}\n\nErrors:#{errored_items.join("\n")}\n\n"
 end
+mail.delivery_method :smtp, address: MAIL_INFO[:mail_host]
 mail.deliver!
 
 puts "Done"

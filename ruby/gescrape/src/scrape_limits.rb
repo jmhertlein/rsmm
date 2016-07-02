@@ -78,8 +78,8 @@ mail = Mail.new do
     body mail_body
   end
 end
+
+mail.delivery_method :smtp, address: MAIL_INFO[:mail_host]
 mail.deliver!
-
-
 
 puts "Done"

@@ -14,6 +14,7 @@ require_relative 'lib/target_tracker.rb'
 require_relative '../config/db.rb'
 require_relative '../config/mail.rb'
 
+puts "Connecting to database..."
 conn = PG.connect(DB_INFO)
 items = ItemTracker.new conn
 prices = PriceTracker.new conn
@@ -52,6 +53,7 @@ mail = Mail.new do
   subject  "Price Update for #{Date.today.strftime("%d/%m/%Y")} Detected"
   body msg_body
 end
+mail.delivery_method :smtp, address: MAIL_INFO[:mail_host]
 mail.deliver!
 
 conn.finish
