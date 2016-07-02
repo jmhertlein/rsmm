@@ -15,7 +15,7 @@ require_relative '../config/mail.rb'
 
 puts "Sending initial email..."
 mail = Mail.new do
-  from 'itemdb@jmhertlein.net'
+  from "itemdb@#{MAIL_INFO[:sender_host]}"
   to   MAIL_INFO[:recipients]
   subject "Item Table Update For #{Date.today.strftime("%d/%m/%Y")}"
   body "Starting update."
@@ -79,7 +79,7 @@ end
 
 puts "Emailing..."
 mail = Mail.new do
-  from 'itemdb@jmhertlein.net'
+  from "itemdb@#{MAIL_INFO[:sender_host]}"
   to   MAIL_INFO[:recipients]
   subject "Item Table Update For #{Date.today.strftime("%d/%m/%Y")}"
   body "Item update finished.\n\nStart Count: #{initial_count}, End Count: #{final_count}\nItems Processed: #{total_processed}\n\nErrors:#{errored_items.join("\n")}\n\n"

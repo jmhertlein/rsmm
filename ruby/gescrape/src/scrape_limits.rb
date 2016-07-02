@@ -70,7 +70,7 @@ mail_body += "<p>Items with updates: #{has_update}</p><br />"
 mail_body += update_table.to_html
 
 mail = Mail.new do
-  from     'limitmon@jmhertlein.net'
+  from     "limitmon@#{MAIL_INFO[:sender_host]}"
   to       MAIL_INFO[:recipients]
   subject  "GE Limit Update Report for #{Date.today.strftime("%d/%m/%Y")}"
   html_part do

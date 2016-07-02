@@ -48,7 +48,7 @@ end
 msg_body = "New prices found:\n\n#{found.join "\n"}"
 
 mail = Mail.new do
-  from     'pxmon@jmhertlein.net'
+  from     "pxmon@#{MAIL_INFO[:sender_host]}"
   to       MAIL_INFO[:recipients]
   subject  "Price Update for #{Date.today.strftime("%d/%m/%Y")} Detected"
   body msg_body
