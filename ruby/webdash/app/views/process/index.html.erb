@@ -1,0 +1,19 @@
+<div class="process-item-container">
+  <div class="process-item line-border">
+    <p class="process-item-title">itemdb</p>
+    <p>Items Tracked: <%= @items_tracked %></p>
+  </div>
+
+  <div class="process-item line-border">
+    <p class="process-item-title">pxmon</p>
+    <table>
+      <tr><td>Last GE Update:</td><td><%= @last_ge_update_ts %></td></tr>
+      <tr><td>Current GE Day:</td><td><%= @current_ge_date %></td></tr>
+    </table>
+  </div>
+
+  <div class="process-item line-border">
+    <p class="process-item-title">limitmon</p>
+    <p>Limits Tracked: <%= @limits_tracked %></p>
+  </div>
+</div>

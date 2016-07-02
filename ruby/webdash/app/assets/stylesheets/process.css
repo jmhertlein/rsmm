@@ -1,0 +1,17 @@
+.process-item-container {
+  display: flex;
+  max-width: 910px;
+  width: 100%;
+  flex-direction: horizontal;
+  justify-content: center;
+}
+
+.process-item {
+  margin: 1em;
+}
+
+.process-item-title {
+  color: white;
+  text-align: center;
+  margin: 0 0 0 0;
+}
