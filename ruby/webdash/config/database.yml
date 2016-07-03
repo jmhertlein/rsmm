@@ -1,6 +1,9 @@
 default: &default
   adapter: postgresql
   username: rsmm-web
+  sslmode: require
+  sslkey: <%= ENV["HOME"] + "/.postgresql/rsmm-web.key" %>
+  sslcert: <%= ENV["HOME"] + "/.postgresql/rsmm-web.crt" %>
   pool: 5
   timeout: 5000
 
