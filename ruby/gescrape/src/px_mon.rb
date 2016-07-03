@@ -51,7 +51,10 @@ mail = Mail.new do
   from     "pxmon@#{MAIL_INFO[:sender_host]}"
   to       MAIL_INFO[:recipients]
   subject  "Price Update for #{Date.today.strftime("%d/%m/%Y")} Detected"
-  body msg_body
+  html_part do
+    content_type 'text/html; charset=UTF-8'
+    body msg_body
+  end
 end
 mail.delivery_method :smtp, address: MAIL_INFO[:mail_host]
 mail.deliver!

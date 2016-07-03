@@ -18,7 +18,10 @@ mail = Mail.new do
   from "itemdb@#{MAIL_INFO[:sender_host]}"
   to   MAIL_INFO[:recipients]
   subject "Item Table Update For #{Date.today.strftime("%d/%m/%Y")}"
-  body "Starting update."
+  html_part do
+    content_type 'text/html; charset=UTF-8'
+    body 'Starting update...'
+  end
 end
 mail.delivery_method :smtp, address: MAIL_INFO[:mail_host]
 mail.deliver!
