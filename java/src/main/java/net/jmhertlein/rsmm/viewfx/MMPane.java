@@ -313,10 +313,12 @@ public class MMPane extends FXMLBorderPane {
                 realQty = qty;
                 px = quote.get().getAsk();
             }
-            
+
             try {
-                turn.addTrade(px, realQty * side.getMultiplier());
+                Trade trade = turn.addTrade(px, realQty * side.getMultiplier());
                 tradeQuantityField.clear();
+                tradeTable.getSelectionModel().select(trade);
+                tradeTable.scrollTo(trade);
             } catch (SQLException e) {
                 Dialogs.showMessage("Error Adding Trade", "Error Adding Trade", e);
             }
@@ -346,9 +348,11 @@ public class MMPane extends FXMLBorderPane {
         }
 
         try {
-            quotes.addQuote(selected, bid, ask);
+            Quote quote = quotes.addQuote(selected, bid, ask);
             quoteBidField.setText("");
             quoteAskField.setText("");
+            quoteTable.getSelectionModel().select(quote);
+            quoteTable.scrollTo(quote);
         } catch (SQLException ex) {
             Dialogs.showMessage("Error Adding Quote", "Error Adding Quote", ex);
         }
@@ -428,7 +432,10 @@ public class MMPane extends FXMLBorderPane {
                 try {
                     quoteTableQuotes.setAll(quotes.getQuotesFor(i, LocalDate.now()));
                     quoteTableQuotes.stream().max((a, b) -> a.getQuoteTS().compareTo(b.getQuoteTS()))
-                            .ifPresent(q -> quoteTable.getSelectionModel().select(q));
+                            .ifPresent(q -> {
+                                quoteTable.getSelectionModel().select(q);
+                                quoteTable.scrollTo(q);
+                            });
                 } catch (SQLException e) {
                     Dialogs.showMessage("Error Showing Quotes", "Error showing quotes for " + i.getName(), e);
                 }
@@ -478,8 +485,62 @@ public class MMPane extends FXMLBorderPane {
             try {
                 quotes.deleteQuote(q);
             } catch (SQLException e) {
-                Dialogs.showMessage("Error Marking Quote", "Could Not Mark Quote Synthetic", e);
+                Dialogs.showMessage("Error Deleting Quote", "Could Not Delete Quote", e);
             }
         });
+    }
+
+    private void beatSelectedQuote(int amt, Side side) {
+        Optional<Quote> quote = Optional.ofNullable(quoteTable.getSelectionModel().getSelectedItem());
+        quote.ifPresent(q -> {
+            try {
+                Item item = q.getItem();
+                int bid, ask;
+                if (side == Side.BID) {
+                    bid = q.getBid() + amt;
+                } else {
+                    bid = q.getBid();
+                }
+
+                if (side == Side.ASK) {
+                    ask = q.getAsk() - amt;
+                } else {
+                    ask = q.getAsk();
+                }
+
+                if (!(bid < ask)) {
+                    Dialogs.showMessage("Spread Error", "Could Not Tighten Spread", "The spread is too tight to perform the requested action.");
+                    return;
+                }
+
+                Quote newQuote = quotes.addQuote(item, bid, ask);
+                quotes.setQuoteSynthetic(newQuote);
+                quoteTable.getSelectionModel().select(newQuote);
+                quoteTable.scrollTo(newQuote);
+            } catch (SQLException e) {
+                Dialogs.showMessage("Error Beating Quote", "Could Not Create New Quote", e);
+            }
+        });
+    }
+
+
+    @FXML
+    void beatQuoteBid() {
+        beatSelectedQuote(1, Side.BID);
+    }
+
+    @FXML
+    void beatQuoteAsk() {
+        beatSelectedQuote(1, Side.ASK);
+    }
+
+    @FXML
+    void leapfrogQuoteBid() {
+        beatSelectedQuote(2, Side.BID);
+    }
+
+    @FXML
+    void leapfrogQuoteAsk() {
+        beatSelectedQuote(2, Side.ASK);
     }
 }

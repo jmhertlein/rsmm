@@ -72,6 +72,13 @@
                                     <ContextMenu>
                                       <items>
                                         <MenuItem mnemonicParsing="false" onAction="#markQuoteSynthetic" text="Mark Synthetic" />
+                                          <SeparatorMenuItem mnemonicParsing="false" />
+                                          <MenuItem mnemonicParsing="false" onAction="#beatQuoteAsk" text="Beat Ask" />
+                                          <MenuItem mnemonicParsing="false" onAction="#leapfrogQuoteAsk" text="Leapfrog Ask" />
+                                          <SeparatorMenuItem mnemonicParsing="false" />
+                                          <MenuItem mnemonicParsing="false" onAction="#beatQuoteBid" text="Beat Bid" />
+                                          <MenuItem mnemonicParsing="false" onAction="#leapfrogQuoteBid" text="Leapfrog Bid" />
+                                          <SeparatorMenuItem mnemonicParsing="false" />
                                           <MenuItem mnemonicParsing="false" onAction="#deleteSelectedQuote" text="Delete" />
                                       </items>
                                     </ContextMenu>

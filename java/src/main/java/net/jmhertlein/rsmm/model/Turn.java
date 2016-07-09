@@ -112,7 +112,7 @@ public class Turn implements Comparable<Turn> {
         position.set(getPosition());
     }
 
-    public void addTrade(int price, int quantity) throws SQLException {
+    public Trade addTrade(int price, int quantity) throws SQLException {
         Trade trade = new Trade(this, Timestamp.from(Instant.now()), price, quantity);
         try (PreparedStatement p = conn.prepareStatement(
                 "INSERT INTO Trade(turn_id,trade_ts,price,quantity) VALUES(?,?,?,?)")) {
@@ -125,6 +125,7 @@ public class Turn implements Comparable<Turn> {
 
         trades.add(trade);
         tradeListeners.stream().forEach(l -> l.onTrade(trade));
+        return trade;
     }
 
     public void bustTrade(Trade t) throws SQLException {

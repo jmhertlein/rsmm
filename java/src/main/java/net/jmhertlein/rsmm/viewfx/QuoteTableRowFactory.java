@@ -26,12 +26,12 @@ public class QuoteTableRowFactory implements Callback<TableView<Quote>, TableRow
 
         row.itemProperty().addListener((prop, old, nu) -> {
             if (old != null) {
-                System.out.println("Removed listener from " + old.syntheticProperty().hashCode());
+                //System.out.println("Removed listener from " + old.syntheticProperty().hashCode());
                 old.syntheticProperty().removeListener(syntheticPropertyListener);
             }
 
             if (nu != null) {
-                System.out.println("Added listener to " + nu.syntheticProperty().hashCode());
+                //System.out.println("Added listener to " + nu.syntheticProperty().hashCode());
                 nu.syntheticProperty().addListener(syntheticPropertyListener);
                 if (nu.isSynthetic()) {
                     row.setStyle("-fx-control-inner-background: aquamarine;\n" +
