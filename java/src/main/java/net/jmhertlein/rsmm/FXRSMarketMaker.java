@@ -26,7 +26,7 @@ public class FXRSMarketMaker extends Application {
         System.out.println("Connecting to " + host + ".");
         Connection conn;
         try {
-            if(getParameters().getNamed().getOrDefault("ssl", "false").equalsIgnoreCase("false"))
+            if(getParameters().getNamed().getOrDefault("ssl", "true").equalsIgnoreCase("false"))
             {
                 conn = DriverManager.getConnection("jdbc:postgresql://" + host + "/rsmm", "rsmm", "");
             }
