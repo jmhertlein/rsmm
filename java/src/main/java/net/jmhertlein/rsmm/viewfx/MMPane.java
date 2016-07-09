@@ -117,6 +117,8 @@ public class MMPane extends FXMLBorderPane {
     private Label quoteCostLabel;
     @FXML
     private CheckBox sellModeCheckBox;
+    @FXML
+    private CheckMenuItem alwaysOnTopCheckBox;
 
 
     public MMPane(Connection conn) {
@@ -542,5 +544,10 @@ public class MMPane extends FXMLBorderPane {
     @FXML
     void leapfrogQuoteAsk() {
         beatSelectedQuote(2, Side.ASK);
+    }
+
+    @FXML
+    void toggleAlwaysOnTop() {
+        ((Stage) this.getScene().getWindow()).setAlwaysOnTop(alwaysOnTopCheckBox.isSelected());
     }
 }

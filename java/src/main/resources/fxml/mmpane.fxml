@@ -206,6 +206,7 @@
                   <ContextMenu>
                     <items>
                       <MenuItem mnemonicParsing="false" onAction="#showItemWindow" text="Manage Items" />
+                        <CheckMenuItem fx:id="alwaysOnTopCheckBox" mnemonicParsing="false" onAction="#toggleAlwaysOnTop" text="Always On Top" />
                     </items>
                   </ContextMenu>
                </contextMenu>
