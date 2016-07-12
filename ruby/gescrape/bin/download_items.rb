@@ -24,7 +24,7 @@ mail.delivery_method :smtp, address: TradeConfig::MAIL_INFO[:mail_host]
 mail.deliver!
 
 puts "Connecting to db..."
-conn = PG.connect(TradeCondig::DB_INFO)
+conn = PG.connect(TradeConfig::DB_INFO)
 
 initial_count = -1
 final_count = -1
