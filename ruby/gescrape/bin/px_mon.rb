@@ -20,20 +20,16 @@ targets = TargetTracker.new conn
 # price updates
 missing = []
 found = []
+
 targets.get_targeted_items.each do |itemid|
   puts "Checking price data for #{itemid}"
-  if !prices.has_price_for? itemid
-    latest_date, price = dl_latest_price_for_item(itemid)
-    if latest_date.eql?(Date.today)
-      prices.record_price itemid, Date.today, price
-      puts "Recorded price for #{itemid}"
-      found << itemid
-    else
-      puts "No price for today available for #{itemid} yet."
-      missing << itemid
-    end
+  latest_date, price = dl_latest_price_for_item(itemid)
+  if !prices.has_price_for? itemid, latest_date
+    prices.record_price itemid, latest_date, price
+    puts "Recorded price for #{itemid}"
+    found << itemid
   else
-    puts "Already have today's price for #{itemid}"
+    puts "Already have latest price for #{itemid}"
   end
 end
 
@@ -42,7 +38,7 @@ if found.empty?
   exit(0)
 end
 
-msg_body = "New prices found:\n\n#{found.join "\n"}"
+msg_body = "New prices found:<br /><br />#{found.join "<br />"}"
 
 mail = Mail.new do
   from     "pxmon@#{TradeConfig::MAIL_INFO[:sender_host]}"
