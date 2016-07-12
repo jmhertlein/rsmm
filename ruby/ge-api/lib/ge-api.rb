@@ -1,4 +1,6 @@
-require_relative '../getjson.rb'
+require 'net/http'
+require 'json'
+require 'uri'
 
 def get_json_for_item itemid
     return get_json("http://services.runescape.com/m=itemdb_rs/api/graph/#{itemid}.json")
@@ -17,4 +19,20 @@ def dl_latest_price_for_item itemid
   prices = dl_prices_for_item(itemid)
   latest_date = prices.keys.sort.last
   return jamflex_to_date(latest_date), prices[latest_date]
+end
+
+def get_json path
+  puts "Fetching #{path}"
+  uri = URI.parse(path)
+
+  http = Net::HTTP.new(uri.host, uri.port)
+  request = Net::HTTP::Get.new(uri.request_uri)
+
+  response = http.request(request)
+
+  if response.code == "200"
+    return JSON.parse(response.body)
+  else
+    raise "error getting json"
+  end
 end

@@ -6,16 +6,13 @@ require "net/http"
 require "uri"
 require 'mail'
 require 'pg'
-require_relative 'lib/html/table.rb'
-require_relative 'lib/ge/ge_api.rb'
-require_relative 'lib/price_tracker.rb'
-require_relative 'lib/item_tracker.rb'
-require_relative 'lib/target_tracker.rb'
-require_relative '../config/db.rb'
-require_relative '../config/mail.rb'
+require 'ge-api'
+require 'gescrape/html/table'
+require 'trade-config'
+require 'trade-db'
 
 puts "Connecting to database..."
-conn = PG.connect(DB_INFO)
+conn = PG.connect(TradeConfig::DB_INFO)
 items = ItemTracker.new conn
 prices = PriceTracker.new conn
 targets = TargetTracker.new conn
@@ -48,15 +45,15 @@ end
 msg_body = "New prices found:\n\n#{found.join "\n"}"
 
 mail = Mail.new do
-  from     "pxmon@#{MAIL_INFO[:sender_host]}"
-  to       MAIL_INFO[:recipients]
+  from     "pxmon@#{TradeConfig::MAIL_INFO[:sender_host]}"
+  to       TradeConfig::MAIL_INFO[:recipients]
   subject  "Price Update for #{Date.today.strftime("%d/%m/%Y")} Detected"
   html_part do
     content_type 'text/html; charset=UTF-8'
     body msg_body
   end
 end
-mail.delivery_method :smtp, address: MAIL_INFO[:mail_host]
+mail.delivery_method :smtp, address: TradeConfig::MAIL_INFO[:mail_host]
 mail.deliver!
 
 conn.finish

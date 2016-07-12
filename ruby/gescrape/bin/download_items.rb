@@ -6,28 +6,25 @@ require "net/http"
 require "uri"
 require 'mail'
 require 'pg'
-require_relative 'lib/getjson.rb'
-require_relative 'lib/price_tracker.rb'
-require_relative 'lib/item_tracker.rb'
-require_relative 'lib/target_tracker.rb'
-require_relative '../config/db.rb'
-require_relative '../config/mail.rb'
+require 'ge-api'
+require 'trade-db'
+require 'trade-config'
 
 puts "Sending initial email..."
 mail = Mail.new do
-  from "itemdb@#{MAIL_INFO[:sender_host]}"
-  to   MAIL_INFO[:recipients]
+  from "itemdb@#{TradeConfig::MAIL_INFO[:sender_host]}"
+  to   TradeConfig::MAIL_INFO[:recipients]
   subject "Item Table Update For #{Date.today.strftime("%d/%m/%Y")}"
   html_part do
     content_type 'text/html; charset=UTF-8'
     body 'Starting update...'
   end
 end
-mail.delivery_method :smtp, address: MAIL_INFO[:mail_host]
+mail.delivery_method :smtp, address: TradeConfig::MAIL_INFO[:mail_host]
 mail.deliver!
 
 puts "Connecting to db..."
-conn = PG.connect(DB_INFO)
+conn = PG.connect(TradeCondig::DB_INFO)
 
 initial_count = -1
 final_count = -1
@@ -82,12 +79,12 @@ end
 
 puts "Emailing..."
 mail = Mail.new do
-  from "itemdb@#{MAIL_INFO[:sender_host]}"
-  to   MAIL_INFO[:recipients]
+  from "itemdb@#{TradeConfig::MAIL_INFO[:sender_host]}"
+  to   TradeConfig::MAIL_INFO[:recipients]
   subject "Item Table Update For #{Date.today.strftime("%d/%m/%Y")}"
   body "Item update finished.\n\nStart Count: #{initial_count}, End Count: #{final_count}\nItems Processed: #{total_processed}\n\nErrors:#{errored_items.join("\n")}\n\n"
 end
-mail.delivery_method :smtp, address: MAIL_INFO[:mail_host]
+mail.delivery_method :smtp, address: TradeConfig::MAIL_INFO[:mail_host]
 mail.deliver!
 
 puts "Done"
