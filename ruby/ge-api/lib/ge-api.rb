@@ -22,7 +22,7 @@ def dl_latest_price_for_item itemid
 end
 
 def get_json path
-  puts "Fetching #{path}"
+  #puts "Fetching #{path}"
   uri = URI.parse(path)
 
   http = Net::HTTP.new(uri.host, uri.port)

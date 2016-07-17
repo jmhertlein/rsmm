@@ -13,7 +13,6 @@ class RequestProcessor
 
   def shutdown
     @shutdown = true
-    puts "Shutdown flag set."
   end
   
   def submit request
@@ -55,16 +54,13 @@ class RequestProcessor
 
   def wait_for_api_throttle
     if (Time.now - @last_throttle_time) > BURST_THROTTLE_INTERVAL_SECONDS
-      puts "Returning because not being throttled."
       return
     end
 
     if (Time.now - @last_req_time) > SAFE_DELAY_INTERVAL_SECONDS
-      puts "Returning because 5 seconds have passed."
       return
     end
     sleep_for = SAFE_DELAY_INTERVAL_SECONDS - (Time.now - @last_req_time)
-    puts "Sleeping for #{sleep_for} seconds."
     sleep(sleep_for + 0.1)
   end
 
