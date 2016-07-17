@@ -1,0 +1,8 @@
+[Unit]
+Description=Grand Exchange API Proxy Service
+
+[Service]
+ExecStart=/usr/bin/ge-svc.rb
+
+[Install]
+WantedBy=multi-user.target

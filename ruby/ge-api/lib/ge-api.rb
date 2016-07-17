@@ -31,8 +31,12 @@ def get_json path
   response = http.request(request)
 
   if response.code == "200"
-    return JSON.parse(response.body)
+    if response.body.empty?
+      return nil
+    else
+      return JSON.parse(response.body)
+    end
   else
-    raise "error getting json"
+    raise "error getting json. http code is #{response.code}"
   end
 end

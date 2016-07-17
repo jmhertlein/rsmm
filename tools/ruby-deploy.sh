@@ -24,12 +24,17 @@ gem build gescrape.gemspec
 mv *.gem "$TMP_DIR"
 cd ..
 
+cd ge-svc
+gem build ge-svc.gemspec
+mv *.gem "$TMP_DIR"
+cd ..
+
 cd "$TMP_DIR"
 echo "OK to install these?"
 ls
 read USER_ACCEPT
 
 if [[ "$USER_ACCEPT" == "y" ]] ; then
-  gem install *.gem
+  gem install --no-user-install *.gem
 fi
 
