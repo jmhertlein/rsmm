@@ -11,7 +11,8 @@ class GEClientRequest
 
   def query_prices itemid
     s = TCPSocket.new @host, @port
-    s.puts {name: @name, type: "price", item_id: itemid}
+    query = {name: @name, type: "price", item_id: itemid}
+    s.puts query.to_json
     ret = JSON.parse s.gets
     s.close
     return ret
@@ -19,7 +20,8 @@ class GEClientRequest
 
   def query_category_items category, first_letter, page
     s = TCPSocket.new @host, @port
-    s.puts {name: @name, type: "price", category: category, letter: first_letter, page: page}
+    query = {name: @name, type: "category", category: category, letter: first_letter, page: page}
+    s.puts query.to_json
     ret = JSON.parse s.gets
     s.close
     return ret

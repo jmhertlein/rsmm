@@ -9,19 +9,32 @@ require 'pg'
 require 'ge-api'
 require 'trade-db'
 require 'trade-config'
+require 'optparse'
+require 'ge-svc'
 
-puts "Sending initial email..."
-mail = Mail.new do
-  from "itemdb@#{TradeConfig::MAIL_INFO[:sender_host]}"
-  to   TradeConfig::MAIL_INFO[:recipients]
-  subject "Item Table Update For #{Date.today.strftime("%d/%m/%Y")}"
-  html_part do
-    content_type 'text/html; charset=UTF-8'
-    body 'Starting update...'
+send_email = true
+OptionParser.new do |opts|
+  opts.banner = "Usage: example.rb [options]"
+
+  opts.on("-e", "--[no-]email", "Send email. Default true.") do |e|
+    send_email = e
   end
+end.parse!
+
+if send_email
+  puts "Sending initial email..."
+  mail = Mail.new do
+    from "itemdb@#{TradeConfig::MAIL_INFO[:sender_host]}"
+    to   TradeConfig::MAIL_INFO[:recipients]
+    subject "Item Table Update For #{Date.today.strftime("%d/%m/%Y")}"
+    html_part do
+      content_type 'text/html; charset=UTF-8'
+      body 'Starting update...'
+    end
+  end
+  mail.delivery_method :smtp, address: TradeConfig::MAIL_INFO[:mail_host]
+  mail.deliver!
 end
-mail.delivery_method :smtp, address: TradeConfig::MAIL_INFO[:mail_host]
-mail.deliver!
 
 puts "Connecting to db..."
 conn = PG.connect(TradeConfig::DB_INFO)
@@ -31,6 +44,7 @@ final_count = -1
 total_processed = 0
 errored_items = []
 
+req = GEClientRequest.new "itemdb"
 puts "Opening transaction..."
 conn.transaction do |txn|
   items = ItemTracker.new txn
@@ -44,30 +58,18 @@ conn.transaction do |txn|
       puts "----Letter: #{let}"
       page_no = 1
       empty_resp = false
-      attempts = 0
-      while attempts < 5 && !empty_resp
-        begin
-          puts "--Page: #{page_no} (attempt #{attempts})"
-          url="http://services.runescape.com/m=itemdb_rs/api/catalogue/items.json?category=#{ctg}&alpha=#{let}&page=#{page_no}"
-          sleep 6
-          page = get_json url
-          if page["items"].empty?
-            empty_resp = true
-            puts "Hit last page"
-          else
-            puts "Recording #{page["items"].size} items..."
-            total_processed += page["items"].size
-            page["items"].each {|item| items.record_id(item["id"], item["name"])}
-          end
-          page_no += 1
-        rescue Exception => e
-          attempts += 1
-          puts "ERROR: #{e.to_s}, RETRYING in 5s"
-          sleep 5
+      while !empty_resp
+        puts "--Page: #{page_no}"
+        page = req.query_category_items ctg, let, page_no
+        if page.empty?
+          empty_resp = true
+          puts "Hit last page"
+        else
+          puts "Recording #{page.size} items..."
+          total_processed += page.size
+          page.each {|item| items.record_id(item["id"], item["name"])}
         end
-      end
-      if attempts >= 5
-        errored_items << "CTG: #{ctg}, LETTER: #{let}, PAGE: #{page_no}"
+        page_no += 1
       end
     end
   end
@@ -77,14 +79,16 @@ conn.transaction do |txn|
   puts "Total Processed: #{total_processed}"
 end
 
-puts "Emailing..."
-mail = Mail.new do
-  from "itemdb@#{TradeConfig::MAIL_INFO[:sender_host]}"
-  to   TradeConfig::MAIL_INFO[:recipients]
-  subject "Item Table Update For #{Date.today.strftime("%d/%m/%Y")}"
-  body "Item update finished.\n\nStart Count: #{initial_count}, End Count: #{final_count}\nItems Processed: #{total_processed}\n\nErrors:#{errored_items.join("\n")}\n\n"
+if send_email
+  puts "Emailing..."
+  mail = Mail.new do
+    from "itemdb@#{TradeConfig::MAIL_INFO[:sender_host]}"
+    to   TradeConfig::MAIL_INFO[:recipients]
+    subject "Item Table Update For #{Date.today.strftime("%d/%m/%Y")}"
+    body "Item update finished.\n\nStart Count: #{initial_count}, End Count: #{final_count}\nItems Processed: #{total_processed}\n\nErrors:#{errored_items.join("\n")}\n\n"
+  end
+  mail.delivery_method :smtp, address: TradeConfig::MAIL_INFO[:mail_host]
+  mail.deliver!
 end
-mail.delivery_method :smtp, address: TradeConfig::MAIL_INFO[:mail_host]
-mail.deliver!
 
 puts "Done"
