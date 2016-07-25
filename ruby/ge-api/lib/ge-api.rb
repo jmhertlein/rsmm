@@ -23,20 +23,26 @@ end
 
 def get_json path
   #puts "Fetching #{path}"
-  uri = URI.parse(path)
+  begin
+    uri = URI.parse(path)
 
-  http = Net::HTTP.new(uri.host, uri.port)
-  request = Net::HTTP::Get.new(uri.request_uri)
+    http = Net::HTTP.new(uri.host, uri.port)
+    request = Net::HTTP::Get.new(uri.request_uri)
 
-  response = http.request(request)
+    response = http.request(request)
 
-  if response.code == "200"
-    if response.body.empty?
-      return nil
+    if response.code == "200"
+      if response.body.empty?
+        return nil
+      else
+        return JSON.parse(response.body)
+      end
     else
-      return JSON.parse(response.body)
+      puts "Weird: non-200 response code: #{response.code}"
+      return nil
     end
-  else
-    raise "error getting json. http code is #{response.code}"
+  rescue Exception => e
+    puts "Error getting json: #{e.to_s}"
+    return nil
   end
 end
