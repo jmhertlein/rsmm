@@ -37,3 +37,5 @@ CREATE TABLE IF NOT EXISTS Price(
   created_ts TIMESTAMP DEFAULT now(),
   PRIMARY KEY(item_id, day)
 );
+
+create view daily_history as (select close_ts::date as day, sum(price * quantity * -1) as closed_profit, sum(abs(quantity))/2 as volume, sum(price*abs(quantity))/2 as notional from trade natural join turn group by day order by day);
