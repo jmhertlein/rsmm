@@ -1,0 +1,9 @@
+.about-blurb {
+  margin-top: 2em;
+  max-width: 600px;
+  text-align: center;
+}
+
+.about-blurb > p > a {
+  color: white;
+}
