@@ -38,4 +38,11 @@ CREATE TABLE IF NOT EXISTS Price(
   PRIMARY KEY(item_id, day)
 );
 
-create view daily_history as (select close_ts::date as day, sum(price * quantity * -1) as closed_profit, sum(abs(quantity))/2 as volume, sum(price*abs(quantity))/2 as notional from trade natural join turn group by day order by day);
+create view daily_history as (select close_ts::date as day,
+sum(price * quantity * -1) as closed_profit,
+sum(abs(quantity))/2 as volume,
+sum(price*abs(quantity))/2 as notional,
+(sum(price*quantity*-1)/(sum(abs(quantity)/2))) as avg_profit_per_item
+
+from trade natural join turn
+group by day);
