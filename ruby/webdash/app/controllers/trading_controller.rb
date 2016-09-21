@@ -8,6 +8,12 @@ class TradingController < ApplicationController
     @total_notional = Price.connection.select_all("select coalesce(sum(abs(quantity)*price)/2,0) from trade")[0]["coalesce"]
     
     @daily_stats = Price.connection.select_all("select * from daily_history order by day desc limit 5")
+
+    raw_long_term_stats = Price.connection.select_all("select day,closed_profit,volume from daily_history order by day")
+    raw_long_term_stats.inspect
+    @long_term_profit = running_sum(raw_long_term_stats.rows.map{|row| [Date.parse(row[0]), row[1].to_i] })
+    @long_term_volume = running_sum(raw_long_term_stats.rows.map{|row| [Date.parse(row[0]), row[2].to_i]})
+    @long_term_ppt = Price.connection.select_all("select day, avg(sum) from (select max(open_ts::date) as day, turn_id, sum(price*quantity*-1) from trade natural join turn group by turn_id) as A group by day;").rows.map{|row| [Date.parse(row[0]), row[1].to_i]}
   end
 
   def commas s
@@ -23,5 +29,10 @@ class TradingController < ApplicationController
     else
       return "#{number_with_delimiter(gp/1000000, :delimiter => ',')}M"
     end
+  end
+
+  def running_sum profit_series
+    sum = 0
+    return profit_series.map{|row| [row[0], sum += row[1]]}
   end
 end

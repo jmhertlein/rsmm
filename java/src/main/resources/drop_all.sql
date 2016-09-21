@@ -1,3 +1,4 @@
+DROP VIEW daily_history;
 DROP TABLE Price;
 DROP TABLE Quote;
 DROP TABLE Trade;

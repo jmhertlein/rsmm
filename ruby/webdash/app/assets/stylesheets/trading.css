@@ -17,7 +17,6 @@
   color: white;
 }
 
-
 .daily-stats {
   margin: 0em 1em 1em 1em;
   display: flex;
@@ -34,10 +33,31 @@
 .daily-stats > table {
   border: 1px solid black;
   border-spacing: 1em 0;
+  padding-bottom: 1em;
 }
 
 .daily-stats > th,td {
   text-align: center;
   padding: 5px;
   border: 1px solid black;
+}
+
+.totals-chart {
+  margin: 0em 1em 1em 1em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.totals-chart > p {
+  color: white;
+}
+
+.totals-charts-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 100%;
 }

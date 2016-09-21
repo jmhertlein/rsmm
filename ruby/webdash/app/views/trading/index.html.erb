@@ -25,3 +25,20 @@
     <% end %>
   </table>
 </div>
+
+<div class="totals-charts-container">
+  <div class="line-border totals-chart">
+    <p>Total Profit</p>
+    <%= line_chart @long_term_profit %>
+  </div>
+
+  <div class="line-border totals-chart">
+    <p>Total Volume</p>
+    <%= line_chart @long_term_volume %>
+  </div>
+
+  <div class="line-border totals-chart">
+    <p>Average Profit Per Turn</p>
+    <%= line_chart @long_term_ppt %>
+  </div>
+</div>
