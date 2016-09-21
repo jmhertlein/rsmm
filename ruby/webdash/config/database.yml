@@ -20,10 +20,16 @@ production:
   database: rsmm-web
 
 rsmm_db:
-  adapter: postgresql
-  host: claudius
-  username: rsmm-web
-  database: rsmm
-  sslmode: require
-  sslkey: <%= ENV["HOME"] + "/.postgresql/rsmm-web.key" %>
-  sslcert: <%= ENV["HOME"] + "/.postgresql/rsmm-web.crt" %>
+  development:
+    adapter: postgresql
+    host: localhost
+    username: rsmm-web
+    database: rsmm
+  production:
+    adapter: postgresql
+    host: claudius
+    username: rsmm-web
+    database: rsmm
+    sslmode: require
+    sslkey: <%= ENV["HOME"] + "/.postgresql/rsmm-web.key" %>
+    sslcert: <%= ENV["HOME"] + "/.postgresql/rsmm-web.crt" %>
