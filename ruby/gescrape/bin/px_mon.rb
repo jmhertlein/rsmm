@@ -16,6 +16,7 @@ require 'ge-svc'
 send_email = true
 write_to_db = true
 mode = :prod
+backfill = false
 OptionParser.new do |opts|
   opts.banner = "Usage: example.rb [options]"
 
@@ -29,6 +30,10 @@ OptionParser.new do |opts|
 
   opts.on("-mMODE", "--mode=MODE", "Pick mode. Default prod.") do |m|
     mode = m.to_sym
+  end
+
+  opts.on("-b", "--[no-]backfill", "Try to backfill data for items from the 90 days the GE API always provides. Default false.") do |b|
+    backfill = b
   end
 end.parse!
 
@@ -46,15 +51,28 @@ req = GEClientRequest.new "pxmon", TradeConfig.for(mode, :ge_svc, :hostname)
 targets.get_targeted_items.each do |itemid|
   puts "Checking price data for #{itemid}"
   price_history = req.query_prices itemid
-  latest_date = price_history.keys.max
-  puts "date is #{latest_date.to_s}"
-  price = price_history[latest_date]
-  if !prices.has_price_for? itemid, latest_date
-    prices.record_price itemid, latest_date, price if write_to_db
-    puts "Recorded price for #{itemid}"
-    found << itemid
+
+  if backfill
+    found_for_cur_item = false
+    price_history.each_entry do |date, price|
+      if !prices.has_price_for? itemid, date
+        prices.record_price itemid, date, price if write_to_db
+        puts "Recorded price for #{itemid} on date #{date}"
+        found_for_cur_item = true
+      end
+    end
+    found << itemid if found_for_cur_item
   else
-    puts "Already have latest price for #{itemid}"
+    latest_date = price_history.keys.max
+    puts "date is #{latest_date.to_s}"
+    price = price_history[latest_date]
+    if !prices.has_price_for? itemid, latest_date
+      prices.record_price itemid, latest_date, price if write_to_db
+      puts "Recorded price for #{itemid}"
+      found << itemid
+    else
+      puts "Already have latest price for #{itemid}"
+    end
   end
 end
 
