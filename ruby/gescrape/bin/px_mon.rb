@@ -28,7 +28,7 @@ OptionParser.new do |opts|
 end.parse!
 
 puts "Connecting to database..."
-conn = PG.connect(TradeConfig::DB_INFO)
+conn = PG.connect(TradeConfig.for :prod, :db)
 items = ItemTracker.new conn
 prices = PriceTracker.new conn
 targets = TargetTracker.new conn
@@ -62,15 +62,15 @@ msg_body = "New prices found:<br /><br />#{found.join "<br />"}"
 
 if send_email
   mail = Mail.new do
-    from     "pxmon@#{TradeConfig::MAIL_INFO[:sender_host]}"
-    to       TradeConfig::MAIL_INFO[:recipients]
+    from     "pxmon@#{TradeConfig.for :prod, :mail, :sender_host}"
+    to       TradeConfig.for :prod, :mail, :recipients
     subject  "Price Update for #{Date.today.strftime("%d/%m/%Y")} Detected"
     html_part do
       content_type 'text/html; charset=UTF-8'
       body msg_body
     end
   end
-  mail.delivery_method :smtp, address: TradeConfig::MAIL_INFO[:mail_host]
+  mail.delivery_method :smtp, address: TradeConfig.for(:prod, :mail, :mail_host)
   mail.deliver!
 end
 

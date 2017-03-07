@@ -24,20 +24,20 @@ end.parse!
 if send_email
   puts "Sending initial email..."
   mail = Mail.new do
-    from "itemdb@#{TradeConfig::MAIL_INFO[:sender_host]}"
-    to   TradeConfig::MAIL_INFO[:recipients]
+    from "itemdb@#{TradeConfig.for :prod, :mail, :sender_host}"
+    to   TradeConfig.for(:prod, :mail, :recipients)
     subject "Item Table Update For #{Date.today.strftime("%d/%m/%Y")}"
     html_part do
       content_type 'text/html; charset=UTF-8'
       body 'Starting update...'
     end
   end
-  mail.delivery_method :smtp, address: TradeConfig::MAIL_INFO[:mail_host]
+  mail.delivery_method :smtp, address: TradeConfig.for(:prod, :mail, :mail_host)
   mail.deliver!
 end
 
 puts "Connecting to db..."
-conn = PG.connect(TradeConfig::DB_INFO)
+conn = PG.connect(TradeConfig.for :prod, :db)
 
 initial_count = -1
 final_count = -1
@@ -82,12 +82,12 @@ end
 if send_email
   puts "Emailing..."
   mail = Mail.new do
-    from "itemdb@#{TradeConfig::MAIL_INFO[:sender_host]}"
-    to   TradeConfig::MAIL_INFO[:recipients]
+    from "itemdb@#{TradeConfig.for :prod, :mail, :sender_host}"
+    to   TradeConfig.for(:prod, :mail, :recipients)
     subject "Item Table Update For #{Date.today.strftime("%d/%m/%Y")}"
     body "Item update finished.\n\nStart Count: #{initial_count}, End Count: #{final_count}\nItems Processed: #{total_processed}\n\nErrors:#{errored_items.join("\n")}\n\n"
   end
-  mail.delivery_method :smtp, address: TradeConfig::MAIL_INFO[:mail_host]
+  mail.delivery_method :smtp, address: TradeConfig.for(:prod, :mail, :mail_host)
   mail.deliver!
 end
 

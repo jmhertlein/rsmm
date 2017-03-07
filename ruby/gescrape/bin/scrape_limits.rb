@@ -38,7 +38,7 @@ puts "Filtered down to #{limits.size} entries."
 
 
 puts "Connecting to db..."
-conn = PG.connect(TradeConfig::DB_INFO)
+conn = PG.connect(TradeConfig.for :prod, :db)
 
 updates = []
 no_match=0
@@ -69,8 +69,8 @@ mail_body += "<p>Items with updates: #{has_update}</p><br />"
 mail_body += update_table.to_html
 
 mail = Mail.new do
-  from     "limitmon@#{TradeConfig::MAIL_INFO[:sender_host]}"
-  to       TradeConfig::MAIL_INFO[:recipients]
+  from     "limitmon@#{TradeConfig.for :prod, :mail, :sender_host]}"
+  to       TradeConfig.for(:prod, :mail, :recipients)
   subject  "GE Limit Update Report for #{Date.today.strftime("%d/%m/%Y")}"
   html_part do
     content_type 'text/html; charset=UTF-8'
@@ -78,7 +78,7 @@ mail = Mail.new do
   end
 end
 
-mail.delivery_method :smtp, address: TradeConfig::MAIL_INFO[:mail_host]
+mail.delivery_method :smtp, address: TradeConfig.for(:prod, :mail, :mail_host)
 mail.deliver!
 
 puts "Done"

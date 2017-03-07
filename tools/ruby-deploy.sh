@@ -35,6 +35,6 @@ ls
 read USER_ACCEPT
 
 if [[ "$USER_ACCEPT" == "y" ]] ; then
-  gem install --no-user-install *.gem
+  sudo gem install --no-user-install *.gem
 fi
 
