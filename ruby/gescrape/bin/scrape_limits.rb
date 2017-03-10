@@ -31,7 +31,8 @@ puts "Fetched."
 limits = Hash.new
 doc.search("table").each do |table|
   headers = table.search("th")
-  next if !headers[0].text.strip.eql?("Item") || !headers[1].text.strip.eql?("Limit")
+  puts table
+  next if headers[0].nil? || !headers[0].text.strip.eql?("Item") || !headers[1].text.strip.eql?("Limit")
 
   table.search("tr").each do |row|
     items = row.search("td")
@@ -79,7 +80,7 @@ mail_body += "<p>Items with updates: #{has_update}</p><br />"
 mail_body += update_table.to_html
 
 mail = Mail.new do
-  from     "limitmon@#{TradeConfig.for mode, :mail, :sender_host]}"
+  from     "limitmon@#{TradeConfig.for mode, :mail, :sender_host}"
   to       TradeConfig.for(mode, :mail, :recipients)
   subject  "GE Limit Update Report for #{Date.today.strftime("%d/%m/%Y")}"
   html_part do
