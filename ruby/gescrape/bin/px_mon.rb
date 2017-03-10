@@ -15,6 +15,7 @@ require 'ge-svc'
 
 send_email = true
 write_to_db = true
+mode = :prod
 OptionParser.new do |opts|
   opts.banner = "Usage: example.rb [options]"
 
@@ -25,10 +26,14 @@ OptionParser.new do |opts|
   opts.on("-w", "--[no-]write", "Write results to db. Default true.") do |w|
     write_to_db = w
   end
+
+  opts.on("-mMODE", "--mode=MODE", "Pick mode. Default prod.") do |m|
+    mode = m.to_sym
+  end
 end.parse!
 
 puts "Connecting to database..."
-conn = PG.connect(TradeConfig.for :prod, :db)
+conn = PG.connect(TradeConfig.for mode, :db)
 items = ItemTracker.new conn
 prices = PriceTracker.new conn
 targets = TargetTracker.new conn
@@ -37,7 +42,7 @@ targets = TargetTracker.new conn
 missing = []
 found = []
 
-req = GEClientRequest.new "pxmon"
+req = GEClientRequest.new "pxmon", TradeConfig.for(mode, :ge_svc, :hostname)
 targets.get_targeted_items.each do |itemid|
   puts "Checking price data for #{itemid}"
   price_history = req.query_prices itemid
@@ -62,15 +67,15 @@ msg_body = "New prices found:<br /><br />#{found.join "<br />"}"
 
 if send_email
   mail = Mail.new do
-    from     "pxmon@#{TradeConfig.for :prod, :mail, :sender_host}"
-    to       TradeConfig.for :prod, :mail, :recipients
+    from     "pxmon@#{TradeConfig.for mode, :mail, :sender_host}"
+    to       TradeConfig.for mode, :mail, :recipients
     subject  "Price Update for #{Date.today.strftime("%d/%m/%Y")} Detected"
     html_part do
       content_type 'text/html; charset=UTF-8'
       body msg_body
     end
   end
-  mail.delivery_method :smtp, address: TradeConfig.for(:prod, :mail, :mail_host)
+  mail.delivery_method :smtp, address: TradeConfig.for(mode, :mail, :mail_host)
   mail.deliver!
 end
 

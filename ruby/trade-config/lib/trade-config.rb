@@ -15,6 +15,9 @@ module TradeConfig
         sender_host: "trade.jmhertlein.net",
         recipients: "jmhertlein@gmail.com",
         mail_host: "trade.jmhertlein.net",
+      },
+      ge_svc: {
+        hostname: "claudius"
       }
     },
 
@@ -30,6 +33,9 @@ module TradeConfig
         sender_host: "trade.jmhertlein.net",
         recipients: "jmhertlein@gmail.com",
         mail_host: "trade.jmhertlein.net",
+      },
+      ge_svc: {
+        hostname: "claudius"
       }
     }
   }

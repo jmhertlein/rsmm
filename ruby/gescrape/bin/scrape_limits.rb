@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'optparse'
 require 'yaml'
 require "json"
 require "net/http"
@@ -13,6 +14,15 @@ require 'trade-db'
 require 'trade-config'
 
 GE_LIMITS_URL="http://runescape.wikia.com/wiki/Ge_limits"
+
+mode = :prod
+OptionParser.new do |opts|
+  opts.banner = "Usage: "
+
+  opts.on("-mMODE", "--mode=MODE", "Pick mode. Default prod.") do |m|
+    mode = m.to_sym
+  end
+end.parse!
 
 puts "Fetching page at #{GE_LIMITS_URL}"
 doc = Nokogiri::HTML(open(GE_LIMITS_URL))
@@ -38,7 +48,7 @@ puts "Filtered down to #{limits.size} entries."
 
 
 puts "Connecting to db..."
-conn = PG.connect(TradeConfig.for :prod, :db)
+conn = PG.connect(TradeConfig.for mode, :db)
 
 updates = []
 no_match=0
@@ -69,8 +79,8 @@ mail_body += "<p>Items with updates: #{has_update}</p><br />"
 mail_body += update_table.to_html
 
 mail = Mail.new do
-  from     "limitmon@#{TradeConfig.for :prod, :mail, :sender_host]}"
-  to       TradeConfig.for(:prod, :mail, :recipients)
+  from     "limitmon@#{TradeConfig.for mode, :mail, :sender_host]}"
+  to       TradeConfig.for(mode, :mail, :recipients)
   subject  "GE Limit Update Report for #{Date.today.strftime("%d/%m/%Y")}"
   html_part do
     content_type 'text/html; charset=UTF-8'
@@ -78,7 +88,7 @@ mail = Mail.new do
   end
 end
 
-mail.delivery_method :smtp, address: TradeConfig.for(:prod, :mail, :mail_host)
+mail.delivery_method :smtp, address: TradeConfig.for(mode, :mail, :mail_host)
 mail.deliver!
 
 puts "Done"

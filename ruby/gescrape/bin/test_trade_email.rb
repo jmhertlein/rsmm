@@ -8,13 +8,23 @@ require 'open-uri'
 require 'pg'
 require 'nokogiri'
 require 'mail'
+require 'optparse'
 require 'gescrape/html/table'
 require 'trade-db'
 require 'trade-config'
 
+mode = :prod
+OptionParser.new do |opts|
+  opts.banner = "Usage: "
+
+  opts.on("-mMODE", "--mode=MODE", "Pick mode. Default prod.") do |m|
+    mode = m.to_sym
+  end
+end.parse!
+
 mail = Mail.new do
-  from     "testemail@#{TradeConfig.for :prod, :mail, :sender_host}"
-  to       TradeConfig.for(:prod, :mail, :recipients)
+  from     "testemail@#{TradeConfig.for mode, :mail, :sender_host}"
+  to       TradeConfig.for(mode, :mail, :recipients)
   subject  "Test Email Please Ignore"
   html_part do
     content_type 'text/html; charset=UTF-8'
@@ -22,7 +32,7 @@ mail = Mail.new do
   end
 end
 
-mail.delivery_method :smtp, address: TradeConfig.for(:prod, :mail, :mail_host)
+mail.delivery_method :smtp, address: TradeConfig.for(mode, :mail, :mail_host)
 mail.deliver!
 
 puts "Done"

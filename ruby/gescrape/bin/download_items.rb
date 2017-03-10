@@ -13,38 +13,43 @@ require 'optparse'
 require 'ge-svc'
 
 send_email = true
+mode = :prod
 OptionParser.new do |opts|
   opts.banner = "Usage: example.rb [options]"
 
   opts.on("-e", "--[no-]email", "Send email. Default true.") do |e|
     send_email = e
   end
+
+  opts.on("-mMODE", "--mode=MODE", "Pick mode. Default prod.") do |m|
+    mode = m.to_sym
+  end
 end.parse!
 
 if send_email
   puts "Sending initial email..."
   mail = Mail.new do
-    from "itemdb@#{TradeConfig.for :prod, :mail, :sender_host}"
-    to   TradeConfig.for(:prod, :mail, :recipients)
+    from "itemdb@#{TradeConfig.for mode, :mail, :sender_host}"
+    to   TradeConfig.for(mode, :mail, :recipients)
     subject "Item Table Update For #{Date.today.strftime("%d/%m/%Y")}"
     html_part do
       content_type 'text/html; charset=UTF-8'
       body 'Starting update...'
     end
   end
-  mail.delivery_method :smtp, address: TradeConfig.for(:prod, :mail, :mail_host)
+  mail.delivery_method :smtp, address: TradeConfig.for(mode, :mail, :mail_host)
   mail.deliver!
 end
 
 puts "Connecting to db..."
-conn = PG.connect(TradeConfig.for :prod, :db)
+conn = PG.connect(TradeConfig.for mode, :db)
 
 initial_count = -1
 final_count = -1
 total_processed = 0
 errored_items = []
 
-req = GEClientRequest.new "itemdb"
+req = GEClientRequest.new "itemdb", TradeConfig.for(mode, :ge_svc, :hostname)
 puts "Opening transaction..."
 conn.transaction do |txn|
   items = ItemTracker.new txn
@@ -82,12 +87,12 @@ end
 if send_email
   puts "Emailing..."
   mail = Mail.new do
-    from "itemdb@#{TradeConfig.for :prod, :mail, :sender_host}"
-    to   TradeConfig.for(:prod, :mail, :recipients)
+    from "itemdb@#{TradeConfig.for mode, :mail, :sender_host}"
+    to   TradeConfig.for(mode, :mail, :recipients)
     subject "Item Table Update For #{Date.today.strftime("%d/%m/%Y")}"
     body "Item update finished.\n\nStart Count: #{initial_count}, End Count: #{final_count}\nItems Processed: #{total_processed}\n\nErrors:#{errored_items.join("\n")}\n\n"
   end
-  mail.delivery_method :smtp, address: TradeConfig.for(:prod, :mail, :mail_host)
+  mail.delivery_method :smtp, address: TradeConfig.for(mode, :mail, :mail_host)
   mail.deliver!
 end
 
