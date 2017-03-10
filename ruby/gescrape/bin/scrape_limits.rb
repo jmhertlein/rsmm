@@ -31,7 +31,6 @@ puts "Fetched."
 limits = Hash.new
 doc.search("table").each do |table|
   headers = table.search("th")
-  puts table
   next if headers[0].nil? || !headers[0].text.strip.eql?("Item") || !headers[1].text.strip.eql?("Limit")
 
   table.search("tr").each do |row|
