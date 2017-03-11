@@ -55,7 +55,9 @@ targets.get_targeted_items.each do |itemid|
   if backfill
     found_for_cur_item = false
     price_history.each_entry do |date, price|
-      if !prices.has_price_for? itemid, date
+      if prices.has_price_for? itemid, date
+        puts "Already have price for #{itemid} on #{date}"
+      else
         prices.record_price itemid, date, price if write_to_db
         puts "Recorded price for #{itemid} on date #{date}"
         found_for_cur_item = true
