@@ -2,7 +2,7 @@
 Description=Grand Exchange API Proxy Service
 
 [Service]
-ExecStart=/usr/bin/ge-svc.rb
+ExecStart=/bin/bash -l -c ge-svc.rb
 User=rsmm
 
 [Install]
