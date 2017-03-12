@@ -33,7 +33,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>net.jmhertlein.rsmm.FXRSMarketMaker</mainClass>
+              <mainClass>cafe.josh.rsmm.FXRSMarketMaker</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -61,7 +61,7 @@
         <version>8.7.0</version>
         <configuration>
           <vendor>jmhnet</vendor>
-          <mainClass>net.jmhertlein.rsmm.FXRSMarketMaker</mainClass>
+          <mainClass>cafe.josh.rsmm.FXRSMarketMaker</mainClass>
         </configuration>
       </plugin>
       <plugin>
@@ -79,7 +79,7 @@
               <outfile>target/rsmm.exe</outfile>
               <errTitle>RS Market Maker</errTitle>
               <classPath>
-                <mainClass>net.jmhertlein.rsmm.FXRSMarketMaker</mainClass>
+                <mainClass>cafe.josh.rsmm.FXRSMarketMaker</mainClass>
                 <addDependencies>false</addDependencies>
                 <preCp>anything</preCp>
               </classPath>
