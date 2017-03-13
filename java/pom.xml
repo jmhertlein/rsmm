@@ -23,7 +23,22 @@
       <version>4.12</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>cafe.josh</groupId>
+      <artifactId>joshfx</artifactId>
+      <version>1</version>
+    </dependency>
   </dependencies>
+  <repositories>
+    <repository>
+      <id>jmh-repo</id>
+      <url>https://maven.josh.cafe/</url>
+    </repository>
+    <repository>
+      <id>jmh-repo-private</id>
+      <url>sftp://maven.josh.cafe/home/maven/repo/</url>
+    </repository>
+  </repositories>
   <build>
     <plugins>
       <plugin>
