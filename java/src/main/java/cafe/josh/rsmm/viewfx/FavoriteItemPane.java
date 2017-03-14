@@ -2,7 +2,7 @@ package cafe.josh.rsmm.viewfx;
 
 import cafe.josh.rsmm.model.Item;
 import cafe.josh.rsmm.viewfx.util.Dialogs;
-import cafe.josh.rsmm.viewfx.util.FXMLBorderPane;
+import cafe.josh.joshfx.FXMLBorderPane;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;

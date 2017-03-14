@@ -1,5 +1,6 @@
 package cafe.josh.rsmm.viewfx;
 
+import cafe.josh.joshfx.FXMLBorderPane;
 import cafe.josh.rsmm.controller.*;
 import cafe.josh.rsmm.model.*;
 import cafe.josh.rsmm.viewfx.util.*;
