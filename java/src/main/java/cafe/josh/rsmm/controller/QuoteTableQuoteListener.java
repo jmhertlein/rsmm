@@ -4,9 +4,6 @@ import cafe.josh.rsmm.model.Quote;
 import cafe.josh.rsmm.model.update.QuoteListener;
 import javafx.collections.ObservableList;
 
-/**
- * Created by joshua on 5/13/16.
- */
 public class QuoteTableQuoteListener implements QuoteListener {
     private final ObservableList<Quote> visibleQuotes;
 

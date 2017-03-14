@@ -1,16 +1,13 @@
 package cafe.josh.rsmm.controller;
 
+import cafe.josh.joshfx.Dialogs;
 import cafe.josh.rsmm.model.NoQuoteException;
 import cafe.josh.rsmm.model.QuoteManager;
 import cafe.josh.rsmm.model.Trade;
 import cafe.josh.rsmm.model.update.TradeListener;
-import cafe.josh.rsmm.viewfx.util.Dialogs;
 
 import java.sql.SQLException;
 
-/**
- * Created by joshua on 5/13/16.
- */
 public class RecalculateProfitOnTradeListener implements TradeListener {
     private final QuoteManager quotes;
 

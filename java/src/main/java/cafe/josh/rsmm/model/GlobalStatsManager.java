@@ -1,5 +1,6 @@
 package cafe.josh.rsmm.model;
 
+import cafe.josh.joshfx.Dialogs;
 import cafe.josh.rsmm.model.update.TurnListener;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
@@ -7,16 +8,12 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import cafe.josh.rsmm.model.update.QuoteListener;
 import cafe.josh.rsmm.model.update.TradeListener;
-import cafe.josh.rsmm.viewfx.util.Dialogs;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * Created by joshua on 3/25/16.
- */
 public class GlobalStatsManager implements TradeListener, TurnListener, QuoteListener {
     private final LongProperty totalProfit;
     private final IntegerProperty profitToday;

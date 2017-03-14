@@ -1,7 +1,7 @@
 package cafe.josh.rsmm.viewfx;
 
+import cafe.josh.joshfx.Dialogs;
 import cafe.josh.rsmm.model.Item;
-import cafe.josh.rsmm.viewfx.util.Dialogs;
 import cafe.josh.joshfx.FXMLBorderPane;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,9 +16,6 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Created by joshua on 5/13/16.
- */
 public class FavoriteItemPane extends FXMLBorderPane {
 
     private final ObservableList<Item> nonFavorites, favorites;

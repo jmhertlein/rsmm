@@ -6,9 +6,6 @@ import javafx.scene.control.TableView;
 import javafx.util.Callback;
 import cafe.josh.rsmm.model.Quote;
 
-/**
- * Created by joshua on 5/14/16.
- */
 public class QuoteTableRowFactory implements Callback<TableView<Quote>, TableRow<Quote>> {
     @Override
     public TableRow<Quote> call(TableView<Quote> val) {

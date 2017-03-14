@@ -17,8 +17,8 @@
 package cafe.josh.rsmm.model;
 
 
+import cafe.josh.joshfx.Dialogs;
 import cafe.josh.rsmm.model.update.QuoteListener;
-import cafe.josh.rsmm.viewfx.util.Dialogs;
 
 import java.sql.*;
 import java.sql.Date;

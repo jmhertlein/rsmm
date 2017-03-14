@@ -1,13 +1,12 @@
-package cafe.josh.rsmm;/**
- * Created by joshua on 3/11/16.
- */
+package cafe.josh.rsmm;
 
+import cafe.josh.joshfx.Dialogs;
 import cafe.josh.rsmm.viewfx.MMPane;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import cafe.josh.rsmm.viewfx.util.Dialogs;
+
 
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -1,5 +1,6 @@
 package cafe.josh.rsmm.viewfx;
 
+import cafe.josh.joshfx.Dialogs;
 import cafe.josh.joshfx.FXMLBorderPane;
 import cafe.josh.rsmm.controller.*;
 import cafe.josh.rsmm.model.*;
@@ -33,9 +34,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Created by joshua on 3/11/16.
- */
 public class MMPane extends FXMLBorderPane {
     private final Connection conn;
     private final ItemManager items;
