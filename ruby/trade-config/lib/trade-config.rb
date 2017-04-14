@@ -12,9 +12,9 @@ module TradeConfig
         sslrootcert: File.join(Dir.home, ".postgresql", "root.crt")
       }, 
       mail: {
-        sender_host: "trade.jmhertlein.net",
+        sender_host: "rsmm.josh.cafe",
         recipients: "jmhertlein@gmail.com",
-        mail_host: "trade.jmhertlein.net",
+        mail_host: "rsmm.josh.cafe",
       },
       ge_svc: {
         hostname: "claudius"
@@ -30,9 +30,9 @@ module TradeConfig
         sslmode: "allow",
       }, 
       mail: {
-        sender_host: "trade.jmhertlein.net",
+        sender_host: "rsmm.josh.cafe",
         recipients: "jmhertlein@gmail.com",
-        mail_host: "trade.jmhertlein.net",
+        mail_host: "rsmm.josh.cafe",
       },
       ge_svc: {
         hostname: "claudius"
