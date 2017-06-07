@@ -36,7 +36,7 @@
     </repository>
     <repository>
       <id>jmh-repo-private</id>
-      <url>sftp://maven.josh.cafe/home/maven/repo/</url>
+      <url>scpexe://maven.josh.cafe/home/maven/repo/</url>
     </repository>
   </repositories>
   <build>
@@ -118,5 +118,12 @@
         </executions>
       </plugin>
     </plugins>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ssh-external</artifactId>
+        <version>2.10</version>
+      </extension>
+    </extensions>
   </build>
 </project>
