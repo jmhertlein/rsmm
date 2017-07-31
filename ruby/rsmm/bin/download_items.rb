@@ -6,11 +6,11 @@ require "net/http"
 require "uri"
 require 'mail'
 require 'pg'
-require 'ge-api'
-require 'trade-db'
-require 'trade-config'
+require 'rsmm/ge-api'
+require 'rsmm/db'
+require 'rsmm/config'
 require 'optparse'
-require 'ge-svc'
+require 'rsmm/ge-svc'
 
 send_email = true
 mode = :prod

@@ -6,12 +6,12 @@ require "net/http"
 require "uri"
 require 'mail'
 require 'pg'
-require 'ge-api'
-require 'gescrape/html/table'
-require 'trade-config'
-require 'trade-db'
+require 'rsmm/ge-api'
+require 'rsmm/crape/html/table'
+require 'rsmm/config'
+require 'rsmm/db'
+require 'rsmm/ge-svc'
 require 'optparse'
-require 'ge-svc'
 
 send_email = true
 write_to_db = true

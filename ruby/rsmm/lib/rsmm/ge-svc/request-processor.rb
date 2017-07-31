@@ -1,5 +1,5 @@
-require 'ge-svc/rr-queue'
-require 'ge-api'
+require 'rsmm/ge-svc/rr-queue'
+require 'rsmm/ge-api'
 class RequestProcessor
   BURST_THROTTLE_INTERVAL_SECONDS = 60 * 60
   SAFE_DELAY_INTERVAL_SECONDS = 5

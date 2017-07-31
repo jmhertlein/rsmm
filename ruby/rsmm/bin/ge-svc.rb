@@ -5,8 +5,8 @@ require 'ostruct'
 require 'yaml'
 require 'json'
 
-require 'ge-svc/ge-request'
-require 'ge-svc/request-processor'
+require 'rsmm/ge-svc/ge-request'
+require 'rsmm/ge-svc/request-processor'
 
 Thread.abort_on_exception = true
 STDOUT.sync = true

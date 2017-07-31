@@ -9,9 +9,9 @@ require 'open-uri'
 require 'pg'
 require 'nokogiri'
 require 'mail'
-require 'gescrape/html/table'
-require 'trade-db'
-require 'trade-config'
+require 'rsmm/scrape/html/table'
+require 'rsmm/db'
+require 'rsmm/config'
 
 GE_LIMITS_URL="http://runescape.wikia.com/wiki/Ge_limits"
 

@@ -1,4 +1,4 @@
-require_relative 'ge/ge_api.rb'
+require 'rsmm/ge-api'
 
 def slurp_prices_for prices, itemid
   dl = dl_prices_for_item(itemid)

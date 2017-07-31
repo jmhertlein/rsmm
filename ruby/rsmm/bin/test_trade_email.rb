@@ -9,9 +9,9 @@ require 'pg'
 require 'nokogiri'
 require 'mail'
 require 'optparse'
-require 'gescrape/html/table'
-require 'trade-db'
-require 'trade-config'
+require 'rsmm/scrape/html/table'
+require 'rsmm/db'
+require 'rsmm/config'
 
 mode = :prod
 OptionParser.new do |opts|
