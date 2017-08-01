@@ -1,5 +1,5 @@
 require 'minitest/autorun'
-require_relative '../lib/ge-svc/rr-queue.rb'
+require 'rsmm/ge-svc/rr-queue.rb'
 
 class TestMeme < MiniTest::Test
   def test_bulk_insert
