@@ -1,6 +1,7 @@
 class TargetTracker
-  def initialize conn
+  def initialize conn, rs_type
     @conn = conn
+    @rs_type = rs_type
   end
 
   def get_targeted_items

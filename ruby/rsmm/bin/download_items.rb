@@ -6,25 +6,23 @@ require "net/http"
 require "uri"
 require 'mail'
 require 'pg'
-require 'rsmm/ge-api'
 require 'rsmm/db'
 require 'rsmm/config'
-require 'optparse'
 require 'rsmm/ge-svc'
+require 'opts4j4r'
 
 send_email = true
 mode = :prod
-OptionParser.new do |opts|
-  opts.banner = "Usage: example.rb [options]"
+options = Opts4J4R::parse do |opts|
+  opts.flag :email, "Send an email on finish or not.", true
+  #opts.flag :write, "Write results to db. Default true."
+  opts.sym! :mode, "One of [prod, dev]."
+  opts.sym! :rs_type, "One of [osrs, rs3]"
+end
 
-  opts.on("-e", "--[no-]email", "Send email. Default true.") do |e|
-    send_email = e
-  end
-
-  opts.on("-mMODE", "--mode=MODE", "Pick mode. Default prod.") do |m|
-    mode = m.to_sym
-  end
-end.parse!
+mode = options[:mode]
+send_email = options[:email]
+rs_type = options[:rs_type]
 
 if send_email
   puts "Sending initial email..."
@@ -49,7 +47,7 @@ final_count = -1
 total_processed = 0
 errored_items = []
 
-req = GEClientRequest.new "itemdb", TradeConfig.for(mode, :ge_svc, :hostname)
+req = GEClientRequest.new "itemdb", rs_type, TradeConfig.for(mode, :ge_svc, :hostname)
 puts "Opening transaction..."
 conn.transaction do |txn|
   items = ItemTracker.new txn

@@ -1,15 +1,16 @@
 require 'date'
 class PriceTracker
-  def initialize conn
+  def initialize conn, rs_type
     @conn = conn
+    @rs_type = rs_type
   end
 
   def record_price itemid, date, price, created=DateTime.now
-    @conn.exec_params('INSERT INTO Price VALUES($1, $2, $3, $4)', [itemid, date, price, created])
+    @conn.exec_params('INSERT INTO Price VALUES($1, $2, $3, $4, $5)', [itemid, date, @rs_type, price, created])
   end
 
   def price_for itemid, date=Date.today
-    res = @conn.exec_params('SELECT price FROM Price WHERE item_id=$1 AND day=$2', [itemid,date])
+    res = @conn.exec_params('SELECT price FROM Price WHERE item_id=$1 AND day=$2 and rs_type=$3', [itemid,date,@rs_type])
 
     return res.ntuples == 0 ? nil : res[0]["price"].to_i
   end
@@ -19,7 +20,7 @@ class PriceTracker
   end
 
   def latest_price_for itemid
-    res = @conn.exec_params('SELECT price FROM Price WHERE item_id = $1 AND day=(SELECT MAX(day) FROM Price WHERE item_id=$1)', [itemid])
+    res = @conn.exec_params('SELECT price FROM Price WHERE item_id = $1 AND rs_type=$2 AND day=(SELECT MAX(day) FROM Price WHERE item_id=$1 and rs_type=$2)', [itemid, @rs_type])
     if res.ntuples == 0
       raise "missing latest price for #{itemid}"
     end
@@ -31,7 +32,7 @@ class PriceTracker
   end
 
   def prices_for itemid, date=Date.today, n_days=180
-    res = @conn.exec_params('SELECT day,price FROM Price WHERE item_id = $1 AND day BETWEEN $3 AND $2 ORDER BY day ASC', [itemid, date, date-(n_days-1)])
+    res = @conn.exec_params('SELECT day,price FROM Price WHERE item_id = $1 AND rs_type=$4 AND day BETWEEN $3 AND $2 ORDER BY day ASC', [itemid, date, date-(n_days-1), @rs_type])
     raise "not enough price data (found #{res.ntuples}, needed #{n_days})" if res.ntuples != n_days
     return res.each.map{|tup| tup["price"].to_i}
   end

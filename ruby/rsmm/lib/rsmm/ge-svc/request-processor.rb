@@ -1,5 +1,5 @@
 require 'rsmm/ge-svc/rr-queue'
-require 'rsmm/ge-api'
+require 'rsmm/jamflex'
 class RequestProcessor
   BURST_THROTTLE_INTERVAL_SECONDS = 60 * 60
   SAFE_DELAY_INTERVAL_SECONDS = 5
@@ -35,12 +35,12 @@ class RequestProcessor
       request = @queue_mutex.synchronize { @queue.pop }
       puts "Handling request for #{request.name}"
       wait_for_api_throttle
-      str = get_json(request.url)
+      str = Jamflex::get_json(request.url)
       mark_request_time
       while str.nil? do
         mark_throttle_time
         wait_for_api_throttle
-        str = get_json(request.url)
+        str = Jamflex::get_json(request.url)
         mark_request_time
       end
 

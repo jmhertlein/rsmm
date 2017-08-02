@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'optparse'
 require 'yaml'
 require "json"
 require "net/http"
@@ -12,17 +11,15 @@ require 'mail'
 require 'rsmm/scrape/html/table'
 require 'rsmm/db'
 require 'rsmm/config'
+require 'opts4j4r'
 
 GE_LIMITS_URL="http://runescape.wikia.com/wiki/Ge_limits"
 
-mode = :prod
-OptionParser.new do |opts|
-  opts.banner = "Usage: "
+options = Opts4J4R::parse do |opts|
+  opts.sym! :mode, "One of [prod, dev]."
+end
 
-  opts.on("-mMODE", "--mode=MODE", "Pick mode. Default prod.") do |m|
-    mode = m.to_sym
-  end
-end.parse!
+mode = options[:mode]
 
 puts "Fetching page at #{GE_LIMITS_URL}"
 doc = Nokogiri::HTML(open(GE_LIMITS_URL))

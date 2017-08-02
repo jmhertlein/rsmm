@@ -1,21 +1,23 @@
 require 'json'
 class GERequest 
-  CATEGORY_URL_FORMAT="http://services.runescape.com/m=itemdb_rs/api/catalogue/items.json?category=%d&alpha=%s&page=%d"
-  PRICE_URL_FORMAT="http://services.runescape.com/m=itemdb_rs/api/graph/%d.json"
+  TYPE_TO_PATH={osrs: "http://services.runescape.com/m=itemdb_oldschool", rs3: "http://services.runescape.com/m=itemdb_rs"}
+  CATEGORY_URL_FORMAT="%s/api/catalogue/items.json?category=%d&alpha=%s&page=%d"
+  PRICE_URL_FORMAT="%s/api/graph/%d.json"
   attr_accessor :name, :socket, :details, :type
 
   def initialize socket, raw
     @socket = socket
     @name = raw["name"]
     @type = raw["type"].to_sym
+    @rs_type = raw["rs_type"].to_sym
     @details = raw
   end
 
   def url
     if @type == :category
-      return CATEGORY_URL_FORMAT % [@details["category"], @details["letter"], @details["page"]]
+      return CATEGORY_URL_FORMAT % [TYPE_TO_PATH[@rs_type], @details["category"], @details["letter"], @details["page"]]
     elsif @type == :price
-      return PRICE_URL_FORMAT % [@details["item_id"]]
+      return PRICE_URL_FORMAT % [TYPE_TO_PATH[@rs_type], @details["item_id"]]
     end
   end
 

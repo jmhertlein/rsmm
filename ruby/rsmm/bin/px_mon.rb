@@ -6,36 +6,25 @@ require "net/http"
 require "uri"
 require 'mail'
 require 'pg'
-require 'rsmm/ge-api'
-require 'rsmm/crape/html/table'
+require 'rsmm/scrape/html/table'
 require 'rsmm/config'
 require 'rsmm/db'
 require 'rsmm/ge-svc'
 require 'optparse'
 
-send_email = true
-write_to_db = true
-mode = :prod
-backfill = false
-OptionParser.new do |opts|
-  opts.banner = "Usage: example.rb [options]"
+options = Opts4J4R::parse do |opts|
+  opts.flag :email, "Send an email on finish or not.", true
+  opts.flag :write, "Write results to db. Default true.", true
+  opts.sym! :mode, "One of [prod, dev]."
+  opts.flag :backfill, "Try to backfill ~90 days of data."
+  opts.sym! :rs_type, "One of [osrs, rs3]"
+end
 
-  opts.on("-e", "--[no-]email", "Send email. Default true.") do |e|
-    send_email = e
-  end
-
-  opts.on("-w", "--[no-]write", "Write results to db. Default true.") do |w|
-    write_to_db = w
-  end
-
-  opts.on("-mMODE", "--mode=MODE", "Pick mode. Default prod.") do |m|
-    mode = m.to_sym
-  end
-
-  opts.on("-b", "--[no-]backfill", "Try to backfill data for items from the 90 days the GE API always provides. Default false.") do |b|
-    backfill = b
-  end
-end.parse!
+send_email = options[:email]
+write_to_db = options[:write]
+mode = options[:mode]
+backfill = options[:backfill]
+rs_type = options[:rs_type]
 
 puts "Connecting to database..."
 conn = PG.connect(TradeConfig.for mode, :db)
@@ -47,7 +36,7 @@ targets = TargetTracker.new conn
 missing = []
 found = []
 
-req = GEClientRequest.new "pxmon", TradeConfig.for(mode, :ge_svc, :hostname)
+req = GEClientRequest.new "pxmon", rs_type, TradeConfig.for(mode, :ge_svc, :hostname)
 targets.get_targeted_items.each do |itemid|
   puts "Checking price data for #{itemid}"
   price_history = req.query_prices itemid
