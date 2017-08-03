@@ -10,7 +10,7 @@ require 'rsmm/scrape/html/table'
 require 'rsmm/config'
 require 'rsmm/db'
 require 'rsmm/ge-svc'
-require 'optparse'
+require 'opts4j4r'
 
 options = Opts4J4R::parse do |opts|
   opts.flag :email, "Send an email on finish or not.", true
@@ -28,9 +28,9 @@ rs_type = options[:rs_type]
 
 puts "Connecting to database..."
 conn = PG.connect(TradeConfig.for mode, :db)
-items = ItemTracker.new conn
-prices = PriceTracker.new conn
-targets = TargetTracker.new conn
+items = ItemTracker.new conn, rs_type
+prices = PriceTracker.new conn, rs_type
+targets = TargetTracker.new conn, rs_type
 
 # price updates
 missing = []

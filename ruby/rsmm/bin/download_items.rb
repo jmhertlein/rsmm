@@ -50,7 +50,7 @@ errored_items = []
 req = GEClientRequest.new "itemdb", rs_type, TradeConfig.for(mode, :ge_svc, :hostname)
 puts "Opening transaction..."
 conn.transaction do |txn|
-  items = ItemTracker.new txn
+  items = ItemTracker.new txn, rs_type
   
   initial_count = items.count_all
   puts "Count at start: #{initial_count}"

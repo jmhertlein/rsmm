@@ -15,17 +15,19 @@ CREATE TABLE IF NOT EXISTS Turn(
   rs_type rs_type,
   open_ts TIMESTAMP NOT NULL DEFAULT now(),
   close_ts TIMESTAMP,
-  item_id INTEGER NOT NULL REFERENCES Item(item_id) ON UPDATE CASCADE,
-  PRIMARY KEY (turn_id, rs_type)
+  item_id INTEGER NOT NULL,
+  PRIMARY KEY (turn_id, rs_type),
+  FOREIGN KEY (item_id, rs_type) REFERENCES Item(item_id, rs_type) ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Trade(
-  turn_id INTEGER REFERENCES Turn(turn_id),
+  turn_id INTEGER,
   trade_ts TIMESTAMP NOT NULL DEFAULT now(),
   rs_type rs_type,
   price INTEGER NOT NULL,
   quantity INTEGER NOT NULL,
-  PRIMARY KEY(turn_id, trade_ts, rs_type)
+  PRIMARY KEY(turn_id, trade_ts, rs_type),
+  FOREIGN KEY (turn_id, rs_type) REFERENCES Turn(turn_id, rs_type)
 );
 
 CREATE TABLE IF NOT EXISTS Quote(
@@ -33,18 +35,20 @@ CREATE TABLE IF NOT EXISTS Quote(
   rs_type rs_type,
   bid1 INTEGER NOT NULL,
   ask1 INTEGER NOT NULL,
-  item_id INTEGER REFERENCES Item(item_id) ON UPDATE CASCADE,
+  item_id INTEGER,
   synthetic BOOLEAN NOT NULL,
-  PRIMARY KEY(item_id, quote_ts, rs_type)
+  PRIMARY KEY(item_id, quote_ts, rs_type),
+  FOREIGN KEY (item_id, rs_type) references Item(item_id, rs_type) ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Price(
-  item_id INTEGER NOT NULL REFERENCES Item(item_id) ON UPDATE CASCADE,
+  item_id INTEGER NOT NULL,
   day DATE NOT NULL,
   rs_type rs_type,
   price INTEGER NOT NULL,
   created_ts TIMESTAMP DEFAULT now(),
-  PRIMARY KEY(item_id, day, rs_type)
+  PRIMARY KEY(item_id, day, rs_type),
+  FOREIGN KEY (item_id, rs_type) REFERENCES Item(item_id, rs_type) ON UPDATE CASCADE
 );
 
 create view daily_history as (select close_ts::date as day,
