@@ -1,13 +1,14 @@
 require 'net/http'
 require 'json'
 require 'uri'
+require 'date'
 
 module Jamflex
-  def jamflex_to_date epoch_millis
+  def self.jamflex_to_date epoch_millis
     return Date.parse(Time.at(epoch_millis[0..-4].to_i).utc.to_s)
   end
 
-  def get_json path
+  def self.get_json path
     #puts "Fetching #{path}"
     begin
       uri = URI.parse(path)

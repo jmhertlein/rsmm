@@ -11,38 +11,37 @@ require 'mail'
 require 'rsmm/scrape/html/table'
 require 'rsmm/db'
 require 'rsmm/config'
+require 'rsmm/scrape/rs_type_scrapers'
 require 'opts4j4r'
 
-GE_LIMITS_URL="http://runescape.wikia.com/wiki/Ge_limits"
+LIMITS_URL_FOR_RS_TYPE = {rs3: "http://runescape.wikia.com/wiki/Calculator:Grand_Exchange_buying_limits", osrs: "http://oldschoolrunescape.wikia.com/wiki/Grand_Exchange/Buying_limits" }
 
 options = Opts4J4R::parse do |opts|
   opts.sym! :mode, "One of [prod, dev]."
+  opts.sym! :rs_type, "One of [osrs, rs3]."
 end
 
 mode = options[:mode]
+rs_type = options[:rs_type]
 
-puts "Fetching page at #{GE_LIMITS_URL}"
-doc = Nokogiri::HTML(open(GE_LIMITS_URL))
+limits_url = LIMITS_URL_FOR_RS_TYPE[rs_type]
+puts "Fetching page at #{limits_url}"
+doc = Nokogiri::HTML(open(limits_url))
 puts "Fetched."
 
-limits = Hash.new
-doc.search("table").each do |table|
-  headers = table.search("th")
-  next if headers[0].nil? || !headers[0].text.strip.eql?("Item") || !headers[1].text.strip.eql?("Limit")
-
-  table.search("tr").each do |row|
-    items = row.search("td")
-    next if items.empty?
-    item_name = items[0].text.strip
-    item_limit = items[1].text.strip.gsub(/,/, "").to_i
-    limits[item_name] = item_limit
-  end
+limits = nil
+case rs_type
+  when :osrs
+    limits = scrape_for_osrs doc
+  when :rs3
+    limits = scrape_for_rs3 doc
+  else
+    raise "Unhandled rs_type: #{rs_type}"
 end
 
 puts "Got #{limits.size} limit entries."
 limits.select!{|k,v| v != 0}
 puts "Filtered down to #{limits.size} entries."
-
 
 puts "Connecting to db..."
 conn = PG.connect(TradeConfig.for mode, :db)
@@ -52,7 +51,7 @@ no_match=0
 has_update=0
 puts "Opening transaction..."
 conn.transaction do |txn|
-  items = ItemTracker.new txn
+  items = ItemTracker.new txn, rs_type
   limits.each do |item, limit|
     id = items.id_for item
     no_match += 1 if id.nil?

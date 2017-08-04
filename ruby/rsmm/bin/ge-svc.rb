@@ -7,7 +7,7 @@ require 'json'
 require 'rsmm/ge-svc/ge-request'
 require 'rsmm/ge-svc/request-processor'
 
-require 'opts4j4r'
+require 'optparse'
 
 Thread.abort_on_exception = true
 STDOUT.sync = true

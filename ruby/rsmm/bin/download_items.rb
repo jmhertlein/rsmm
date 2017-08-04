@@ -11,6 +11,8 @@ require 'rsmm/config'
 require 'rsmm/ge-svc'
 require 'opts4j4r'
 
+TYPE_TO_VALID_CATEGORIES={osrs: (1..1), rs3: (0..37)}
+
 send_email = true
 mode = :prod
 options = Opts4J4R::parse do |opts|
@@ -55,7 +57,7 @@ conn.transaction do |txn|
   initial_count = items.count_all
   puts "Count at start: #{initial_count}"
 
-  (0..37).each do |ctg|
+  TYPE_TO_VALID_CATEGORIES[rs_type].each do |ctg|
     puts "--------Category: #{ctg}"
     ('a'..'z').each do |let|
       puts "----Letter: #{let}"
