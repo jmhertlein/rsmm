@@ -19,10 +19,14 @@ LIMITS_URL_FOR_RS_TYPE = {rs3: "http://runescape.wikia.com/wiki/Calculator:Grand
 options = Opts4J4R::parse do |opts|
   opts.sym! :mode, "One of [prod, dev]."
   opts.sym! :rs_type, "One of [osrs, rs3]."
+  opts.flag :show_non_matching, "Include list of non-matching items in stdout output."
 end
+
+puts options
 
 mode = options[:mode]
 rs_type = options[:rs_type]
+show_non_matching = options[:show_non_matching]
 
 limits_url = LIMITS_URL_FOR_RS_TYPE[rs_type]
 puts "Fetching page at #{limits_url}"
@@ -47,30 +51,55 @@ puts "Connecting to db..."
 conn = PG.connect(TradeConfig.for mode, :db)
 
 updates = []
-no_match=0
+non_matching = []
 has_update=0
 puts "Opening transaction..."
 conn.transaction do |txn|
   items = ItemTracker.new txn, rs_type
   limits.each do |item, limit|
+    matched_ids = nil
+    matched_names = nil
     id = items.id_for item
-    no_match += 1 if id.nil?
-    next if id.nil?
-    cur_limit = items.limit_for id
-    next if limit.eql?(cur_limit)
-    has_update += 1 
-    items.record_limit id, limit
-    updates << [id, item, cur_limit, limit]
-  end
-  puts
+    if id.nil?
+      if rs_type == :osrs
+        matches = map_non_matching_osrs name
+      else
+        matches = []
+      end
 
-  puts "#{no_match} non-matching items."
+      if matches.empty?
+        non_matching << item
+        matched_ids = []
+        matched_names = []
+      else
+        matched_ids = matches.map{|name| items.id_for name}.compact
+        matched_names = matches
+      end
+    else
+      matched_ids = [id]
+      matched_names = [item]
+    end
+    matched_ids.zip(matched_names).each do |m_id, m_name|
+      cur_limit = items.limit_for m_id
+      next if limit.eql?(cur_limit)
+      has_update += 1 
+      items.record_limit m_id, limit
+      updates << [m_id, m_name, cur_limit, limit]
+    end
+  end
+
+  puts "#{non_matching.size} non-matching items."
+  if show_non_matching
+    puts "<---->"
+    non_matching.each {|i| puts i}
+    puts "<---->"
+  end
   puts "#{has_update} items w/ new data."
 end
 
 update_table = Table.new ["ID", "Item", "Old", "New"], updates
 
-mail_body = "<p>Non-matching items: #{no_match}</p>"
+mail_body = "<p>Non-matching items: #{non_matching.size}</p>"
 mail_body += "<p>Items with updates: #{has_update}</p><br />"
 mail_body += update_table.to_html
 
