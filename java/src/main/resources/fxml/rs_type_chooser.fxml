@@ -5,17 +5,16 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-
 <fx:root type="DialogPane" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
    <content>
       <VBox spacing="5.0">
          <children>
-            <RadioButton mnemonicParsing="false" text="OldSchool" />
-            <RadioButton mnemonicParsing="false" text="RS3" />
+            <RadioButton fx:id="osrsButton" mnemonicParsing="false" text="OldSchool" />
+            <RadioButton fx:id="rs3Button" mnemonicParsing="false" text="RS3" />
          </children>
       </VBox>
    </content>
    <buttonTypes>
       <ButtonType fx:constant="NEXT" />
    </buttonTypes>
-</DialogPane>
+</fx:root>
