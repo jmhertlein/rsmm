@@ -47,7 +47,8 @@ public class TurnManager {
         this.tradeListeners = new ArrayList<>();
 
 
-        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE close_ts IS NULL")) {
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE close_ts IS NULL AND rs_type=?")) {
+            p.setString(1, rsType.getEnumString());
             try (ResultSet rs = p.executeQuery()) {
                 while (rs.next()) {
                     openTurns.add(new Turn(conn, tradeListeners, items, quotes, rs));
@@ -55,7 +56,8 @@ public class TurnManager {
             }
         }
 
-        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE close_ts::date = now()::date")) {
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Turn WHERE close_ts::date = now()::date and rs_type=?")) {
+            p.setString(1, rsType.getEnumString());
             try (ResultSet rs = p.executeQuery()) {
                 while (rs.next()) {
                     closedTurnsToday.add(new Turn(conn, tradeListeners, items, quotes, rs));
@@ -87,9 +89,10 @@ public class TurnManager {
 
         Timestamp openTs = Timestamp.from(Instant.now());
 
-        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Turn(item_id, open_ts) VALUES(?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Turn(item_id, open_ts, rs_type) VALUES(?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
             p.setInt(1, item.getId());
             p.setTimestamp(2, openTs);
+            p.setString(3, rsType.getEnumString());
             p.executeUpdate();
             try (ResultSet keys = p.getGeneratedKeys()) {
                 keys.next();
@@ -147,9 +150,10 @@ public class TurnManager {
 
     public void closeTurn(long turnId) throws SQLException {
         Timestamp closeTs = Timestamp.from(Instant.now());
-        try (PreparedStatement p = conn.prepareStatement("UPDATE Turn SET close_ts=? WHERE turn_id=?")) {
+        try (PreparedStatement p = conn.prepareStatement("UPDATE Turn SET close_ts=? WHERE turn_id=? AND rs_type=?")) {
             p.setTimestamp(1, closeTs);
             p.setLong(2, turnId);
+            p.setString(3, rsType.getEnumString());
             int rows = p.executeUpdate();
             if (rows > 0) {
                 Turn turn = openTurns.stream().filter(t -> t.getTurnId() == turnId).findFirst().orElseThrow(() -> new NoSuchElementException("No such open turn for id: " + turnId));

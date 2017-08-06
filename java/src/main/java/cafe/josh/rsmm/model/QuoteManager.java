@@ -46,12 +46,13 @@ public class QuoteManager {
 
     public Quote addQuote(Item item, int bid, int ask) throws SQLException {
         Timestamp quoteTs = Timestamp.from(Instant.now());
-        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Quote(item_id,quote_ts,bid1,ask1,synthetic) VALUES(?,?,?,?,?)")) {
+        try (PreparedStatement p = conn.prepareStatement("INSERT INTO Quote(item_id,rs_type,quote_ts,bid1,ask1,synthetic) VALUES(?,?,?,?,?,?)")) {
             p.setInt(1, item.getId());
-            p.setTimestamp(2, quoteTs);
-            p.setInt(3, bid);
-            p.setInt(4, ask);
-            p.setBoolean(5, false);
+            p.setString(2, rsType.getEnumString());
+            p.setTimestamp(3, quoteTs);
+            p.setInt(4, bid);
+            p.setInt(5, ask);
+            p.setBoolean(6, false);
             p.executeUpdate();
         }
 
@@ -75,10 +76,11 @@ public class QuoteManager {
         q.syntheticProperty().set(!q.isSynthetic());
         boolean isSynthetic = q.isSynthetic();
 
-        try (PreparedStatement ps = conn.prepareStatement("UPDATE Quote SET synthetic=? WHERE quote_ts=? AND item_id=?")) {
+        try (PreparedStatement ps = conn.prepareStatement("UPDATE Quote SET synthetic=? WHERE quote_ts=? AND item_id=? AND rs_type=?")) {
             ps.setBoolean(1, isSynthetic);
             ps.setTimestamp(2, q.getQuoteTS());
             ps.setInt(3, q.getItem().getId());
+            ps.setString(4, rsType.getEnumString());
             if (ps.executeUpdate() == 0) {
                 throw new SQLException("Error: no rows updated for " + q.toString());
             }
@@ -100,9 +102,10 @@ public class QuoteManager {
             itemsForDay.put(item, quotes);
 
             System.out.println("Cache miss: Quotes for " + item.getName() + " for " + date.toString());
-            try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Quote WHERE item_id=? AND quote_ts::date = ? ORDER BY quote_ts ASC")) {
+            try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Quote WHERE item_id=? AND quote_ts::date = ? AND rs_type=? ORDER BY quote_ts ASC")) {
                 p.setInt(1, item.getId());
                 p.setDate(2, Date.valueOf(date));
+                p.setString(3, rsType.getEnumString());
                 try (ResultSet rs = p.executeQuery()) {
                     while (rs.next()) {
                         quotes.add(new Quote(item, rs));
@@ -122,9 +125,10 @@ public class QuoteManager {
             return;
         }
 
-        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM Quote WHERE quote_ts=? AND item_id=?")) {
+        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM Quote WHERE quote_ts=? AND item_id=? AND rs_type=?")) {
             ps.setTimestamp(1, q.getQuoteTS());
             ps.setInt(2, q.getItem().getId());
+            ps.setString(3, rsType.getEnumString());
             if (ps.executeUpdate() == 0) {
                 throw new SQLException("Error: no rows updated for " + q.toString());
             }

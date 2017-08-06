@@ -50,6 +50,7 @@ public class FXRSMarketMaker extends Application {
         Optional<RSType> o = dlg.showAndWait();
         if(!o.isPresent())
         {
+            System.out.println("No choice picked, exiting.");
             return;
         }
 

@@ -20,7 +20,7 @@ public class RSTypeDialog extends FXMLDialog<RSType> {
     public RSTypeDialog() {
         super("/fxml/rs_type_chooser.fxml");
         initModality(Modality.APPLICATION_MODAL);
-        resultConverterProperty().setValue(buttonType -> buttonType == ButtonType.OK ? getSelectedType() : null);
+        resultConverterProperty().setValue(buttonType -> buttonType == ButtonType.NEXT ? getSelectedType() : null);
         group = new ToggleGroup();
         osrsButton.setToggleGroup(group);
         rs3Button.setToggleGroup(group);
