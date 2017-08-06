@@ -33,15 +33,22 @@ def scrape_for_osrs doc
 end
 
 def to_doses name
-  [1..4].map{|dose| "#{name}(#{dose})"}
+  (1..4).map{|dose| "#{name}(#{dose})"}
+end
 
 def map_non_matching_osrs name
   case name
-    when "Antidote++": to_doses name
-    when name.match?(/Super (attack|strength|defense|restore)/): to_doses name
-    when name.match?(/[A-Z][a-z]+\spotion/): to_doses name
-    when "Saradomin brew": to_doses name
-    when "Zamorak brew": to_doses name
-    else []
+    when "Antidote++"
+      to_doses name
+    when /Super (attack|strength|defence|restore)/ 
+      to_doses name
+    when /[A-Z][a-z]+\spotion/
+      to_doses name
+    when "Saradomin brew"
+      to_doses name
+    when "Zamorak brew"
+      to_doses name
+    else
+      []
   end
 end

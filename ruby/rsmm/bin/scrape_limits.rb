@@ -62,7 +62,8 @@ conn.transaction do |txn|
     id = items.id_for item
     if id.nil?
       if rs_type == :osrs
-        matches = map_non_matching_osrs name
+        matches = map_non_matching_osrs item
+        #puts "Expanded #{item} to #{matches}"
       else
         matches = []
       end
@@ -72,7 +73,7 @@ conn.transaction do |txn|
         matched_ids = []
         matched_names = []
       else
-        matched_ids = matches.map{|name| items.id_for name}.compact
+        matched_ids = matches.map{|name| items.id_for name}
         matched_names = matches
       end
     else
@@ -80,6 +81,7 @@ conn.transaction do |txn|
       matched_names = [item]
     end
     matched_ids.zip(matched_names).each do |m_id, m_name|
+      raise "Special-case for #{m_name} mapped to a null id." if m_id.nil?
       cur_limit = items.limit_for m_id
       next if limit.eql?(cur_limit)
       has_update += 1 
