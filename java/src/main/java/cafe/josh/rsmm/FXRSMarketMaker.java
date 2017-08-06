@@ -54,6 +54,8 @@ public class FXRSMarketMaker extends Application {
             return;
         }
 
+        System.out.println("RSType: " + o.get().getEnumString());
+
         stage.setScene(new Scene(new MMPane(conn, o.get())));
         stage.setTitle("RS Market Maker");
         stage.getIcons().add(new Image("/coins.png"));
