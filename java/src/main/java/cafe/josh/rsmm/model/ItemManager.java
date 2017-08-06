@@ -29,17 +29,20 @@ import java.util.*;
  */
 public class ItemManager {
     private final Connection conn;
+    private final RSType rsType;
 
     private final List<Item> items;
 
     private final List<ItemListener> itemListeners;
 
-    public ItemManager(Connection conn) throws SQLException {
+    public ItemManager(Connection conn, RSType rsType) throws SQLException {
         this.conn = conn;
+        this.rsType = rsType;
         items = new ArrayList<>();
         itemListeners = new ArrayList<>();
 
-        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Item ORDER BY item_name ASC")) {
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Item WHERE rs_type=? ORDER BY item_name ASC")) {
+            p.setString(1, rsType.getEnumString());
             try (ResultSet rs = p.executeQuery()) {
                 while (rs.next()) {
                     Item i = new Item(rs);
@@ -60,9 +63,10 @@ public class ItemManager {
     }
 
     public void updateFavorite(Item i, boolean favorite) throws SQLException {
-        try (PreparedStatement p = conn.prepareStatement("UPDATE Item SET favorite=? WHERE item_id=?")) {
+        try (PreparedStatement p = conn.prepareStatement("UPDATE Item SET favorite=? WHERE item_id=? and rs_type=?")) {
             p.setBoolean(1, favorite);
             p.setInt(2, i.getId());
+            p.setString(3, rsType.getEnumString());
             p.executeUpdate();
         }
     }

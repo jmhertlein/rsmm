@@ -31,13 +31,15 @@ import java.util.*;
  */
 public class QuoteManager {
     private final Connection conn;
+    private final RSType rsType;
 
     private final Map<LocalDate, Map<Item, List<Quote>>> cache;
 
     private final List<QuoteListener> quoteListeners;
 
-    public QuoteManager(Connection conn) {
+    public QuoteManager(Connection conn, RSType rsType) {
         this.conn = conn;
+        this.rsType = rsType;
         cache = new HashMap<>();
         quoteListeners = new ArrayList<>();
     }

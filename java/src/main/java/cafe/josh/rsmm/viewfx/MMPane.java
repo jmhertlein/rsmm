@@ -49,6 +49,8 @@ public class MMPane extends FXMLBorderPane {
 
     private final IntegerProperty gePriceProperty;
 
+    private final RSType rsType;
+
     @FXML
     private TableView<Trade> tradeTable;
     @FXML
@@ -117,14 +119,15 @@ public class MMPane extends FXMLBorderPane {
     private CheckMenuItem alwaysOnTopCheckBox;
 
 
-    public MMPane(Connection conn) {
+    public MMPane(Connection conn, RSType rsType) {
         super("/fxml/mmpane.fxml");
         this.conn = conn;
+        this.rsType = rsType;
 
         try {
-            items = new ItemManager(conn);
-            quotes = new QuoteManager(conn);
-            turns = new TurnManager(conn, items, quotes);
+            items = new ItemManager(conn, rsType);
+            quotes = new QuoteManager(conn, rsType);
+            turns = new TurnManager(conn, items, quotes, rsType);
         } catch (SQLException | NoSuchItemException | NoQuoteException e) {
             Dialogs.showMessage("Load Error", "Error reading from database.", e);
             throw new RuntimeException("Couldn't load startup data.");

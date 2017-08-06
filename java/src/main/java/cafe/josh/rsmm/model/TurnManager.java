@@ -31,14 +31,16 @@ import java.util.Optional;
  */
 public class TurnManager {
     private final Connection conn;
+    private final RSType rsType;
 
     private final List<Turn> openTurns, closedTurnsToday;
 
     private final List<TurnListener> turnListeners;
     private final List<TradeListener> tradeListeners;
 
-    public TurnManager(Connection conn, ItemManager items, QuoteManager quotes) throws SQLException, NoSuchItemException, NoQuoteException {
+    public TurnManager(Connection conn, ItemManager items, QuoteManager quotes, RSType rsType) throws SQLException, NoSuchItemException, NoQuoteException {
         this.conn = conn;
+        this.rsType = rsType;
         this.openTurns = new ArrayList<>();
         this.closedTurnsToday = new ArrayList<>();
         this.turnListeners = new ArrayList<>();

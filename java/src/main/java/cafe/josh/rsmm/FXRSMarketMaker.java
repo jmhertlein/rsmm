@@ -1,7 +1,9 @@
 package cafe.josh.rsmm;
 
 import cafe.josh.joshfx.Dialogs;
+import cafe.josh.rsmm.model.RSType;
 import cafe.josh.rsmm.viewfx.MMPane;
+import cafe.josh.rsmm.viewfx.RSTypeDialog;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -11,6 +13,7 @@ import javafx.stage.Stage;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Optional;
 
 public class FXRSMarketMaker extends Application {
 
@@ -43,7 +46,14 @@ public class FXRSMarketMaker extends Application {
             return;
         }
 
-        stage.setScene(new Scene(new MMPane(conn)));
+        RSTypeDialog dlg = new RSTypeDialog();
+        Optional<RSType> o = dlg.showAndWait();
+        if(!o.isPresent())
+        {
+            return;
+        }
+
+        stage.setScene(new Scene(new MMPane(conn, o.get())));
         stage.setTitle("RS Market Maker");
         stage.getIcons().add(new Image("/coins.png"));
         stage.show();
