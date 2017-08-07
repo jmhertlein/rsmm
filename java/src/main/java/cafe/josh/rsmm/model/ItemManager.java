@@ -41,7 +41,7 @@ public class ItemManager {
         items = new ArrayList<>();
         itemListeners = new ArrayList<>();
 
-        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Item WHERE rs_type=? ORDER BY item_name ASC")) {
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Item WHERE rs_type=?::rs_type ORDER BY item_name ASC")) {
             p.setString(1, rsType.getEnumString());
             try (ResultSet rs = p.executeQuery()) {
                 while (rs.next()) {
@@ -63,7 +63,7 @@ public class ItemManager {
     }
 
     public void updateFavorite(Item i, boolean favorite) throws SQLException {
-        try (PreparedStatement p = conn.prepareStatement("UPDATE Item SET favorite=? WHERE item_id=? and rs_type=?")) {
+        try (PreparedStatement p = conn.prepareStatement("UPDATE Item SET favorite=? WHERE item_id=? and rs_type=?::rs_type")) {
             p.setBoolean(1, favorite);
             p.setInt(2, i.getId());
             p.setString(3, rsType.getEnumString());

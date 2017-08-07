@@ -37,13 +37,14 @@ public class Turn implements Comparable<Turn> {
     private final ObjectProperty<Item> item;
     private final SimpleObjectProperty<Timestamp> open, close;
     private final Set<Trade> trades;
+    private final RSType rsType;
 
     private final IntegerProperty openProfit, closedProfit, positionCost, position;
 
     private final List<TradeListener>  tradeListeners;
 
-    public Turn(Connection conn, List<TradeListener> listeners, ItemManager items, QuoteManager quotes, ResultSet rs) throws SQLException, NoSuchItemException, NoQuoteException {
-        this(conn, listeners, quotes, rs.getLong("turn_id"), getItemFromResults(rs, items), rs.getTimestamp("open_ts"), rs.getTimestamp("close_ts"));
+    public Turn(Connection conn, RSType rsType, List<TradeListener> listeners, ItemManager items, QuoteManager quotes, ResultSet rs) throws SQLException, NoSuchItemException, NoQuoteException {
+        this(conn, rsType, listeners, quotes, rs.getLong("turn_id"), getItemFromResults(rs, items), rs.getTimestamp("open_ts"), rs.getTimestamp("close_ts"));
     }
 
     public ObjectProperty<Item> itemProperty() {
@@ -79,17 +80,19 @@ public class Turn implements Comparable<Turn> {
         return items.getItem(itemId).orElseThrow(() -> new NoSuchItemException(itemId));
     }
 
-    public Turn(Connection conn, List<TradeListener> listeners, QuoteManager quotes, long turnId, Item item, Timestamp open, Timestamp close) throws SQLException, NoQuoteException {
+    public Turn(Connection conn, RSType rsType, List<TradeListener> listeners, QuoteManager quotes, long turnId, Item item, Timestamp open, Timestamp close) throws SQLException, NoQuoteException {
         this.conn = conn;
         this.turnId = turnId;
         this.item = new SimpleObjectProperty<>(item);
         this.open = new SimpleObjectProperty<>(open);
         this.close = new SimpleObjectProperty<>(close);
         this.tradeListeners = listeners;
+        this.rsType = rsType;
 
         this.trades = new HashSet<>();
-        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Trade WHERE turn_id=?")) {
+        try (PreparedStatement p = conn.prepareStatement("SELECT * FROM Trade WHERE turn_id=? and rs_type=?::rs_type")) {
             p.setLong(1, turnId);
+            p.setString(2, rsType.getEnumString());
             try (ResultSet rs = p.executeQuery()) {
                 while (rs.next()) {
                     trades.add(new Trade(this, rs));
@@ -114,11 +117,12 @@ public class Turn implements Comparable<Turn> {
     public Trade addTrade(int price, int quantity) throws SQLException {
         Trade trade = new Trade(this, Timestamp.from(Instant.now()), price, quantity);
         try (PreparedStatement p = conn.prepareStatement(
-                "INSERT INTO Trade(turn_id,trade_ts,price,quantity) VALUES(?,?,?,?)")) {
+                "INSERT INTO Trade(turn_id,trade_ts,rs_type,price,quantity) VALUES(?,?,?::rs_type,?,?)")) {
             p.setLong(1, trade.getTurn().getTurnId());
             p.setTimestamp(2, trade.getTradeTime());
-            p.setInt(3, trade.getPrice());
-            p.setInt(4, trade.getQuantity());
+            p.setString(3, rsType.getEnumString());
+            p.setInt(4, trade.getPrice());
+            p.setInt(5, trade.getQuantity());
             p.executeUpdate();
         }
 
@@ -128,9 +132,10 @@ public class Turn implements Comparable<Turn> {
     }
 
     public void bustTrade(Trade t) throws SQLException {
-        try (PreparedStatement p = conn.prepareStatement("DELETE FROM Trade WHERE turn_id=? AND trade_ts=?")) {
+        try (PreparedStatement p = conn.prepareStatement("DELETE FROM Trade WHERE turn_id=? AND trade_ts=? and rs_type=?::rs_type")) {
             p.setLong(1, t.getTurn().getTurnId());
             p.setTimestamp(2, t.getTradeTime());
+            p.setString(3, rsType.getEnumString());
             p.executeUpdate();
         }
 
