@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS Price(
   FOREIGN KEY (item_id, rs_type) REFERENCES Item(item_id, rs_type) ON UPDATE CASCADE
 );
 
-create view daily_history as (select close_ts::date as day,
+create view daily_history as (select close_ts::date as day, rs_type,
 sum(price * quantity * -1) as closed_profit,
 sum(abs(quantity))/2 as volume,
 sum(price*abs(quantity))/2 as notional,
