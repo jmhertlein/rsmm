@@ -1,4 +1,5 @@
 require 'json'
+require 'rsmm/jamflex'
 class GERequest 
   TYPE_TO_PATH={osrs: "http://services.runescape.com/m=itemdb_oldschool", rs3: "http://services.runescape.com/m=itemdb_rs"}
   CATEGORY_URL_FORMAT="%s/api/catalogue/items.json?category=%d&alpha=%s&page=%d"
@@ -25,7 +26,7 @@ class GERequest
     if @type == :price
       prices = {}
       json["daily"].each do |k,v|
-        prices[jamflex_to_date(k)] = v.to_i
+        prices[Jamflex::jamflex_to_date(k)] = v.to_i
       end
       @socket.puts prices.to_json
     else
