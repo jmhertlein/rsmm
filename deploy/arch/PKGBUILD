@@ -1,0 +1,37 @@
+# Maintainer: Josh Hertlein <jmhertlein@gmail.com>
+pkgname=rsmm-desktop
+pkgver=1
+pkgrel=1
+epoch=
+pkgdesc="Desktop application for RSMM."
+arch=(any)
+url="https://rsmm.josh.cafe"
+license=('unknown')
+groups=()
+depends=(java-runtime maven)
+#makedepends=()
+provides=(rsmm-desktop)
+
+build() {
+  cd ../../../java
+  mvn clean package
+}
+
+check() {
+  cd ../../../java
+  mvn test
+}
+
+package() {
+        cd ../../..
+
+	mkdir -p "$pkgdir/usr/share/rsmm-desktop"
+	mkdir -p "$pkgdir/usr/lib/rsmm-desktop"
+        mkdir -p "$pkgdir/usr/bin"
+        mkdir -p  "$pkgdir/usr/share/applications/"
+
+	cp deploy/rsmm.png "$pkgdir/usr/share/rsmm-desktop"
+	cp java/target/rsmm-*.jar "$pkgdir/usr/lib/rsmm-desktop"
+	cp deploy/rsmm-desktop "$pkgdir/usr/bin/"
+        cp deploy/rsmm-desktop.desktop "$pkgdir/usr/share/applications/"
+}
