@@ -28,7 +28,7 @@ node {
 
     dir('./out') {
       stage('Upload to gems.josh.cafe') {
-        sh 'gem inabox ./*.gem'
+        sh 'gem inabox -o ./*.gem'
       }
 
       stage('Upload to repo.josh.cafe') {
