@@ -32,9 +32,9 @@ node {
       }
 
       stage('Upload to repo.josh.cafe') {
-        sh 'sudo cp ./*.pkg.tar.xz /srv/http/pacman'
+        sh 'cp ./*.pkg.tar.xz /srv/http/pacman'
         dir('/srv/http/pacman') {
-          sh 'sudo repo-add repo.josh.cafe.db.tar.xz ./rsmm-desktop*.pkg.tar.xz'
+          sh 'repo-add repo.josh.cafe.db.tar.xz ./rsmm-desktop*.pkg.tar.xz'
         }
       }
     }
