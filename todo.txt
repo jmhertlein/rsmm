@@ -2,3 +2,5 @@ add a "long term stats" frame that shows total profit all time, last month, last
 
 make various prices be green/red
 make negatives render in ()'s instead of -'s
+
+make ge-svc log name + rs-type of request
