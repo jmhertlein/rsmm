@@ -133,7 +133,7 @@ public class MMPane extends FXMLBorderPane {
             throw new RuntimeException("Couldn't load startup data.");
         }
 
-        GlobalStatsManager statsManager = new GlobalStatsManager(conn, turns, quotes);
+        GlobalStatsManager statsManager = new GlobalStatsManager(conn, turns, quotes, rsType);
 
         try {
             statsManager.recalculateProfit();

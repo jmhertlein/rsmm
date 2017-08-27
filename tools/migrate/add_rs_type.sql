@@ -37,9 +37,12 @@ alter table price add primary key (item_id, day, rs_type);
 alter table price add foreign key (item_id, rs_type) references item(item_id, rs_type) on update cascade;
 
 create view daily_history as (select close_ts::date as day,
+rs_type,
 sum(price * quantity * -1) as closed_profit,
 sum(abs(quantity))/2 as volume,
 sum(price*abs(quantity))/2 as notional,
 (sum(price*quantity*-1)/(sum(abs(quantity)/2))) as avg_profit_per_item
 from trade natural join turn
 group by day, rs_type);
+
+alter table item drop constraint unique_item_id; -- why is this even in the schema

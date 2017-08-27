@@ -26,10 +26,13 @@ public class GlobalStatsManager implements TradeListener, TurnListener, QuoteLis
     private final TurnManager turns;
     private final QuoteManager quotes;
 
-    public GlobalStatsManager(Connection conn, TurnManager turns, QuoteManager quotes) {
+    private final RSType rsType;
+
+    public GlobalStatsManager(Connection conn, TurnManager turns, QuoteManager quotes, RSType rsType) {
         this.conn = conn;
         this.turns = turns;
         this.quotes = quotes;
+        this.rsType = rsType;
         totalProfit = new SimpleLongProperty();
         profitToday = new SimpleIntegerProperty();
         pendingprofit = new SimpleIntegerProperty();
@@ -63,7 +66,8 @@ public class GlobalStatsManager implements TradeListener, TurnListener, QuoteLis
     }
 
     public void recalculateTotalProfit() throws SQLException {
-        try (PreparedStatement ps = conn.prepareStatement("SELECT SUM(price * (quantity*-1)) AS total_closed FROM Trade NATURAL JOIN Turn WHERE close_ts IS NOT NULL;")) {
+        try (PreparedStatement ps = conn.prepareStatement("SELECT SUM(price * (quantity*-1)) AS total_closed FROM Trade NATURAL JOIN Turn WHERE close_ts IS NOT NULL and rs_type=?::rs_type;")) {
+            ps.setString(1, rsType.getEnumString());
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
                 totalProfit.set(rs.getLong("total_closed"));
@@ -88,7 +92,8 @@ public class GlobalStatsManager implements TradeListener, TurnListener, QuoteLis
     }
 
     public void recalculateDailyQuoteCost() throws SQLException {
-        try (PreparedStatement ps = conn.prepareStatement("SELECT SUM(ask1 - bid1) AS daily_quote_cost FROM Quote WHERE quote_ts::date = now()::date AND NOT synthetic;")) {
+        try (PreparedStatement ps = conn.prepareStatement("SELECT SUM(ask1 - bid1) AS daily_quote_cost FROM Quote WHERE quote_ts::date = now()::date AND NOT synthetic and rs_type=?::rs_type;")) {
+            ps.setString(1, rsType.getEnumString());
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
                 dailyQuoteCost.set(rs.getInt("daily_quote_cost"));
