@@ -22,11 +22,11 @@ node {
       sh 'mv deploy/arch/*.pkg.tar.xz ./out'
     }
 
-    dir('./out') {
-      stage('Archive') {
-        archive './*'
-      }
+    stage('Archive') {
+      archive './*'
+    }
 
+    dir('./out') {
       stage('Upload to gems.josh.cafe') {
         sh 'gem inabox ./*.gem'
       }
