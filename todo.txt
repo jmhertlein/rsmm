@@ -4,3 +4,4 @@ make various prices be green/red
 make negatives render in ()'s instead of -'s
 
 make ge-svc log name + rs-type of request
+either remove emails, or make them say what rs_type they're for
