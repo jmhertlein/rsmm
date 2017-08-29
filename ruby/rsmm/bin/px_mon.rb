@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 
 require 'yaml'
+require 'date'
 require "json"
 require "net/http"
 require "uri"
-require 'mail'
 require 'pg'
 require 'rsmm/scrape/html/table'
 require 'rsmm/config'
@@ -12,15 +12,15 @@ require 'rsmm/db'
 require 'rsmm/ge-svc'
 require 'opts4j4r'
 
+start_ts = DateTime.now
+
 options = Opts4J4R::parse do |opts|
-  opts.flag :email, "Send an email on finish or not.", true
   opts.flag :write, "Write results to db. Default true.", true
   opts.sym! :mode, "One of [prod, dev]."
   opts.flag :backfill, "Try to backfill ~90 days of data."
   opts.sym! :rs_type, "One of [osrs, rs3]"
 end
 
-send_email = options[:email]
 write_to_db = options[:write]
 mode = options[:mode]
 backfill = options[:backfill]
@@ -31,6 +31,8 @@ conn = PG.connect(TradeConfig.for mode, :db)
 items = ItemTracker.new conn, rs_type
 prices = PriceTracker.new conn, rs_type
 targets = TargetTracker.new conn, rs_type
+history = HistoryTracker.new conn, rs_type
+begin
 
 # price updates
 missing = []
@@ -67,25 +69,14 @@ targets.get_targeted_items.each do |itemid|
   end
 end
 
+history.record_pxmon_result start_ts, found.size if write_to_db
+
 if found.empty?
   puts "No new prices found."
-  exit(0)
 end
 
-msg_body = "New prices found:<br /><br />#{found.join "<br />"}"
-
-if send_email
-  mail = Mail.new do
-    from     "pxmon@#{TradeConfig.for mode, :mail, :sender_host}"
-    to       TradeConfig.for mode, :mail, :recipients
-    subject  "Price Update for #{Date.today.strftime("%d/%m/%Y")} Detected"
-    html_part do
-      content_type 'text/html; charset=UTF-8'
-      body msg_body
-    end
-  end
-  mail.delivery_method :smtp, address: TradeConfig.for(mode, :mail, :mail_host)
-  mail.deliver!
+rescue Exception => e
+  history.record_exception :pxmon, start_ts, e if write_to_db
+  raise e
 end
-
 conn.finish

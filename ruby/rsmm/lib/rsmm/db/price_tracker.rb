@@ -6,7 +6,7 @@ class PriceTracker
   end
 
   def record_price itemid, date, price, created=DateTime.now
-    @conn.exec_params('INSERT INTO Price VALUES($1, $2, $3, $4, $5)', [itemid, date, @rs_type, price, created])
+    @conn.exec_params('INSERT INTO Price(item_id, day, rs_type, price, created_ts) VALUES($1, $2, $3, $4, $5)', [itemid, date, @rs_type, price, created])
   end
 
   def price_for itemid, date=Date.today
