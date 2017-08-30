@@ -91,6 +91,7 @@ create table itemdl_result(
 
 create table limitmon_result(
   run_id integer primary key references process_result(run_id),
+  items_scraped integer not null,
   updated_items integer not null,
   non_matching_items integer not null
 );

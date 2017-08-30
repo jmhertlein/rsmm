@@ -19,12 +19,12 @@ class HistoryTracker
     end
   end
 
-  def record_limitmon_result start_ts, updated_items, n_non_matching_items
+  def record_limitmon_result start_ts, items_scraped, updated_items, n_non_matching_items
     @conn.transaction do |txn|
       run_id = record_run txn, :limitmon, start_ts, DateTime.now, true, "#{updated_items.size} updates."
-      @txn.exec_params('insert into limitmon_result(run_id, updated_items, non_matching_items) values($1, $2, $3)',  [run_id, updated_items.size, n_non_matching_items])
+      txn.exec_params('insert into limitmon_result(run_id, items_scraped, updated_items, non_matching_items) values($1, $2, $3, $4)',  [run_id, items_scraped, updated_items.size, n_non_matching_items])
       updated_items.each do |item_id, old, new|
-        @txn.exec_params('insert into limitmon_result_item(run_id, item_id, old_limit, new_limit) values ($1, $2, $3, $4)',  [run_id, item_id, old, new])
+        txn.exec_params('insert into limitmon_result_item(run_id, item_id, old_limit, new_limit) values ($1, $2, $3, $4)',  [run_id, item_id, old, new])
       end
     end
   end

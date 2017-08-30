@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'date'
 require 'yaml'
 require "json"
 require "net/http"
@@ -16,18 +17,23 @@ require 'opts4j4r'
 
 LIMITS_URL_FOR_RS_TYPE = {rs3: "http://runescape.wikia.com/wiki/Calculator:Grand_Exchange_buying_limits", osrs: "http://oldschoolrunescape.wikia.com/wiki/Grand_Exchange/Buying_limits" }
 
+start_ts = DateTime.now
+
 options = Opts4J4R::parse do |opts|
   opts.sym! :mode, "One of [prod, dev]."
   opts.sym! :rs_type, "One of [osrs, rs3]."
   opts.flag :show_non_matching, "Include list of non-matching items in stdout output."
 end
 
-puts options
-
 mode = options[:mode]
 rs_type = options[:rs_type]
 show_non_matching = options[:show_non_matching]
 
+puts "Connecting to db..."
+conn = PG.connect(TradeConfig.for mode, :db)
+history = HistoryTracker.new conn, rs_type
+
+begin
 limits_url = LIMITS_URL_FOR_RS_TYPE[rs_type]
 puts "Fetching page at #{limits_url}"
 doc = Nokogiri::HTML(open(limits_url))
@@ -47,8 +53,6 @@ puts "Got #{limits.size} limit entries."
 limits.select!{|k,v| v != 0}
 puts "Filtered down to #{limits.size} entries."
 
-puts "Connecting to db..."
-conn = PG.connect(TradeConfig.for mode, :db)
 
 updates = []
 non_matching = []
@@ -86,7 +90,7 @@ conn.transaction do |txn|
       next if limit.eql?(cur_limit)
       has_update += 1 
       items.record_limit m_id, limit
-      updates << [m_id, m_name, cur_limit, limit]
+      updates << [m_id, cur_limit, limit]
     end
   end
 
@@ -99,23 +103,11 @@ conn.transaction do |txn|
   puts "#{has_update} items w/ new data."
 end
 
-update_table = Table.new ["ID", "Item", "Old", "New"], updates
-
-mail_body = "<p>Non-matching items: #{non_matching.size}</p>"
-mail_body += "<p>Items with updates: #{has_update}</p><br />"
-mail_body += update_table.to_html
-
-mail = Mail.new do
-  from     "limitmon@#{TradeConfig.for mode, :mail, :sender_host}"
-  to       TradeConfig.for(mode, :mail, :recipients)
-  subject  "GE Limit Update Report for #{Date.today.strftime("%d/%m/%Y")}"
-  html_part do
-    content_type 'text/html; charset=UTF-8'
-    body mail_body
-  end
-end
-
-mail.delivery_method :smtp, address: TradeConfig.for(mode, :mail, :mail_host)
-mail.deliver!
-
+history.record_limitmon_result start_ts, limits.size, updates, non_matching.size
 puts "Done"
+
+rescue Exception => e
+  history.record_exception :limitmon, start_ts, e
+  raise e
+end
+conn.finish
