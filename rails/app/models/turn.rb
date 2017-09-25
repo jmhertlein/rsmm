@@ -1,3 +1,3 @@
-class Price < RSMMBase
+class Turn < RSMMBase
   table_name "price"
 end

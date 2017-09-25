@@ -1,0 +1,15 @@
+<table>
+  <tr>
+    <% @process_results.columns.each do |col| %>
+      <th><%= col  %> </th>
+    <% end %>
+  </tr>
+
+  <% @process_results.rows.each do |row| %>
+    <tr>
+      <% row.each do |val| %>
+        <td><%= val %></td>
+      <% end %>
+    </tr>
+  <% end %>
+</table>
