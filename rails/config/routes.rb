@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   # Example of regular route:
   get 'trading' => 'trading#index'
   get 'processes' => 'process#index'
+  get 'process/:rs_type/' => 'process#process_summary'
   get 'process/:rs_type/:process_name/' => 'process#process_runs'
   get 'process/:rs_type/:process_name/:run_id' => 'process#process_run'
   #get 'about' => 'about#index'

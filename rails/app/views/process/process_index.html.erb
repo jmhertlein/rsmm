@@ -1,15 +1,19 @@
-<table>
-  <tr>
-    <% @process_results.columns.each do |col| %>
-      <th><%= col  %> </th>
-    <% end %>
-  </tr>
+<div class="process-item-container">
+  <div class="process-item line-border">
+    <p class="process-item-title">itemdb</p>
+    <p>Items Tracked: <%= @items_tracked %></p>
+  </div>
 
-  <% @process_results.rows.each do |row| %>
-    <tr>
-      <% row.each do |val| %>
-        <td><%= val %></td>
-      <% end %>
-    </tr>
-  <% end %>
-</table>
+  <div class="process-item line-border">
+    <p class="process-item-title">pxmon</p>
+    <table>
+      <tr><td>Last GE Update:</td><td><%= @last_ge_update_ts %></td></tr>
+      <tr><td>Current GE Day:</td><td><%= @current_ge_date %></td></tr>
+    </table>
+  </div>
+
+  <div class="process-item line-border">
+    <p class="process-item-title">limitmon</p>
+    <p>Limits Tracked: <%= @limits_tracked %></p>
+  </div>
+</div>

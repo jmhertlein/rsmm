@@ -15,3 +15,11 @@
   text-align: center;
   margin: 0 0 0 0;
 }
+
+.process-index-table {
+  margin-top: 1em;
+}
+
+.process-index-table th {
+  color: white;
+}

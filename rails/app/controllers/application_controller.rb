@@ -9,4 +9,8 @@ class ApplicationController < ActionController::Base
   def cache_other_db_connections
     RSMMBase.connection.cache { yield }
   end
+
+  def not_found
+    raise ActionController::RoutingError.new('Not Found')
+  end
 end
