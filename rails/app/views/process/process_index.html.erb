@@ -1,11 +1,16 @@
+<div class="rstype-banner line-border">
+  <%= image_tag "#{@rs_type}_icon", class: "rstype-banner-icon" %>
+  <h1 class="rstype-banner-text"><%= @rs_type.upcase %></h1>
+</div>
+
 <div class="process-item-container">
   <div class="process-item line-border">
-    <p class="process-item-title">itemdb</p>
+    <%= link_to "itemdl", "/process/#{@rs_type}/itemdl", class: "process-item-title" %>
     <p>Items Tracked: <%= @items_tracked %></p>
   </div>
 
   <div class="process-item line-border">
-    <p class="process-item-title">pxmon</p>
+    <%= link_to "pxmon", "/process/#{@rs_type}/pxmon", class: "process-item-title" %>
     <table>
       <tr><td>Last GE Update:</td><td><%= @last_ge_update_ts %></td></tr>
       <tr><td>Current GE Day:</td><td><%= @current_ge_date %></td></tr>
@@ -13,7 +18,7 @@
   </div>
 
   <div class="process-item line-border">
-    <p class="process-item-title">limitmon</p>
+    <%= link_to "limitmon", "/process/#{@rs_type}/limitmon", class: "process-item-title" %>
     <p>Limits Tracked: <%= @limits_tracked %></p>
   </div>
 </div>

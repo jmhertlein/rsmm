@@ -10,11 +10,17 @@
   margin: 1em;
 }
 
-.process-item-title {
+.process-item > a {
   color: white;
   text-align: center;
   margin: 0 0 0 0;
+  display: block;
 }
+
+.process-item > a:link    {color: white;}
+.process-item > a:visited {color: white;}
+.process-item > a:hover   {color: white;}
+.process-item > a:active  {color: white;}
 
 .process-index-table {
   margin-top: 1em;
@@ -22,4 +28,34 @@
 
 .process-index-table th {
   color: white;
+}
+
+.rstype-icon {
+  width: 10em;
+  margin: 1em;
+}
+
+.rstype-icons {
+  margin: 1em;
+}
+
+.rstype-banner {
+  margin: 1em;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.rstype-banner-icon {
+  width: 3em;
+  margin-left: 1em;
+  margin-right: 0.5em;
+}
+
+.rstype-banner-text {
+  font-size: 12px;
+  color: white;
+  margin-left: 0.5em;
+  margin-right: 1em;
 }

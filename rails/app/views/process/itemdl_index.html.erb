@@ -1,0 +1,17 @@
+<table class="process-index-table line-border">
+  <tr> 
+    <% ["Id", "Start", "End", "Start Count", "End Count", "Items Processed"].each do |h| %>
+      <th><%= h %></th>
+    <% end %>
+  </tr>
+<% @process_results.each do |r| %>
+  <tr>
+    <td><%= r["run_id"] %></td>
+    <td><%= r["duration"].first.strftime("%m/%d %H:%M") %></td>
+    <td><%= r["duration"].last.strftime("%m/%d %H:%M") %></td>
+    <td><%= r["start_count"] %></td>
+    <td><%= r["end_count"] %></td>
+    <td><%= r["items_processed"] %></td>
+  </tr>
+<% end %>
+</table>
