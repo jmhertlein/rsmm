@@ -1,0 +1,17 @@
+<table class="process-index-table line-border">
+  <tr> 
+    <% ["Id", "Start", "End", "Items Scraped", "Updated Items", "Non-Matching Items"].each do |h| %>
+      <th><%= h %></th>
+    <% end %>
+  </tr>
+<% @process_results.each do |r| %>
+  <tr>
+    <td><%= r["run_id"] %></td>
+    <td><%= r["duration"].first.strftime("%m/%d %H:%M") %></td>
+    <td><%= r["duration"].last.strftime("%m/%d %H:%M") %></td>
+    <td><%= r["items_scraped"] %></td>
+    <td><%= link_to r["updated_items"], "/process/#{@rs_type}/limitmon/#{r["run_id"]}"  %></td>
+    <td><%= r["non_matching_items"] %></td>
+  </tr>
+<% end %>
+</table>

@@ -23,42 +23,36 @@ class ProcessController < ApplicationController
     not_found unless [:pxmon, :itemdl, :limitmon].include? process_name
 
     table = "#{process_name}_result"
-
     @process_results = ProcessResult.joined_to(table).where(rs_type: rs_type, process: process_name)
 
     render "#{process_name}_index"
   end
 
   def process_run
-    rs_type = process_params["rs_type"].to_sym
-    process_name = process_params["process_name"].to_sym
+    @rs_type = process_params["rs_type"].to_sym
+    @process_name = process_params["process_name"].to_sym
     run_id = process_params["run_id"].to_i
-    
-    not_found unless [:osrs, :rs3].include? rs_type
-    not_found unless [:pxmon, :itemdl, :limitmon].include? process_name
 
-    @run_row = @process_results = Price.connection.select_all("select * from process_result r join :ptable pt on (r.run_id=pt.run_id) where rs_type=:rs_type and process=:pname and r.run_id=:run_id", {ptable: table, rs_type: rs_type, pname: process_name, run_id: run_id})
+    not_found unless [:osrs, :rs3].include? @rs_type
+    not_found unless [:pxmon, :itemdl, :limitmon].include? @process_name
 
-    case process_name
+    table = "#{@process_name}_result"
+    @run = ProcessResult.joined_to(table).where(run_id: run_id, rs_type: @rs_type, process: @process_name).first
+
+    case @process_name
     when :pxmon
       render "pxmon"
     when :itemdl
       render "itemdl"
     when :limitmon
-      @limit_updates = Price.connection.select_all("select * from limitmon_result_item where run_id=:run_id", {run_id: run_id})
+      @limit_updates = LimitmonResultItem.find_for_run run_id, @rs_type
       render "limitmon"
     end
   end
-
 
   private
   def process_params
     params.require(:rs_type)
     params.permit(:rs_type, :process_name, :run_id)
-  end
-
-  private
-  def query sql, binds
-    Price.connection.select_all(sql, "", binds.map{|b| [nil, b]})
   end
 end

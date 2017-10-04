@@ -1,0 +1,31 @@
+<table class="process-index-table line-border">
+  <tr> 
+    <% ["Id", "Start", "End", "Items Scraped", "Updated Items", "Non-Matching Items"].each do |h| %>
+      <th><%= h %></th>
+    <% end %>
+  </tr>
+  <tr>
+    <td><%= @run["run_id"] %></td>
+    <td><%= @run["duration"].first.strftime("%m/%d %H:%M") %></td>
+    <td><%= @run["duration"].last.strftime("%m/%d %H:%M") %></td>
+    <td><%= @run["items_scraped"] %></td>
+    <td><%= @run["updated_items"] %></td>
+    <td><%= @run["non_matching_items"] %></td>
+  </tr>
+</table>
+
+
+<table class="process-index-table line-border">
+  <tr> 
+    <% ["Item Name", "Old Limit", "New Limit"].each do |h| %>
+      <th><%= h %></th>
+    <% end %>
+  </tr>
+  <% @limit_updates.each do |r| %>
+  <tr>
+    <td><%= r["item_name"] %></td>
+    <td><%= r["old_limit"] %></td>
+    <td><%= r["new_limit"] %></td>
+  </tr>
+  <% end %>
+</table>

@@ -8,3 +8,7 @@ insert into pxmon_result values(3, 12);
 insert into pxmon_result values(4, 13);
 
 insert into process_exception values(2, 'DangError', 'Super broken!!', 'something.rb: line 21\nsomethingelse.rb: line 22\nathirdthing.rb: line 12');
+
+insert into process_result values(5, 'limitmon', 'osrs', tsrange('2017-09-10 03:01:00', '2017-09-10 04:02:00'), true, 'some things happened');
+insert into limitmon_result values(5, 100, 1, 11);
+insert into limitmon_result_item values(5, 4718, 1, 3);
