@@ -46,7 +46,8 @@ class ProcessController < ApplicationController
                                                   from process_result pr 
                                                   left join #{table} pt on (pr.run_id=pt.run_id)
                                                   where rs_type=? and process=?
-                                                  order by lower(pr.duration) desc",
+                                                  order by lower(pr.duration) desc
+                                                  limit 20",
                                                   @rs_type, @process_name]
 
     render "#{@process_name}_index"
