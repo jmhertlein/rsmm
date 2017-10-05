@@ -1,0 +1,8 @@
+<div class="rstype-banner line-border">
+  <%= link_to image_tag("#{@rs_type}_icon", class: "rstype-banner-icon"), "/process/#{@rs_type}" %>
+  <% unless @process_name.nil? %>
+  <h1 class="rstype-banner-text"><%= @process_name.upcase %></h1>
+  <% else %>
+  <h1 class="rstype-banner-text"><%= @rs_type.upcase %></h1>
+  <% end %>
+</div>

@@ -45,6 +45,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  width: 9.5em;
 }
 
 .rstype-banner-icon {
@@ -58,4 +59,8 @@
   color: white;
   margin-left: 0.5em;
   margin-right: 1em;
+}
+
+.summary-header {
+  color: white;
 }

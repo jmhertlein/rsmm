@@ -1,0 +1,24 @@
+<div class="line-border">
+  <table class="process-index-table">
+    <tr> 
+      <% ["Id", "Start", "End"].each do |h| %>
+        <th><%= h %></th>
+      <% end %>
+    </tr>
+    <tr>
+      <td><%= @run["run_id"] %></td>
+      <td><%= @run["duration"].first.strftime("%m/%d %H:%M") %></td>
+      <td><%= @run["duration"].last.strftime("%m/%d %H:%M") %></td>
+    </tr>
+  </table>
+
+  <hr />
+
+  <div><span class="summary-header">Summary:</span> <span><%= @run["summary"] %></span></div>
+
+  <div>
+    <p><span class="summary-header"><%= @run["error_type"] %>:</span> <%= @run["message"] %></p>
+    <p class="summary-header">Stack Trace:</p>
+    <pre><%= @run["stack_trace"] %></pre>
+  </div>
+</div>

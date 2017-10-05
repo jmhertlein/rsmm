@@ -99,7 +99,7 @@ create table limitmon_result(
 create table limitmon_result_item(
   run_id integer references limitmon_result(run_id),
   item_id integer not null,
-  old_limit integer not null,
+  old_limit integer,
   new_limit integer not null,
   primary key (run_id, item_id)
 );

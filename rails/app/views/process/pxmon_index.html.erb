@@ -1,11 +1,14 @@
+<%= render "breadcrumb" %>
+
 <table class="process-index-table line-border">
   <tr> 
-    <% ["Id", "Start", "End", "Prices Found"].each do |h| %>
+    <% ["Status", "Id", "Start", "End", "Prices Found"].each do |h| %>
       <th><%= h %></th>
     <% end %>
   </tr>
 <% @process_results.each do |r| %>
   <tr>
+    <td><%= hitsplat r, @rs_type, @process_name %></td>
     <td><%= r["run_id"] %></td>
     <td><%= r["duration"].first.strftime("%m/%d %H:%M") %></td>
     <td><%= r["duration"].last.strftime("%m/%d %H:%M") %></td>

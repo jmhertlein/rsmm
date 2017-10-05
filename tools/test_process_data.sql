@@ -1,3 +1,10 @@
+begin;
+delete from pxmon_result;
+delete from limitmon_result_item;
+delete from limitmon_result;
+delete from process_exception;
+delete from process_result;
+
 insert into process_result values(1, 'pxmon', 'osrs', tsrange('2017-09-10 00:01:00', '2017-09-10 00:02:00'), true, '10 prices found.');
 insert into process_result values(2, 'pxmon', 'osrs', tsrange('2017-09-10 01:01:00', '2017-09-10 01:02:00'), false, '11 prices found.');
 insert into process_result values(3, 'pxmon', 'osrs', tsrange('2017-09-10 02:01:00', '2017-09-10 04:02:00'), true, '12 prices found.');
@@ -7,8 +14,9 @@ insert into pxmon_result values(1, 10);
 insert into pxmon_result values(3, 12);
 insert into pxmon_result values(4, 13);
 
-insert into process_exception values(2, 'DangError', 'Super broken!!', 'something.rb: line 21\nsomethingelse.rb: line 22\nathirdthing.rb: line 12');
+insert into process_exception values(2, 'DangError', 'Super broken!!', 'something.rb: line 21somethingelse.rb: line 22athirdthing.rb: line 12');
 
 insert into process_result values(5, 'limitmon', 'osrs', tsrange('2017-09-10 03:01:00', '2017-09-10 04:02:00'), true, 'some things happened');
 insert into limitmon_result values(5, 100, 1, 11);
 insert into limitmon_result_item values(5, 4718, 1, 3);
+commit;

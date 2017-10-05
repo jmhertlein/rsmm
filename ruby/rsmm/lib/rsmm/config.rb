@@ -35,7 +35,7 @@ module TradeConfig
         mail_host: "rsmm.josh.cafe",
       },
       ge_svc: {
-        hostname: "claudius"
+        hostname: "localhost"
       }
     }
   }

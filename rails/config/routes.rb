@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   get 'process/:rs_type/' => 'process#process_summary'
   get 'process/:rs_type/:process_name/' => 'process#process_runs'
   get 'process/:rs_type/:process_name/:run_id' => 'process#process_run'
+  #get 'process/error/:rs_type/:process_name/:run_id' => 'process#process_error'
   #get 'about' => 'about#index'
 
   # Example of named route that can be invoked with purchase_url(id: product.id)
