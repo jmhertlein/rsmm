@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
 
   s.bindir = 'bin'
-  s.executables = ["px_mon.rb", "download_items.rb", "scrape_limits.rb", "test_trade_email.rb", "ge-svc.rb", "test-gesvc-client.rb"]
+  s.executables = ["pxmon.rb", "itemdb.rb", "limitmon.rb", "test_trade_email.rb", "ge-svc.rb", "test-gesvc-client.rb"]
 
   s.add_runtime_dependency 'nokogiri'
   s.add_runtime_dependency 'pg'
