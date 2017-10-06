@@ -1,6 +1,6 @@
 # Maintainer: Josh Hertlein <jmhertlein@gmail.com>
 pkgname=rsmm-desktop
-pkgver=1
+pkgver=2
 pkgrel=1
 epoch=
 pkgdesc="Desktop application for RSMM."
