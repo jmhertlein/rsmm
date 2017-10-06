@@ -1,3 +1,3 @@
 class ProcessException < RSMMBase
-  table_name "process_exception"
+  self.table_name = "process_exception"
 end

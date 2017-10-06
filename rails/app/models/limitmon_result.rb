@@ -1,3 +1,3 @@
 class LimitmonResult < RSMMBase
-  table_name "limitmon_result"
+  self.table_name = "limitmon_result"
 end

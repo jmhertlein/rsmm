@@ -1,3 +1,3 @@
 class Quote < RSMMBase
-  table_name "quote"
+  self.table_name = "quote"
 end

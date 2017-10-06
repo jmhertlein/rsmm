@@ -1,3 +1,3 @@
 class DailyHistory < RSMMBase
-  table_name "daily_history"
+  self.table_name = "daily_history"
 end

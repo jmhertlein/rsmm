@@ -1,3 +1,3 @@
 class Turn < RSMMBase
-  table_name "price"
+  self.table_name = "price"
 end

@@ -1,3 +1,3 @@
 class Trade < RSMMBase
-  table_name "trade"
+  self.table_name = "trade"
 end

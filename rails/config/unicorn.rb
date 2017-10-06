@@ -1,5 +1,5 @@
 # set path to application
-app_dir = "/var/www/trade.jmhertlein.net"
+app_dir = "/srv/http/webdash/rails"
 shared_dir = "#{app_dir}/shared"
 working_directory app_dir
 
