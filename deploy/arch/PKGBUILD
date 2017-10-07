@@ -1,7 +1,7 @@
 # Maintainer: Josh Hertlein <jmhertlein@gmail.com>
 pkgname=rsmm-desktop
 pkgver=2
-pkgrel=1
+pkgrel=2
 epoch=
 pkgdesc="Desktop application for RSMM."
 arch=(any)
@@ -14,7 +14,7 @@ provides=(rsmm-desktop)
 
 build() {
   cd ../../../java
-  mvn clean package
+  mvn clean package -Pshaded
 }
 
 check() {
