@@ -6,10 +6,6 @@ module TradeConfig
         port: 5432,
         dbname: "rsmm",
         user: "rsmm",
-        sslmode: "require",
-        sslcert: File.join(Dir.home, ".postgresql", "rsmm.crt"),
-        sslkey: File.join(Dir.home, ".postgresql", "rsmm.key"),
-        sslrootcert: File.join(Dir.home, ".postgresql", "root.crt")
       }, 
       mail: {
         sender_host: "rsmm.josh.cafe",
